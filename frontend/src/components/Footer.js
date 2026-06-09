@@ -47,7 +47,7 @@ const Footer = () => {
     <footer className="footer" id="footer">
       <div className="footer__gradient-line" />
 
-      <div className="footer__container">
+      <div className="section__container">
         <div className="footer__grid">
           <ScrollReveal direction="up" delay={0}>
             <div className="footer__col footer__col--brand">

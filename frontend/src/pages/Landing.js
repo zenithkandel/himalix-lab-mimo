@@ -36,7 +36,8 @@ const Hero = ({ content }) => {
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 1.2, duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
         >
-          <i className="fa-light fa-sharp fa-microchip" style={{ fontSize: '0.85rem' }} /> Hardware & Custom IoT Solutions
+          <span className="hero__status-dot circular-decor" />
+          <span>SYSTEM ONLINE // CUSTOM DIGITAL FABRICATION DEPT</span>
         </motion.div>
 
         <motion.h1

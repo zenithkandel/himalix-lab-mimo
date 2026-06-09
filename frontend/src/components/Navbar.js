@@ -80,9 +80,6 @@ const Navbar = () => {
               />
             </button>
 
-            <Link to="/admin" className="navbar__link navbar__link--admin">
-              Console
-            </Link>
           </div>
 
           <div style={{ display: 'flex', gap: '1.25rem', alignItems: 'center' }} className="navbar__hamburger-wrap">
@@ -169,26 +166,6 @@ const Navbar = () => {
                 >
                   <i className={theme === 'light' ? 'fa-light fa-sharp fa-moon' : 'fa-light fa-sharp fa-sun'} /> {theme === 'light' ? 'Dark Mode' : 'Light Mode'}
                 </motion.button>
-
-                <motion.div
-                  className="navbar__sidebar-divider"
-                  initial={{ scaleX: 0 }}
-                  animate={{ scaleX: 1 }}
-                  transition={{ delay: 0.25 }}
-                />
-                
-                <motion.div
-                  initial={{ opacity: 0, x: 20 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  transition={{ delay: 0.3 }}
-                >
-                  <Link
-                    to="/admin"
-                    className="navbar__sidebar-link navbar__sidebar-link--admin"
-                  >
-                    <i className="fa-light fa-sharp fa-gauge-high" style={{ marginRight: '8px' }} /> Console
-                  </Link>
-                </motion.div>
               </div>
             </motion.div>
           </>

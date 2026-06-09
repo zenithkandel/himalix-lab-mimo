@@ -76,7 +76,7 @@ const LoadingScreen = ({ onComplete }) => {
                   animate={{ opacity: 1 }}
                   transition={{ duration: 0.5 }}
                 >
-                  {String(progress).padStart(3, '0')}
+                  {progress}
                 </motion.span>
                 <span className="loader-percent">%</span>
               </div>
