@@ -6,6 +6,7 @@ const { authMiddleware } = require('../middleware/auth');
 
 const router = express.Router();
 
+
 // POST /register
 router.post('/register', async (req, res) => {
   try {

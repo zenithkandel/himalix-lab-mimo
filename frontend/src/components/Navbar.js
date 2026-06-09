@@ -52,10 +52,10 @@ const Navbar = () => {
       <nav className={`navbar ${scrolled ? 'navbar--scrolled' : ''}`}>
         <div className="navbar__container">
           <Link to="/" className="navbar__logo">
-            <span style={{ 
-              fontFamily: "var(--font-heading)", 
-              fontWeight: 500, 
-              fontSize: '1rem', 
+            <span style={{
+              fontFamily: "var(--font-heading)",
+              fontWeight: 500,
+              fontSize: '1rem',
               letterSpacing: '3px',
               color: 'var(--text-primary)'
             }}>
@@ -115,10 +115,10 @@ const Navbar = () => {
               transition={{ type: 'tween', ease: 'easeOut', duration: 0.3 }}
             >
               <div className="navbar__sidebar-header">
-                <span style={{ 
-                  fontFamily: "var(--font-heading)", 
-                  fontWeight: 500, 
-                  fontSize: '1rem', 
+                <span style={{
+                  fontFamily: "var(--font-heading)",
+                  fontWeight: 500,
+                  fontSize: '1rem',
                   letterSpacing: '2px'
                 }}>
                   HIMALIX <span style={{ color: 'var(--accent-primary)' }}>LABS</span>
