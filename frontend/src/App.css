@@ -786,7 +786,7 @@ button {
   left: 125%;
 }
 
-.service-card__link:hover {
+.service-card .service-card__link:hover {
   background: var(--accent-primary);
   color: #000000;
   border-color: var(--accent-primary);
@@ -799,7 +799,7 @@ button {
   transition: var(--transition-fast);
 }
 
-.service-card__link:hover i {
+.service-card .service-card__link:hover i {
   transform: translateX(4px);
   color: #000000;
 }
