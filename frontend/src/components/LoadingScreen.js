@@ -27,23 +27,21 @@ const LoadingScreen = ({ onComplete }) => {
       } else {
         clearInterval(logInterval);
       }
-    }, 450);
+    }, 90);
 
     // Dynamic progress simulation
     const progressInterval = setInterval(() => {
       setProgress((prev) => {
-        const next = prev + Math.floor(Math.random() * 4) + 1;
+        const next = prev + Math.floor(Math.random() * 5) + 2;
         if (next >= 100) {
           clearInterval(progressInterval);
           setIsDone(true);
-          setTimeout(() => {
-            if (onComplete) onComplete();
-          }, 1000); // Wait for animations to resolve
+          if (onComplete) onComplete();
           return 100;
         }
         return next;
       });
-    }, 40);
+    }, 30);
 
     return () => {
       clearInterval(progressInterval);
@@ -59,7 +57,7 @@ const LoadingScreen = ({ onComplete }) => {
           initial={{ clipPath: 'inset(0% 0% 0% 0%)' }}
           exit={{ 
             clipPath: 'inset(100% 0% 0% 0%)',
-            transition: { duration: 1.1, ease: [0.85, 0, 0.15, 1] } 
+            transition: { duration: 0.75, ease: [0.85, 0, 0.15, 1] } 
           }}
         >
           <div className="loader-container">

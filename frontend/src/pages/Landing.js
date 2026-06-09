@@ -34,7 +34,7 @@ const Hero = ({ content }) => {
           className="hero__eyebrow"
           initial={{ opacity: 0, y: 15 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.1, duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
+          transition={{ delay: 0.02, duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
         >
           <i className="fa-light fa-sharp fa-microchip" style={{ fontSize: '0.85rem' }} /> Hardware & Custom IoT Solutions
         </motion.div>
@@ -43,7 +43,7 @@ const Hero = ({ content }) => {
           className="hero__title"
           initial={{ opacity: 0, y: 30 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.25, duration: 1.0, ease: [0.16, 1, 0.3, 1] }}
+          transition={{ delay: 0.1, duration: 0.75, ease: [0.16, 1, 0.3, 1] }}
         >
           {content?.hero_headline || 'Innovating Nepal\'s Tech Future'}
         </motion.h1>
@@ -52,7 +52,7 @@ const Hero = ({ content }) => {
           className="hero__subtitle"
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.4, duration: 0.9, ease: [0.16, 1, 0.3, 1] }}
+          transition={{ delay: 0.18, duration: 0.75, ease: [0.16, 1, 0.3, 1] }}
         >
           {content?.hero_subline || 'Empowering Nepalese innovators with cutting-edge electronics, 3D printing, and custom tech solutions.'}
         </motion.p>
@@ -61,7 +61,7 @@ const Hero = ({ content }) => {
           className="hero__actions"
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.55, duration: 0.9, ease: [0.16, 1, 0.3, 1] }}
+          transition={{ delay: 0.26, duration: 0.75, ease: [0.16, 1, 0.3, 1] }}
         >
           <button className="btn btn--gold" onClick={() => scrollTo('#services')}>
             {content?.hero_cta_text || 'Explore Our Services'} <i className="fa-light fa-sharp fa-arrow-right" style={{ fontSize: '0.8rem' }} />
