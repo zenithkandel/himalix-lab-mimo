@@ -44,7 +44,7 @@ const Navbar = () => {
       <nav className={`navbar ${scrolled ? 'navbar--scrolled' : ''}`}>
         <div className="navbar__container">
           <Link to="/" className="navbar__logo">
-            HIMALIX <span className="navbar__logo-accent">LABS</span>
+            <img src="/logo.png" alt="Himalix Labs" className="navbar__logo-img" />
           </Link>
 
           <div className="navbar__links">
@@ -93,9 +93,7 @@ const Navbar = () => {
               transition={{ type: 'tween', duration: 0.3 }}
             >
               <div className="navbar__sidebar-header">
-                <span className="navbar__sidebar-logo">
-                  HIMALIX <span className="navbar__logo-accent">LABS</span>
-                </span>
+                <img src="/logo.png" alt="Himalix Labs" className="navbar__sidebar-logo" />
                 <button
                   className="navbar__sidebar-close"
                   onClick={() => setMobileOpen(false)}
