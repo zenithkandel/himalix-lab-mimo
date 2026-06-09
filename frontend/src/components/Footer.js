@@ -43,7 +43,7 @@ const Footer = () => {
           <ScrollReveal direction="up" delay={0}>
             <div className="footer__col footer__col--brand">
               <Link to="/" className="footer__logo">
-                HIMALIX <span className="footer__logo-accent">LABS</span>
+                <img src="/logo.png" alt="Himalix Labs" className="footer__logo-img" />
               </Link>
               <p className="footer__desc">
                 Pioneering the future of embedded electronics and IoT solutions.

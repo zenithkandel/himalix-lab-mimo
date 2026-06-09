@@ -109,18 +109,28 @@ input, textarea, select {
 }
 
 .navbar__logo {
-  font-family: var(--font-heading);
-  font-size: 1.5rem;
-  font-weight: 700;
-  color: var(--text-primary);
-  letter-spacing: 1px;
   display: flex;
   align-items: center;
-  gap: 4px;
+}
+
+.navbar__logo-img {
+  height: 40px;
+  width: auto;
+  filter: invert(1);
+}
+
+.navbar--scrolled .navbar__logo-img {
+  filter: invert(1);
 }
 
 .navbar__logo-accent {
   color: var(--accent-primary);
+}
+
+.navbar__sidebar-logo {
+  height: 36px;
+  width: auto;
+  filter: invert(1);
 }
 
 .navbar__links {
