@@ -9,10 +9,10 @@ router.get('/', async (req, res) => {
     const [contentRows] = await pool.query('SELECT * FROM landing_content');
     const content = {};
     contentRows.forEach(row => {
-      content[row.section_name] = {
-        id: row.id,
-        ...JSON.parse(row.content_value)
-      };
+      if (!content[row.section]) {
+        content[row.section] = {};
+      }
+      content[row.section][row.content_key] = row.content_value;
     });
 
     const [services] = await pool.query(
@@ -44,7 +44,7 @@ router.get('/', async (req, res) => {
 router.get('/section/:section', async (req, res) => {
   try {
     const [rows] = await pool.query(
-      'SELECT * FROM landing_content WHERE section_name = ?',
+      'SELECT * FROM landing_content WHERE section = ?',
       [req.params.section]
     );
 
@@ -52,12 +52,12 @@ router.get('/section/:section', async (req, res) => {
       return res.status(404).json({ error: 'Section not found' });
     }
 
-    const row = rows[0];
-    res.json({
-      id: row.id,
-      section_name: row.section_name,
-      ...JSON.parse(row.content_value)
+    const sectionData = {};
+    rows.forEach(row => {
+      sectionData[row.content_key] = row.content_value;
     });
+
+    res.json(sectionData);
   } catch (error) {
     console.error('Get section error:', error);
     res.status(500).json({ error: 'Server error' });

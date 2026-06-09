@@ -4,7 +4,7 @@ import ScrollReveal from '../components/ScrollReveal';
 import AnimatedCounter from '../components/AnimatedCounter';
 
 /* ─── Hero Section ──────────────────────────────────────────────── */
-const Hero = () => {
+const Hero = ({ content }) => {
   const particles = Array.from({ length: 40 }, (_, i) => ({
     id: i,
     x: Math.random() * 100,
@@ -69,29 +69,26 @@ const Hero = () => {
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.5, duration: 0.7 }}
         >
-          Building the <span className="hero__title-accent">Future</span> of
-          <br />
-          <span className="hero__title-accent">Embedded</span> Electronics
+          {content?.hero_headline || 'Innovating Nepal\'s Tech Future'}
         </motion.h1>
 
         <motion.p
           className="hero__subtitle"
           initial={{ opacity: 0, y: 30 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.7, duration: 0.7 }}
+          transition={{ delay: 0.7, duration: 0.6 }}
         >
-          From concept to creation — we design and build cutting-edge embedded
-          systems, IoT devices, and smart hardware that push boundaries.
+          {content?.hero_subline || 'Empowering Nepalese innovators with cutting-edge electronics, 3D printing, and custom tech solutions'}
         </motion.p>
 
         <motion.div
-          className="hero__ctas"
+          className="hero__actions"
           initial={{ opacity: 0, y: 30 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.9, duration: 0.7 }}
+          transition={{ delay: 0.9, duration: 0.6 }}
         >
-          <button className="btn btn--gold" onClick={() => scrollTo('#services')}>
-            Explore Services <i className="fa-solid fa-arrow-right" />
+          <button className="btn btn--gold" onClick={() => scrollTo(content?.hero_cta_link || '#services')}>
+            {content?.hero_cta_text || 'Explore Our Services'} <i className="fa-solid fa-arrow-right" />
           </button>
           <button className="btn btn--outline" onClick={() => scrollTo('#contact')}>
             Contact Us
@@ -120,46 +117,7 @@ const Hero = () => {
 };
 
 /* ─── Services Section ──────────────────────────────────────────── */
-const servicesData = [
-  {
-    icon: 'fa-solid fa-microchip',
-    title: 'Embedded Systems',
-    desc: 'Custom embedded solutions engineered for performance, reliability, and efficiency.',
-    features: ['ARM Cortex Programming', 'Real-Time OS', 'Low Power Design', 'Hardware Debugging'],
-  },
-  {
-    icon: 'fa-solid fa-tower-broadcast',
-    title: 'IoT Solutions',
-    desc: 'End-to-end IoT ecosystems connecting devices, data, and people seamlessly.',
-    features: ['Sensor Networks', 'Cloud Integration', 'MQTT/CoAP Protocols', 'Edge Computing'],
-  },
-  {
-    icon: 'fa-solid fa-draw-polygon',
-    title: 'PCB Design',
-    desc: 'Professional multi-layer PCB layouts optimized for signal integrity and manufacturability.',
-    features: ['Multi-Layer Design', 'Signal Integrity', 'DFM Optimization', '3D Modeling'],
-  },
-  {
-    icon: 'fa-solid fa-code',
-    title: 'Firmware Dev',
-    desc: 'Robust, optimized firmware for microcontrollers and embedded platforms.',
-    features: ['C/C++/Rust', 'Bootloaders', 'OTA Updates', 'Driver Development'],
-  },
-  {
-    icon: 'fa-solid fa-cubes',
-    title: 'Prototyping',
-    desc: 'Rapid prototyping from concept to working hardware in weeks, not months.',
-    features: ['3D Printing', 'SMT Assembly', 'Functional Testing', 'Iterative Design'],
-  },
-  {
-    icon: 'fa-solid fa-shield-halved',
-    title: 'Security Audits',
-    desc: 'Comprehensive security analysis and hardening for connected devices.',
-    features: ['Penetration Testing', 'Secure Boot', 'Encryption', 'Compliance'],
-  },
-];
-
-const Services = () => (
+const Services = ({ services }) => (
   <section className="services" id="services">
     <div className="section__container">
       <ScrollReveal>
@@ -175,26 +133,28 @@ const Services = () => (
       </ScrollReveal>
 
       <div className="services__grid">
-        {servicesData.map((s, i) => (
-          <ScrollReveal key={s.title} delay={i * 0.1}>
+        {(services || []).map((s, i) => {
+          const features = typeof s.features === 'string' ? JSON.parse(s.features) : (s.features || []);
+          return (
+          <ScrollReveal key={s.id || i} delay={i * 0.1}>
             <motion.div
               className="service-card"
               whileHover={{ y: -8, boxShadow: '0 0 30px rgba(212,160,23,0.15)' }}
               transition={{ duration: 0.3 }}
             >
               <div className="service-card__icon">
-                <i className={s.icon} />
+                <i className={s.icon_class} />
               </div>
               <h3 className="service-card__title">{s.title}</h3>
-              <p className="service-card__desc">{s.desc}</p>
+              <p className="service-card__desc">{s.description}</p>
               <ul className="service-card__features">
-                {s.features.map((f) => (
+                {features.map((f) => (
                   <li key={f}>
                     <i className="fa-solid fa-check" /> {f}
                   </li>
                 ))}
               </ul>
-              <a href="#contact" className="service-card__link">
+              <a href={s.link_url || '#contact'} className="service-card__link">
                 Learn More <i className="fa-solid fa-arrow-right" />
               </a>
             </motion.div>
@@ -206,7 +166,7 @@ const Services = () => (
 );
 
 /* ─── About Section ─────────────────────────────────────────────── */
-const About = () => (
+const About = ({ content }) => (
   <section className="about" id="about">
     <div className="section__container">
       <div className="about__grid">
@@ -214,16 +174,13 @@ const About = () => (
           <ScrollReveal>
             <p className="section__eyebrow"><i className="fa-solid fa-building" /> Who We Are</p>
             <h2 className="section__title">
-              About <span className="section__title-accent">Himalix Labs</span>
+              {content?.about_title || 'About Himalix Labs'}
             </h2>
           </ScrollReveal>
 
           <ScrollReveal delay={0.1}>
             <p className="about__desc">
-              Himalix Labs is a premier electronics and embedded systems company based in
-              Kathmandu, Nepal. We specialize in turning complex technical challenges into
-              elegant, production-ready solutions. Our team combines deep hardware expertise
-              with modern software practices to deliver products that excel.
+              {content?.about_description || 'Himalix Labs is Nepal\'s premier technology solutions organization, dedicated to making advanced electronics and digital fabrication accessible to every Nepalese innovator.'}
             </p>
           </ScrollReveal>
 
@@ -236,8 +193,7 @@ const About = () => (
                 <div>
                   <h4 className="about__card-title">Our Mission</h4>
                   <p className="about__card-desc">
-                    To democratize access to advanced embedded technology and empower
-                    innovators across South Asia to build the future.
+                    {content?.about_mission || 'To democratize technology access in Nepal and empower the next generation of innovators with tools, knowledge, and support.'}
                   </p>
                 </div>
               </div>
@@ -251,8 +207,7 @@ const About = () => (
                 <div>
                   <h4 className="about__card-title">Our Vision</h4>
                   <p className="about__card-desc">
-                    To become the region's leading hub for embedded innovation, fostering
-                    a thriving ecosystem of hardware creators and IoT pioneers.
+                    {content?.about_vision || 'Building a thriving tech ecosystem in Nepal where every idea can become reality.'}
                   </p>
                 </div>
               </div>
@@ -290,40 +245,7 @@ const About = () => (
 );
 
 /* ─── Team Section ──────────────────────────────────────────────── */
-const teamData = [
-  {
-    name: 'Aarav Sharma',
-    role: 'Founder & CEO',
-    bio: 'Embedded systems architect with 10+ years building IoT platforms and custom hardware solutions.',
-    socials: [
-      { icon: 'fa-brands fa-linkedin-in', href: '#' },
-      { icon: 'fa-brands fa-github', href: '#' },
-      { icon: 'fa-brands fa-twitter', href: '#' },
-    ],
-  },
-  {
-    name: 'Sita Thapa',
-    role: 'Head of Engineering',
-    bio: 'Firmware and PCB design expert. Passionate about creating reliable, efficient hardware from scratch.',
-    socials: [
-      { icon: 'fa-brands fa-linkedin-in', href: '#' },
-      { icon: 'fa-brands fa-github', href: '#' },
-      { icon: 'fa-brands fa-twitter', href: '#' },
-    ],
-  },
-  {
-    name: 'Rohan Gurung',
-    role: 'IoT Solutions Lead',
-    bio: 'Full-stack IoT engineer bridging the gap between embedded devices and cloud intelligence.',
-    socials: [
-      { icon: 'fa-brands fa-linkedin-in', href: '#' },
-      { icon: 'fa-brands fa-github', href: '#' },
-      { icon: 'fa-brands fa-twitter', href: '#' },
-    ],
-  },
-];
-
-const Team = () => (
+const Team = ({ members }) => (
   <section className="team" id="team">
     <div className="section__container">
       <ScrollReveal>
@@ -339,45 +261,51 @@ const Team = () => (
       </ScrollReveal>
 
       <div className="team__grid">
-        {teamData.map((member, i) => (
-          <ScrollReveal key={member.name} delay={i * 0.15}>
+        {(members || []).map((member, i) => {
+          const socials = typeof member.social_links === 'string' ? JSON.parse(member.social_links) : (member.social_links || {});
+          return (
+          <ScrollReveal key={member.id || i} delay={i * 0.15}>
             <motion.div
               className="team-card"
               whileHover={{ y: -6 }}
               transition={{ duration: 0.3 }}
             >
               <div className="team-card__avatar">
-                <div className="team-card__avatar-placeholder">
-                  <i className="fa-solid fa-user" />
-                </div>
+                {member.image_url ? (
+                  <img src={member.image_url} alt={member.name} className="team-card__avatar-img" />
+                ) : (
+                  <div className="team-card__avatar-placeholder">
+                    <i className="fa-solid fa-user" />
+                  </div>
+                )}
               </div>
               <h3 className="team-card__name">{member.name}</h3>
               <p className="team-card__role">{member.role}</p>
               <p className="team-card__bio">{member.bio}</p>
               <div className="team-card__socials">
-                {member.socials.map((s, j) => (
-                  <a key={j} href={s.href} className="team-card__social" aria-label={s.icon.split(' ').pop()}>
-                    <i className={s.icon} />
-                  </a>
-                ))}
+                {socials.linkedin && <a href={socials.linkedin} className="team-card__social" aria-label="LinkedIn"><i className="fa-brands fa-linkedin-in" /></a>}
+                {socials.github && <a href={socials.github} className="team-card__social" aria-label="GitHub"><i className="fa-brands fa-github" /></a>}
+                {socials.twitter && <a href={socials.twitter} className="team-card__social" aria-label="Twitter"><i className="fa-brands fa-twitter" /></a>}
               </div>
             </motion.div>
           </ScrollReveal>
-        ))}
+        );
+        })}
       </div>
     </div>
   </section>
 );
 
 /* ─── Stats Section ─────────────────────────────────────────────── */
-const statsData = [
-  { value: 150, suffix: '+', label: 'Projects Completed', icon: 'fa-solid fa-rocket' },
-  { value: 95, suffix: '+', label: 'Happy Clients', icon: 'fa-solid fa-face-smile' },
-  { value: 200, suffix: '+', label: 'Products Available', icon: 'fa-solid fa-box-open' },
-  { value: 8, suffix: '+', label: 'Years Experience', icon: 'fa-solid fa-calendar-check' },
-];
+const Stats = ({ content }) => {
+  const statsData = [
+    { value: content?.stats_projects || '500+', label: 'Projects Completed', icon: 'fa-solid fa-rocket' },
+    { value: content?.stats_clients || '200+', label: 'Happy Clients', icon: 'fa-solid fa-face-smile' },
+    { value: content?.stats_products || '1000+', label: 'Products Available', icon: 'fa-solid fa-box-open' },
+    { value: content?.stats_years || '5+', label: 'Years Experience', icon: 'fa-solid fa-calendar-check' },
+  ];
 
-const Stats = () => (
+  return (
   <section className="stats" id="stats">
     <div className="stats__pattern" />
     <div className="section__container">
@@ -389,7 +317,7 @@ const Stats = () => (
                 <i className={stat.icon} />
               </div>
               <div className="stat-card__number">
-                <AnimatedCounter end={stat.value} suffix={stat.suffix} duration={2} />
+                {stat.value}
               </div>
               <p className="stat-card__label">{stat.label}</p>
             </div>
@@ -398,59 +326,30 @@ const Stats = () => (
       </div>
     </div>
   </section>
-);
+  );
+};
 
 /* ─── Testimonials Section ──────────────────────────────────────── */
-const testimonialsData = [
-  {
-    quote: 'Himalix Labs transformed our concept into a production-ready IoT device in record time. Their technical depth is unmatched.',
-    name: 'Bikash Rai',
-    title: 'CTO',
-    company: 'Nepal IoT Corp',
-    rating: 5,
-  },
-  {
-    quote: 'The PCB design quality and attention to signal integrity was exceptional. They delivered a flawless product on the first revision.',
-    name: 'Anita Lama',
-    title: 'Hardware Lead',
-    company: 'SmartFarm Technologies',
-    rating: 5,
-  },
-  {
-    quote: 'Working with Himalix Labs was a game-changer. They brought our firmware from prototype to production with world-class reliability.',
-    name: 'Prakash Adhikari',
-    title: 'Founder',
-    company: 'DevTech Solutions',
-    rating: 5,
-  },
-  {
-    quote: 'Their embedded security audit caught vulnerabilities we never knew existed. Truly professional and thorough.',
-    name: 'Sunita Karki',
-    title: 'VP Engineering',
-    company: 'SecureNepal',
-    rating: 5,
-  },
-];
-
-const Testimonials = () => {
+const Testimonials = ({ testimonials }) => {
   const [current, setCurrent] = useState(0);
   const [paused, setPaused] = useState(false);
   const intervalRef = useRef(null);
+  const items = testimonials || [];
 
   useEffect(() => {
-    if (paused) return;
+    if (paused || items.length === 0) return;
     intervalRef.current = setInterval(() => {
-      setCurrent((prev) => (prev + 1) % testimonialsData.length);
+      setCurrent((prev) => (prev + 1) % items.length);
     }, 5000);
     return () => clearInterval(intervalRef.current);
-  }, [paused]);
+  }, [paused, items.length]);
 
   const goTo = (i) => {
     setCurrent(i);
     clearInterval(intervalRef.current);
   };
 
-  const t = testimonialsData[current];
+  const t = items[current] || {};
 
   return (
     <section className="testimonials" id="testimonials">
@@ -479,11 +378,11 @@ const Testimonials = () => {
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.4 }}
               >
-                {t.quote}
+                {t.content}
               </motion.p>
               <div className="testimonials__stars">
                 {Array.from({ length: 5 }).map((_, i) => (
-                  <i key={i} className={`fa-${i < t.rating ? 'solid' : 'regular'} fa-star`} />
+                  <i key={i} className={`fa-${i < (t.rating || 5) ? 'solid' : 'regular'} fa-star`} />
                 ))}
               </div>
               <div className="testimonials__author">
@@ -491,16 +390,16 @@ const Testimonials = () => {
                   <i className="fa-solid fa-user" />
                 </div>
                 <div>
-                  <h4 className="testimonials__author-name">{t.name}</h4>
+                  <h4 className="testimonials__author-name">{t.client_name}</h4>
                   <p className="testimonials__author-title">
-                    {t.title}, {t.company}
+                    {t.client_title}, {t.company}
                   </p>
                 </div>
               </div>
             </div>
 
             <div className="testimonials__nav">
-              {testimonialsData.map((_, i) => (
+              {items.map((_, i) => (
                 <button
                   key={i}
                   className={`testimonials__dot ${i === current ? 'testimonials__dot--active' : ''}`}
@@ -513,14 +412,14 @@ const Testimonials = () => {
             <div className="testimonials__arrows">
               <button
                 className="testimonials__arrow"
-                onClick={() => goTo((current - 1 + testimonialsData.length) % testimonialsData.length)}
+                onClick={() => goTo((current - 1 + items.length) % items.length)}
                 aria-label="Previous"
               >
                 <i className="fa-solid fa-chevron-left" />
               </button>
               <button
                 className="testimonials__arrow"
-                onClick={() => goTo((current + 1) % testimonialsData.length)}
+                onClick={() => goTo((current + 1) % items.length)}
                 aria-label="Next"
               >
                 <i className="fa-solid fa-chevron-right" />
@@ -534,7 +433,7 @@ const Testimonials = () => {
 };
 
 /* ─── Contact Section ───────────────────────────────────────────── */
-const Contact = () => {
+const Contact = ({ content, settings }) => {
   const [form, setForm] = useState({ name: '', email: '', subject: '', message: '' });
   const [errors, setErrors] = useState({});
   const [submitted, setSubmitted] = useState(false);
@@ -579,9 +478,9 @@ const Contact = () => {
   };
 
   const contactInfo = [
-    { icon: 'fa-solid fa-envelope', label: 'Email', value: 'info@himalixlabs.com' },
-    { icon: 'fa-solid fa-phone', label: 'Phone', value: '+977-1-XXXXXXX' },
-    { icon: 'fa-solid fa-location-dot', label: 'Address', value: 'Kathmandu, Nepal' },
+    { icon: 'fa-solid fa-envelope', label: 'Email', value: content?.contact_email || 'info@himalixlab.com' },
+    { icon: 'fa-solid fa-phone', label: 'Phone', value: content?.contact_phone || '+977-9800000000' },
+    { icon: 'fa-solid fa-location-dot', label: 'Address', value: content?.contact_address || 'Kathmandu, Nepal' },
   ];
 
   return (
@@ -589,7 +488,7 @@ const Contact = () => {
       <div className="section__container">
         <ScrollReveal>
           <div className="section__header">
-            <p className="section__eyebrow"><i className="fa-solid fa-paper-plane" /> Get In Touch</p>
+            <p className="section__eyebrow"><i className="fa-solid fa-paper-plane" /> {content?.contact_title || 'Get In Touch'}</p>
             <h2 className="section__title">
               Contact <span className="section__title-accent">Us</span>
             </h2>
@@ -718,24 +617,24 @@ const Contact = () => {
 
 /* ─── Main Landing Page ─────────────────────────────────────────── */
 const Landing = () => {
-  const [content, setContent] = useState(null);
+  const [data, setData] = useState(null);
 
   useEffect(() => {
     fetch('http://localhost:5001/api/content')
       .then((res) => res.json())
-      .then(setContent)
+      .then(setData)
       .catch(() => {});
   }, []);
 
   return (
     <main className="landing">
-      <Hero />
-      <Services />
-      <About />
-      <Team />
-      <Stats />
-      <Testimonials />
-      <Contact />
+      <Hero content={data?.content?.hero} />
+      <Services services={data?.services} />
+      <About content={data?.content?.about} />
+      <Team members={data?.team} />
+      <Stats content={data?.content?.stats} />
+      <Testimonials testimonials={data?.testimonials} />
+      <Contact content={data?.content?.contact} settings={data?.settings} />
     </main>
   );
 };
