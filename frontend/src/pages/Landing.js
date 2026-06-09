@@ -36,8 +36,7 @@ const Hero = ({ content }) => {
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 1.2, duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
         >
-          <span className="hero__status-dot circular-decor" />
-          <span>SYSTEM ONLINE // CUSTOM DIGITAL FABRICATION DEPT</span>
+          <i className="fa-light fa-sharp fa-microchip" style={{ fontSize: '0.85rem' }} /> Hardware & Custom IoT Solutions
         </motion.div>
 
         <motion.h1
@@ -193,25 +192,47 @@ const About = ({ content }) => (
             <div className="about__visual-grid">
               <div className="about__visual-crosshair-v" />
               <div className="about__visual-crosshair-h" />
+              
+              {/* Radial blueprint circles */}
               <div className="radar-circle radar-circle--1 circular-decor" />
               <div className="radar-circle radar-circle--2 circular-decor" />
               <div className="radar-circle radar-circle--3 circular-decor" />
+              
+              {/* Central mechanical hub */}
+              <div className="radar-center-core circular-decor" />
+              
+              {/* Pulsing data-stream connector lines */}
+              <svg className="about__visual-svg" width="100%" height="100%" style={{ position: 'absolute', top: 0, left: 0, pointerEvents: 'none' }}>
+                <line x1="50%" y1="50%" x2="22%" y2="22%" className="radar-connector-line" />
+                <line x1="50%" y1="50%" x2="80%" y2="57%" className="radar-connector-line" />
+                <line x1="50%" y1="50%" x2="31%" y2="80%" className="radar-connector-line" />
+                <line x1="50%" y1="50%" x2="60%" y2="35%" className="radar-connector-line" />
+                <line x1="50%" y1="50%" x2="51%" y2="73%" className="radar-connector-line" />
+              </svg>
+              
+              {/* Conic sweep scan */}
               <div className="radar-line-sweep" />
+              
+              {/* Telemetry Target Cards */}
               {[
-                { icon: 'fa-light fa-sharp fa-microchip', label: 'Hardware' },
-                { icon: 'fa-light fa-sharp fa-cube', label: '3D Printing' },
-                { icon: 'fa-light fa-sharp fa-diagram-project', label: 'IoT Config' },
-                { icon: 'fa-light fa-sharp fa-code', label: 'Firmware' },
-                { icon: 'fa-light fa-sharp fa-robot', label: 'Automation' },
+                { icon: 'fa-light fa-sharp fa-microchip', label: 'Hardware', code: 'HW-01' },
+                { icon: 'fa-light fa-sharp fa-cube', label: '3D Printing', code: 'PR-02' },
+                { icon: 'fa-light fa-sharp fa-diagram-project', label: 'IoT Config', code: 'IO-03' },
+                { icon: 'fa-light fa-sharp fa-code', label: 'Firmware', code: 'FW-04' },
+                { icon: 'fa-light fa-sharp fa-robot', label: 'Automation', code: 'AU-05' },
               ].map((item, i) => (
                 <motion.div
                   key={item.label}
                   className={`about__visual-item about__visual-item--${i + 1}`}
-                  animate={{ y: [0, -10, 0] }}
+                  animate={{ y: [0, -6, 0] }}
                   transition={{ duration: 4 + i * 0.8, repeat: Infinity, ease: 'easeInOut' }}
                 >
+                  <div className="about__visual-item-tag">{item.code}</div>
                   <i className={item.icon} />
-                  <span>{item.label}</span>
+                  <span className="about__visual-item-label">{item.label}</span>
+                  <span className="about__visual-item-status">
+                    <span className="status-dot-green circular-decor" /> ACTIVE
+                  </span>
                 </motion.div>
               ))}
             </div>
