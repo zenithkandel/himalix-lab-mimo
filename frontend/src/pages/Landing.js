@@ -136,30 +136,31 @@ const Services = ({ services }) => (
         {(services || []).map((s, i) => {
           const features = typeof s.features === 'string' ? JSON.parse(s.features) : (s.features || []);
           return (
-          <ScrollReveal key={s.id || i} delay={i * 0.1}>
-            <motion.div
-              className="service-card"
-              whileHover={{ y: -8, boxShadow: '0 0 30px rgba(212,160,23,0.15)' }}
-              transition={{ duration: 0.3 }}
-            >
-              <div className="service-card__icon">
-                <i className={s.icon_class} />
-              </div>
-              <h3 className="service-card__title">{s.title}</h3>
-              <p className="service-card__desc">{s.description}</p>
-              <ul className="service-card__features">
-                {features.map((f) => (
-                  <li key={f}>
-                    <i className="fa-solid fa-check" /> {f}
-                  </li>
-                ))}
-              </ul>
-              <a href={s.link_url || '#contact'} className="service-card__link">
-                Learn More <i className="fa-solid fa-arrow-right" />
-              </a>
-            </motion.div>
-          </ScrollReveal>
-        ))}
+            <ScrollReveal key={s.id || i} delay={i * 0.1}>
+              <motion.div
+                className="service-card"
+                whileHover={{ y: -8, boxShadow: '0 0 30px rgba(212,160,23,0.15)' }}
+                transition={{ duration: 0.3 }}
+              >
+                <div className="service-card__icon">
+                  <i className={s.icon_class} />
+                </div>
+                <h3 className="service-card__title">{s.title}</h3>
+                <p className="service-card__desc">{s.description}</p>
+                <ul className="service-card__features">
+                  {features.map((f) => (
+                    <li key={f}>
+                      <i className="fa-solid fa-check" /> {f}
+                    </li>
+                  ))}
+                </ul>
+                <a href={s.link_url || '#contact'} className="service-card__link">
+                  Learn More <i className="fa-solid fa-arrow-right" />
+                </a>
+              </motion.div>
+            </ScrollReveal>
+          )
+        })}
       </div>
     </div>
   </section>
@@ -264,32 +265,32 @@ const Team = ({ members }) => (
         {(members || []).map((member, i) => {
           const socials = typeof member.social_links === 'string' ? JSON.parse(member.social_links) : (member.social_links || {});
           return (
-          <ScrollReveal key={member.id || i} delay={i * 0.15}>
-            <motion.div
-              className="team-card"
-              whileHover={{ y: -6 }}
-              transition={{ duration: 0.3 }}
-            >
-              <div className="team-card__avatar">
-                {member.image_url ? (
-                  <img src={member.image_url} alt={member.name} className="team-card__avatar-img" />
-                ) : (
-                  <div className="team-card__avatar-placeholder">
-                    <i className="fa-solid fa-user" />
-                  </div>
-                )}
-              </div>
-              <h3 className="team-card__name">{member.name}</h3>
-              <p className="team-card__role">{member.role}</p>
-              <p className="team-card__bio">{member.bio}</p>
-              <div className="team-card__socials">
-                {socials.linkedin && <a href={socials.linkedin} className="team-card__social" aria-label="LinkedIn"><i className="fa-brands fa-linkedin-in" /></a>}
-                {socials.github && <a href={socials.github} className="team-card__social" aria-label="GitHub"><i className="fa-brands fa-github" /></a>}
-                {socials.twitter && <a href={socials.twitter} className="team-card__social" aria-label="Twitter"><i className="fa-brands fa-twitter" /></a>}
-              </div>
-            </motion.div>
-          </ScrollReveal>
-        );
+            <ScrollReveal key={member.id || i} delay={i * 0.15}>
+              <motion.div
+                className="team-card"
+                whileHover={{ y: -6 }}
+                transition={{ duration: 0.3 }}
+              >
+                <div className="team-card__avatar">
+                  {member.image_url ? (
+                    <img src={member.image_url} alt={member.name} className="team-card__avatar-img" />
+                  ) : (
+                    <div className="team-card__avatar-placeholder">
+                      <i className="fa-solid fa-user" />
+                    </div>
+                  )}
+                </div>
+                <h3 className="team-card__name">{member.name}</h3>
+                <p className="team-card__role">{member.role}</p>
+                <p className="team-card__bio">{member.bio}</p>
+                <div className="team-card__socials">
+                  {socials.linkedin && <a href={socials.linkedin} className="team-card__social" aria-label="LinkedIn"><i className="fa-brands fa-linkedin-in" /></a>}
+                  {socials.github && <a href={socials.github} className="team-card__social" aria-label="GitHub"><i className="fa-brands fa-github" /></a>}
+                  {socials.twitter && <a href={socials.twitter} className="team-card__social" aria-label="Twitter"><i className="fa-brands fa-twitter" /></a>}
+                </div>
+              </motion.div>
+            </ScrollReveal>
+          );
         })}
       </div>
     </div>
@@ -306,26 +307,26 @@ const Stats = ({ content }) => {
   ];
 
   return (
-  <section className="stats" id="stats">
-    <div className="stats__pattern" />
-    <div className="section__container">
-      <div className="stats__grid">
-        {statsData.map((stat, i) => (
-          <ScrollReveal key={stat.label} delay={i * 0.1}>
-            <div className="stat-card">
-              <div className="stat-card__icon">
-                <i className={stat.icon} />
+    <section className="stats" id="stats">
+      <div className="stats__pattern" />
+      <div className="section__container">
+        <div className="stats__grid">
+          {statsData.map((stat, i) => (
+            <ScrollReveal key={stat.label} delay={i * 0.1}>
+              <div className="stat-card">
+                <div className="stat-card__icon">
+                  <i className={stat.icon} />
+                </div>
+                <div className="stat-card__number">
+                  {stat.value}
+                </div>
+                <p className="stat-card__label">{stat.label}</p>
               </div>
-              <div className="stat-card__number">
-                {stat.value}
-              </div>
-              <p className="stat-card__label">{stat.label}</p>
-            </div>
-          </ScrollReveal>
-        ))}
+            </ScrollReveal>
+          ))}
+        </div>
       </div>
-    </div>
-  </section>
+    </section>
   );
 };
 
@@ -623,7 +624,7 @@ const Landing = () => {
     fetch('http://localhost:5001/api/content')
       .then((res) => res.json())
       .then(setData)
-      .catch(() => {});
+      .catch(() => { });
   }, []);
 
   return (
