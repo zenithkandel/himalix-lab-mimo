@@ -70,23 +70,6 @@ const Hero = ({ content }) => {
             Get in touch
           </button>
         </motion.div>
-
-        <motion.div
-          className="hero__scroll-indicator"
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ delay: 2.2 }}
-          onClick={() => scrollTo('#services')}
-        >
-          <span>Explore</span>
-          <motion.div
-            className="hero__scroll-arrow"
-            animate={{ y: [0, 6, 0] }}
-            transition={{ duration: 2, repeat: Infinity, ease: 'easeInOut' }}
-          >
-            <i className="fa-light fa-sharp fa-chevron-down" />
-          </motion.div>
-        </motion.div>
       </div>
     </section>
   );
@@ -207,6 +190,10 @@ const About = ({ content }) => (
         <ScrollReveal direction="right" delay={0.2}>
           <div className="about__visual">
             <div className="about__visual-grid">
+              <div className="radar-circle radar-circle--1 circular-decor" />
+              <div className="radar-circle radar-circle--2 circular-decor" />
+              <div className="radar-circle radar-circle--3 circular-decor" />
+              <div className="radar-line-sweep" />
               {[
                 { icon: 'fa-light fa-sharp fa-microchip', label: 'Hardware' },
                 { icon: 'fa-light fa-sharp fa-cube', label: '3D Printing' },

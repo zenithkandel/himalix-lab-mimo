@@ -118,7 +118,7 @@ const Footer = () => {
       </div>
 
       <div className="footer__bottom">
-        <div className="footer__bottom-inner">
+        <div className="footer__bottom-inner section__container">
           <p>&copy; {new Date().getFullYear()} Himalix Labs. All rights reserved.</p>
           <p className="footer__bottom-tagline">Designed for the future.</p>
         </div>
