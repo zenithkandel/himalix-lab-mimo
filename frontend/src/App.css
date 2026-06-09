@@ -5,13 +5,14 @@
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Space+Grotesk:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap');
 
 :root {
+  /* Default: Dark Theme */
   --bg-primary: #000000;
   --bg-secondary: #050505;
   --bg-tertiary: #0a0a0a;
   --bg-glass: rgba(10, 10, 10, 0.45);
   --bg-glass-hover: rgba(20, 20, 20, 0.65);
   
-  --accent-primary: #e0af3c; /* Brushed champagne gold */
+  --accent-primary: #e0af3c; /* Champagne Gold */
   --accent-secondary: #cba02f;
   --accent-glow: rgba(224, 175, 60, 0.08);
   --accent-glow-strong: rgba(224, 175, 60, 0.2);
@@ -36,11 +37,34 @@
   --transition-slow: 0.8s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
-/* ─── RESET & BASE STYLES ────────────────────────────────────────── */
+/* Light Theme Overrides */
+.light-theme {
+  --bg-primary: #ffffff;
+  --bg-secondary: #fafafa;
+  --bg-tertiary: #f0f0f0;
+  --bg-glass: rgba(255, 255, 255, 0.7);
+  --bg-glass-hover: rgba(255, 255, 255, 0.95);
+  
+  --text-primary: #000000;
+  --text-secondary: rgba(0, 0, 0, 0.85);
+  --text-muted: rgba(0, 0, 0, 0.55);
+  --text-dark: rgba(0, 0, 0, 0.3);
+  
+  --border-color: rgba(0, 0, 0, 0.08);
+  --border-color-hover: rgba(0, 0, 0, 0.14);
+  --border-gold: rgba(224, 175, 60, 0.35);
+  --border-gold-hover: rgba(224, 175, 60, 0.65);
+
+  --accent-glow: rgba(224, 175, 60, 0.04);
+  --accent-glow-strong: rgba(224, 175, 60, 0.15);
+}
+
+/* ─── RESET & FORCE ZERO BORDER RADIUS ───────────────────────────── */
 *, *::before, *::after {
   margin: 0;
   padding: 0;
   box-sizing: border-box;
+  border-radius: 0 !important; /* Force all border-radius to zero */
 }
 
 html {
@@ -57,7 +81,7 @@ body {
   overflow-x: hidden;
 }
 
-/* Custom Scrollbar for premium feel */
+/* Custom Scrollbar */
 ::-webkit-scrollbar {
   width: 6px;
   height: 6px;
@@ -67,7 +91,6 @@ body {
 }
 ::-webkit-scrollbar-thumb {
   background: rgba(255, 255, 255, 0.1);
-  border-radius: 10px;
 }
 ::-webkit-scrollbar-thumb:hover {
   background: var(--accent-primary);
@@ -97,7 +120,6 @@ button {
   position: absolute;
   width: 500px;
   height: 500px;
-  border-radius: 50%;
   background: radial-gradient(circle, var(--accent-glow) 0%, rgba(0,0,0,0) 70%);
   pointer-events: none;
   z-index: 0;
@@ -247,7 +269,7 @@ button {
 
 .section__title-accent {
   color: var(--accent-primary);
-  background: linear-gradient(135deg, #ffffff 0%, var(--accent-primary) 100%);
+  background: linear-gradient(135deg, var(--text-primary) 0%, var(--accent-primary) 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
 }
@@ -273,7 +295,6 @@ button {
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 2px;
-  border-radius: 50px;
   cursor: pointer;
   transition: var(--transition-normal);
   position: relative;
@@ -287,7 +308,6 @@ button {
   left: 0;
   right: 0;
   bottom: 0;
-  border-radius: 50px;
   padding: 1px;
   background: linear-gradient(135deg, rgba(255,255,255,0.1), rgba(255,255,255,0.01));
   -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
@@ -336,9 +356,8 @@ button {
   width: calc(100% - 4rem);
   max-width: 1100px;
   z-index: 999;
-  border-radius: 100px;
   border: 1px solid var(--border-color);
-  background: rgba(0, 0, 0, 0.4);
+  background: var(--bg-glass);
   backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
   transition: var(--transition-normal);
@@ -346,10 +365,14 @@ button {
 }
 
 .navbar--scrolled {
-  top: 1rem;
-  background: rgba(0, 0, 0, 0.85);
-  border-color: rgba(255, 255, 255, 0.08);
-  box-shadow: 0 20px 40px rgba(0,0,0,0.5);
+  top: 0;
+  width: 100%;
+  max-width: 100%;
+  border-left: none;
+  border-right: none;
+  background: var(--bg-glass-hover);
+  border-color: var(--border-color);
+  box-shadow: 0 20px 40px rgba(0,0,0,0.1);
   padding: 0.9rem 2.5rem;
 }
 
@@ -365,10 +388,24 @@ button {
 }
 
 .navbar__logo-img {
-  height: 22px;
+  height: 26px;
   width: auto;
-  filter: brightness(1.2);
   transition: var(--transition-normal);
+}
+
+/* Logo Color Inversion Rules */
+.dark-theme .navbar__logo-img,
+.dark-theme .footer__logo img {
+  filter: invert(1);
+}
+.light-theme .navbar__logo-img,
+.light-theme .footer__logo img {
+  filter: none;
+}
+/* If theme class is missing, default is dark, so invert by default */
+.navbar__logo-img,
+.footer__logo-img {
+  filter: invert(1);
 }
 
 .navbar__links {
@@ -410,7 +447,6 @@ button {
 .navbar__link--admin {
   color: var(--accent-primary);
   border: 1px solid var(--border-gold);
-  border-radius: 50px;
   padding: 0.5rem 1.25rem;
   background: rgba(224, 175, 60, 0.05);
 }
@@ -422,7 +458,7 @@ button {
 .navbar__link--admin:hover {
   background: var(--accent-primary);
   color: var(--bg-primary);
-  box-shadow: 0 0 15px rgba(224, 175, 60, 0.35);
+  box-shadow: 0 0 15px rgba(224, 175, 60, 0.15);
 }
 
 .navbar__hamburger {
@@ -446,7 +482,7 @@ button {
   left: 0;
   right: 0;
   bottom: 0;
-  background: rgba(0, 0, 0, 0.7);
+  background: rgba(0, 0, 0, 0.6);
   z-index: 1998;
   backdrop-filter: blur(10px);
 }
@@ -526,26 +562,8 @@ button {
   left: 0;
   width: 100%;
   height: 100%;
-  background: radial-gradient(circle at 50% 50%, #080808 0%, #000000 100%);
+  background: var(--bg-secondary);
   z-index: 0;
-}
-
-.hero__particle {
-  position: absolute;
-  background: var(--accent-primary);
-  border-radius: 50%;
-  pointer-events: none;
-}
-
-.hero__shape {
-  position: absolute;
-  border: 1px solid rgba(255, 255, 255, 0.02);
-  pointer-events: none;
-}
-
-.hero__shape--circle {
-  border-radius: 50%;
-  border-color: rgba(224, 175, 60, 0.025);
 }
 
 .hero__content {
@@ -568,7 +586,6 @@ button {
   margin-bottom: 2.25rem;
   background: rgba(224, 175, 60, 0.05);
   border: 1px solid var(--border-gold);
-  border-radius: 50px;
   padding: 0.5rem 1.25rem;
 }
 
@@ -623,7 +640,6 @@ button {
   width: 1.25rem;
   height: 2rem;
   border: 1px solid rgba(255, 255, 255, 0.15);
-  border-radius: 100px;
   position: relative;
 }
 
@@ -656,7 +672,6 @@ button {
   backdrop-filter: blur(16px);
   -webkit-backdrop-filter: blur(16px);
   border: 1px solid var(--border-color);
-  border-radius: 16px;
   padding: 3.5rem 2.5rem;
   transition: var(--transition-normal);
   display: flex;
@@ -784,7 +799,6 @@ button {
 .about__card {
   background: var(--bg-glass);
   border: 1px solid var(--border-color);
-  border-radius: 12px;
   padding: 2rem;
   display: flex;
   gap: 1.5rem;
@@ -804,7 +818,6 @@ button {
   border: 1px solid var(--border-gold);
   width: 48px;
   height: 48px;
-  border-radius: 10px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -837,7 +850,6 @@ button {
   width: 100%;
   height: 100%;
   border: 1px solid var(--border-color);
-  border-radius: 20px;
   background-image: 
     linear-gradient(rgba(255, 255, 255, 0.015) 1px, transparent 1px),
     linear-gradient(90deg, rgba(255, 255, 255, 0.015) 1px, transparent 1px);
@@ -862,7 +874,6 @@ button {
   background: var(--bg-glass);
   backdrop-filter: blur(10px);
   border: 1px solid var(--border-color);
-  border-radius: 14px;
   display: flex;
   flex-direction: column;
   gap: 0.5rem;
@@ -911,7 +922,6 @@ button {
 .team-card {
   background: var(--bg-glass);
   border: 1px solid var(--border-color);
-  border-radius: 16px;
   padding: 3.5rem 2.5rem;
   text-align: center;
   transition: var(--transition-normal);
@@ -929,7 +939,6 @@ button {
 .team-card__avatar {
   width: 110px;
   height: 110px;
-  border-radius: 50%;
   border: 1px solid var(--border-gold);
   margin-bottom: 2rem;
   overflow: hidden;
@@ -948,7 +957,6 @@ button {
   width: 100%;
   height: 100%;
   object-fit: cover;
-  border-radius: 50%;
 }
 
 .team-card__avatar-placeholder {
@@ -993,7 +1001,6 @@ button {
 .team-card__social {
   width: 38px;
   height: 38px;
-  border-radius: 50%;
   border: 1px solid var(--border-color);
   color: var(--text-muted);
   display: flex;
@@ -1028,7 +1035,6 @@ button {
   padding: 2.5rem 1.5rem;
   background: var(--bg-glass);
   border: 1px solid var(--border-color);
-  border-radius: 12px;
   transition: var(--transition-normal);
 }
 
@@ -1078,7 +1084,6 @@ button {
 .testimonials__card {
   background: var(--bg-glass);
   border: 1px solid var(--border-color);
-  border-radius: 16px;
   padding: 4.5rem;
   text-align: center;
   position: relative;
@@ -1123,7 +1128,6 @@ button {
 .testimonials__author-avatar {
   width: 50px;
   height: 50px;
-  border-radius: 50%;
   border: 1px solid var(--border-gold);
   overflow: hidden;
   background: var(--bg-tertiary);
@@ -1159,7 +1163,6 @@ button {
 .testimonials__dot {
   width: 8px;
   height: 8px;
-  border-radius: 50%;
   background: rgba(255,255,255,0.15);
   cursor: pointer;
   transition: var(--transition-fast);
@@ -1185,7 +1188,6 @@ button {
 .testimonials__arrow {
   width: 44px;
   height: 44px;
-  border-radius: 50%;
   border: 1px solid var(--border-color);
   background: var(--bg-glass);
   color: var(--text-muted);
@@ -1217,14 +1219,12 @@ button {
 .contact__form-wrap {
   background: var(--bg-glass);
   border: 1px solid var(--border-color);
-  border-radius: 16px;
   padding: 3.5rem;
 }
 
 .contact__success {
   background: rgba(16, 185, 129, 0.03);
   border: 1px solid rgba(16, 185, 129, 0.15);
-  border-radius: 12px;
   padding: 3rem 2rem;
   color: #10b981;
   text-align: center;
@@ -1275,7 +1275,6 @@ button {
   padding: 1.1rem 1.4rem;
   background: rgba(255, 255, 255, 0.02);
   border: 1px solid var(--border-color);
-  border-radius: 10px;
   color: var(--text-primary);
   font-family: var(--font-body);
   font-size: 0.95rem;
@@ -1350,7 +1349,6 @@ button {
   color: var(--accent-primary);
   width: 40px;
   height: 40px;
-  border-radius: 8px;
   border: 1px solid var(--border-gold);
   background: rgba(224, 175, 60, 0.03);
   display: flex;
@@ -1382,7 +1380,6 @@ button {
 .contact__social {
   width: 40px;
   height: 40px;
-  border-radius: 50%;
   border: 1px solid var(--border-color);
   color: var(--text-muted);
   display: flex;
@@ -1444,7 +1441,6 @@ button {
 .footer__social-icon {
   width: 38px;
   height: 38px;
-  border-radius: 50%;
   border: 1px solid var(--border-color);
   color: var(--text-muted);
   display: flex;
@@ -1527,13 +1523,13 @@ button {
 .admin-layout {
   display: flex;
   min-height: 100vh;
-  background: #000000;
+  background: var(--bg-primary);
   font-family: var(--font-body);
 }
 
 .admin-sidebar {
   width: 280px;
-  background: #040404;
+  background: var(--bg-secondary);
   border-right: 1px solid var(--border-color);
   position: fixed;
   top: 0;
@@ -1586,7 +1582,6 @@ button {
   gap: 1rem;
   padding: 0.9rem 1.25rem;
   color: var(--text-muted);
-  border-radius: 8px;
   transition: var(--transition-fast);
   font-size: 0.85rem;
   text-align: left;
@@ -1599,7 +1594,7 @@ button {
 }
 
 .admin-sidebar-item.active {
-  background: rgba(224, 175, 60, 0.08);
+  background: var(--accent-glow);
   color: var(--accent-primary);
 }
 
@@ -1614,7 +1609,6 @@ button {
   color: #ffffff;
   font-size: 0.7rem;
   padding: 0.15rem 0.45rem;
-  border-radius: 50px;
   margin-left: auto;
 }
 
@@ -1651,7 +1645,7 @@ button {
   position: sticky;
   top: 0;
   z-index: 100;
-  background: rgba(0, 0, 0, 0.7);
+  background: var(--bg-glass);
   backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
   border-bottom: 1px solid var(--border-color);
@@ -1680,7 +1674,7 @@ button {
   align-items: center;
   justify-content: center;
   min-height: 100vh;
-  background: #000000;
+  background: var(--bg-primary);
   position: relative;
   padding: 2rem;
 }
@@ -1700,7 +1694,6 @@ button {
   background: var(--bg-glass);
   backdrop-filter: blur(20px);
   border: 1px solid var(--border-color);
-  border-radius: 16px;
   padding: 4rem 3rem;
   width: 100%;
   max-width: 440px;
@@ -1755,7 +1748,6 @@ button {
   padding: 1rem 1.25rem;
   background: rgba(255, 255, 255, 0.02);
   border: 1px solid var(--border-color);
-  border-radius: 8px;
   color: var(--text-primary);
   font-family: var(--font-body);
   font-size: 0.9rem;
@@ -1792,7 +1784,6 @@ button {
 .admin-stat-card {
   background: var(--bg-glass);
   border: 1px solid var(--border-color);
-  border-radius: 12px;
   padding: 2rem 1.75rem;
   display: flex;
   align-items: center;
@@ -1808,7 +1799,6 @@ button {
 .admin-stat-card .admin-stat-icon {
   width: 50px;
   height: 50px;
-  border-radius: 10px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -1840,7 +1830,6 @@ button {
 .admin-card {
   background: var(--bg-glass);
   border: 1px solid var(--border-color);
-  border-radius: 14px;
   padding: 2.5rem;
   margin-bottom: 2.5rem;
 }
@@ -1865,7 +1854,6 @@ button {
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 1.5px;
-  border-radius: 50px;
   transition: var(--transition-normal);
 }
 
@@ -1875,8 +1863,8 @@ button {
 }
 
 .admin-btn-primary:hover {
-  background: #ffffff;
-  color: #000000;
+  background: var(--text-primary);
+  color: var(--bg-primary);
   transform: translateY(-2px);
   box-shadow: 0 10px 20px rgba(224, 175, 60, 0.2);
 }
@@ -1923,7 +1911,6 @@ button {
 .admin-table-container {
   background: var(--bg-glass);
   border: 1px solid var(--border-color);
-  border-radius: 12px;
   overflow: hidden;
 }
 
@@ -1942,7 +1929,6 @@ button {
   padding: 0.75rem 1.25rem;
   background: rgba(255,255,255,0.02);
   border: 1px solid var(--border-color);
-  border-radius: 50px;
   color: var(--text-primary);
 }
 
@@ -1963,7 +1949,7 @@ button {
   text-transform: uppercase;
   letter-spacing: 1.5px;
   color: var(--text-muted);
-  background: rgba(255, 255, 255, 0.01);
+  background: rgba(255, 255, 255, 0.015);
   border-bottom: 1px solid var(--border-color);
   text-align: left;
 }
@@ -1997,9 +1983,8 @@ button {
 }
 
 .admin-modal-content {
-  background: #080808;
+  background: var(--bg-secondary);
   border: 1px solid var(--border-color);
-  border-radius: 16px;
   width: 100%;
   max-width: 650px;
   max-height: 90vh;
@@ -2043,33 +2028,37 @@ button {
   flex: 1;
 }
 
+.admin-modal-footer {
+  padding: 1.25rem 2rem;
+  border-top: 1px solid var(--border-color);
+  display: flex;
+  justify-content: flex-end;
+  gap: 1rem;
+}
+
 /* Badges */
 .admin-badge-active {
   background: rgba(16, 185, 129, 0.08);
   color: #10b981;
   border: 1px solid rgba(16, 185, 129, 0.2);
-  border-radius: 50px;
 }
 
 .admin-badge-inactive {
   background: rgba(255, 255, 255, 0.05);
   color: var(--text-muted);
   border: 1px solid var(--border-color);
-  border-radius: 50px;
 }
 
 .admin-badge-unread {
   background: rgba(224, 175, 60, 0.08);
   color: var(--accent-primary);
   border: 1px solid var(--border-gold);
-  border-radius: 50px;
 }
 
 /* Messages admin */
 .admin-message-item {
   background: rgba(255, 255, 255, 0.01);
   border: 1px solid var(--border-color);
-  border-radius: 12px;
   margin-bottom: 1rem;
   overflow: hidden;
   transition: var(--transition-normal);
@@ -2096,7 +2085,6 @@ button {
 .admin-message-avatar {
   width: 44px;
   height: 44px;
-  border-radius: 50%;
   background: rgba(224, 175, 60, 0.08);
   border: 1px solid var(--border-gold);
   color: var(--accent-primary);
@@ -2127,6 +2115,12 @@ button {
   line-height: 1.7;
 }
 
+.admin-message-actions {
+  display: flex;
+  gap: 0.5rem;
+  margin-top: 1rem;
+}
+
 /* Toast admin */
 .admin-toast-container {
   position: fixed;
@@ -2139,16 +2133,15 @@ button {
 }
 
 .admin-toast {
-  background: #0a0a0a;
+  background: var(--bg-secondary);
   border: 1px solid var(--border-color);
-  border-radius: 8px;
   padding: 1rem 1.75rem;
   color: var(--text-primary);
   display: flex;
   align-items: center;
   gap: 0.75rem;
   font-size: 0.85rem;
-  box-shadow: 0 20px 40px rgba(0,0,0,0.5);
+  box-shadow: 0 20px 40px rgba(0,0,0,0.2);
 }
 
 .admin-toast-success {
@@ -2164,7 +2157,6 @@ button {
   width: 120px;
   height: 120px;
   object-fit: cover;
-  border-radius: 8px;
   border: 1px solid var(--border-color);
   margin-top: 1rem;
 }
@@ -2198,7 +2190,6 @@ button {
   padding: 0.75rem 1rem;
   background: rgba(255, 255, 255, 0.02);
   border: 1px solid var(--border-color);
-  border-radius: 6px;
   color: var(--text-primary);
 }
 
@@ -2217,7 +2208,6 @@ button {
 .admin-quick-action {
   background: var(--bg-glass);
   border: 1px solid var(--border-color);
-  border-radius: 12px;
   padding: 1.5rem;
   display: flex;
   align-items: center;
@@ -2237,7 +2227,6 @@ button {
   background: rgba(224, 175, 60, 0.05);
   width: 38px;
   height: 38px;
-  border-radius: 8px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -2246,6 +2235,35 @@ button {
 .admin-quick-action span {
   font-size: 0.85rem;
   font-weight: 500;
+  color: var(--text-secondary);
+}
+
+/* Dragging visual helpers */
+.admin-draggable-card:active {
+  cursor: grabbing;
+}
+.admin-draggable-card.dragging {
+  opacity: 0.4;
+  border: 1px dashed var(--accent-primary);
+  background: var(--accent-glow) !important;
+}
+
+.admin-empty {
+  text-align: center;
+  padding: 64px 32px;
+  color: var(--text-muted);
+}
+
+.admin-empty i {
+  font-size: 3rem;
+  margin-bottom: 16px;
+  opacity: 0.3;
+}
+
+.admin-empty h3 {
+  font-family: var(--font-heading);
+  font-size: 1.25rem;
+  margin-bottom: 8px;
   color: var(--text-secondary);
 }
 
@@ -2290,6 +2308,10 @@ button {
   .navbar__hamburger {
     display: flex;
   }
+
+  .navbar__mobile-theme-btn {
+    display: block !important;
+  }
   
   .about__grid,
   .contact__grid,
@@ -2309,6 +2331,26 @@ button {
   
   .testimonials__arrows {
     display: none;
+  }
+  
+  /* Mobile Admin */
+  .admin-sidebar {
+    left: -280px;
+  }
+  .admin-sidebar--open {
+    left: 0;
+  }
+  .admin-content {
+    margin-left: 0;
+  }
+  .admin-mobile-toggle {
+    display: flex !important;
+  }
+  .admin-body {
+    padding: 1.5rem;
+  }
+  .admin-header {
+    padding: 1rem 1.5rem;
   }
 }
 
