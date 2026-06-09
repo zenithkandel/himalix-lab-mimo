@@ -52,15 +52,7 @@ const Footer = () => {
           <ScrollReveal direction="up" delay={0}>
             <div className="footer__col footer__col--brand">
               <Link to="/" className="footer__logo">
-                <span style={{ 
-                  fontFamily: "var(--font-heading)", 
-                  fontWeight: 500, 
-                  fontSize: '1.2rem', 
-                  letterSpacing: '2.5px',
-                  color: 'var(--text-primary)'
-                }}>
-                  HIMALIX <span style={{ color: 'var(--accent-primary)' }}>LABS</span>
-                </span>
+                <img src="/logo.png" alt="Himalix Labs" className="footer__logo-img" style={{ height: '24px', width: 'auto' }} />
               </Link>
               <p className="footer__desc">
                 Democratizing advanced electronics, 3D printing, and bespoke tech solutions for innovators across Nepal.
@@ -108,15 +100,15 @@ const Footer = () => {
               <h4 className="footer__heading">Contact</h4>
               <ul className="footer__list footer__list--contact">
                 <li>
-                  <i className="fa-solid fa-location-dot" />
+                  <i className="fa-light fa-sharp fa-location-dot" />
                   <span>Kathmandu, Nepal</span>
                 </li>
                 <li>
-                  <i className="fa-solid fa-envelope" />
+                  <i className="fa-light fa-sharp fa-envelope" />
                   <span>info@himalixlabs.com</span>
                 </li>
                 <li>
-                  <i className="fa-solid fa-phone" />
+                  <i className="fa-light fa-sharp fa-phone" />
                   <span>+977-1-XXXXXXXX</span>
                 </li>
               </ul>

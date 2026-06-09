@@ -1,10 +1,18 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion } from 'framer-motion';
 import ScrollReveal from '../components/ScrollReveal';
 import AnimatedCounter from '../components/AnimatedCounter';
 import LoadingScreen from '../components/LoadingScreen';
 import SmoothScroll from '../components/SmoothScroll';
-import InteractiveCanvas from '../components/InteractiveCanvas';
+import Footer from '../components/Footer';
+
+// Helper to convert generic icons into light-sharp themed icons dynamically
+const getIconClass = (cls) => {
+  if (!cls) return 'fa-light fa-sharp fa-cube';
+  return cls
+    .replace('fa-solid', 'fa-light fa-sharp')
+    .replace('fa-regular', 'fa-light fa-sharp');
+};
 
 /* ─── Hero Section ──────────────────────────────────────────────── */
 const Hero = ({ content }) => {
@@ -28,7 +36,7 @@ const Hero = ({ content }) => {
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 1.2, duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
         >
-          <i className="fa-solid fa-microchip" style={{ fontSize: '0.85rem' }} /> Hardware & Custom IoT Solutions
+          <i className="fa-light fa-sharp fa-microchip" style={{ fontSize: '0.85rem' }} /> Hardware & Custom IoT Solutions
         </motion.div>
 
         <motion.h1
@@ -56,7 +64,7 @@ const Hero = ({ content }) => {
           transition={{ delay: 1.8, duration: 0.9, ease: [0.16, 1, 0.3, 1] }}
         >
           <button className="btn btn--gold" onClick={() => scrollTo('#services')}>
-            {content?.hero_cta_text || 'Explore Our Services'} <i className="fa-solid fa-arrow-right" style={{ fontSize: '0.8rem' }} />
+            {content?.hero_cta_text || 'Explore Our Services'} <i className="fa-light fa-sharp fa-arrow-right" style={{ fontSize: '0.8rem' }} />
           </button>
           <button className="btn btn--outline" onClick={() => scrollTo('#contact')}>
             Get in touch
@@ -76,7 +84,7 @@ const Hero = ({ content }) => {
             animate={{ y: [0, 6, 0] }}
             transition={{ duration: 2, repeat: Infinity, ease: 'easeInOut' }}
           >
-            <i className="fa-solid fa-chevron-down" />
+            <i className="fa-light fa-sharp fa-chevron-down" />
           </motion.div>
         </motion.div>
       </div>
@@ -84,11 +92,9 @@ const Hero = ({ content }) => {
   );
 };
 
-// Seperate background canvas layer to optimize renders
 const HeroBackground = React.memo(() => {
   return (
     <div className="hero__bg">
-      <InteractiveCanvas />
       {/* Decorative ambient lighting overlays */}
       <div className="ambient-glow ambient-glow--top-left" />
       <div className="ambient-glow ambient-glow--bottom-right" />
@@ -103,7 +109,7 @@ const Services = ({ services }) => (
     <div className="section__container">
       <ScrollReveal>
         <div className="section__header">
-          <p className="section__eyebrow"><i className="fa-solid fa-gear" /> Solutions</p>
+          <p className="section__eyebrow"><i className="fa-light fa-sharp fa-gear" /> Solutions</p>
           <h2 className="section__title">
             Our <span className="section__title-accent">Services</span>
           </h2>
@@ -125,19 +131,19 @@ const Services = ({ services }) => (
             <ScrollReveal key={s.id || i} delay={i * 0.1}>
               <div className="service-card">
                 <div className="service-card__icon">
-                  <i className={s.icon_class || 'fa-solid fa-cube'} />
+                  <i className={getIconClass(s.icon_class)} />
                 </div>
                 <h3 className="service-card__title">{s.title}</h3>
                 <p className="service-card__desc">{s.description}</p>
                 <ul className="service-card__features">
                   {features.map((f, index) => (
                     <li key={index}>
-                      <i className="fa-solid fa-circle-notch" /> {f}
+                      <i className="fa-light fa-sharp fa-circle-notch" /> {f}
                     </li>
                   ))}
                 </ul>
                 <a href={s.link_url || '#contact'} className="service-card__link">
-                  Request Service <i className="fa-solid fa-arrow-right-long" />
+                  Request Service <i className="fa-light fa-sharp fa-arrow-right-long" />
                 </a>
               </div>
             </ScrollReveal>
@@ -155,7 +161,7 @@ const About = ({ content }) => (
       <div className="about__grid">
         <div className="about__text">
           <ScrollReveal>
-            <p className="section__eyebrow"><i className="fa-solid fa-compass" /> Mission & Vision</p>
+            <p className="section__eyebrow"><i className="fa-light fa-sharp fa-compass" /> Mission & Vision</p>
             <h2 className="section__title">
               {content?.about_title || 'About Himalix Labs'}
             </h2>
@@ -171,7 +177,7 @@ const About = ({ content }) => (
             <ScrollReveal direction="left" delay={0.2}>
               <div className="about__card">
                 <div className="about__card-icon">
-                  <i className="fa-solid fa-bullseye" />
+                  <i className="fa-light fa-sharp fa-bullseye" />
                 </div>
                 <div>
                   <h4 className="about__card-title">Our Mission</h4>
@@ -185,7 +191,7 @@ const About = ({ content }) => (
             <ScrollReveal direction="left" delay={0.3}>
               <div className="about__card">
                 <div className="about__card-icon">
-                  <i className="fa-solid fa-eye" />
+                  <i className="fa-light fa-sharp fa-eye" />
                 </div>
                 <div>
                   <h4 className="about__card-title">Our Vision</h4>
@@ -202,11 +208,11 @@ const About = ({ content }) => (
           <div className="about__visual">
             <div className="about__visual-grid">
               {[
-                { icon: 'fa-solid fa-microchip', label: 'Hardware' },
-                { icon: 'fa-solid fa-cube', label: '3D Printing' },
-                { icon: 'fa-solid fa-diagram-project', label: 'IoT Config' },
-                { icon: 'fa-solid fa-code', label: 'Firmware' },
-                { icon: 'fa-solid fa-robot', label: 'Automation' },
+                { icon: 'fa-light fa-sharp fa-microchip', label: 'Hardware' },
+                { icon: 'fa-light fa-sharp fa-cube', label: '3D Printing' },
+                { icon: 'fa-light fa-sharp fa-diagram-project', label: 'IoT Config' },
+                { icon: 'fa-light fa-sharp fa-code', label: 'Firmware' },
+                { icon: 'fa-light fa-sharp fa-robot', label: 'Automation' },
               ].map((item, i) => (
                 <motion.div
                   key={item.label}
@@ -232,7 +238,7 @@ const Team = ({ members }) => (
     <div className="section__container">
       <ScrollReveal>
         <div className="section__header">
-          <p className="section__eyebrow"><i className="fa-solid fa-users" /> Co-Founders</p>
+          <p className="section__eyebrow"><i className="fa-light fa-sharp fa-users" /> Co-Founders</p>
           <h2 className="section__title">
             Our <span className="section__title-accent">Team</span>
           </h2>
@@ -258,7 +264,7 @@ const Team = ({ members }) => (
                     <img src={member.image_url} alt={member.name} className="team-card__avatar-img" />
                   ) : (
                     <div className="team-card__avatar-placeholder">
-                      <i className="fa-solid fa-user" />
+                      <i className="fa-light fa-sharp fa-user" />
                     </div>
                   )}
                 </div>
@@ -294,10 +300,10 @@ const Stats = ({ content }) => {
   const pYears = parseStatValue(content?.stats_years || '5+');
 
   const statsData = [
-    { num: pProjects.num, suffix: pProjects.suffix, label: 'Projects Completed', icon: 'fa-solid fa-rocket' },
-    { num: pClients.num, suffix: pClients.suffix, label: 'Happy Clients', icon: 'fa-solid fa-heart' },
-    { num: pProducts.num, suffix: pProducts.suffix, label: 'Components Supplied', icon: 'fa-solid fa-microchip' },
-    { num: pYears.num, suffix: pYears.suffix, label: 'Years Experience', icon: 'fa-solid fa-calendar-check' },
+    { num: pProjects.num, suffix: pProjects.suffix, label: 'Projects Completed', icon: 'fa-light fa-sharp fa-rocket' },
+    { num: pClients.num, suffix: pClients.suffix, label: 'Happy Clients', icon: 'fa-light fa-sharp fa-heart' },
+    { num: pProducts.num, suffix: pProducts.suffix, label: 'Components Supplied', icon: 'fa-light fa-sharp fa-microchip' },
+    { num: pYears.num, suffix: pYears.suffix, label: 'Years Experience', icon: 'fa-light fa-sharp fa-calendar-check' },
   ];
 
   return (
@@ -351,7 +357,7 @@ const Testimonials = ({ testimonials }) => {
       <div className="section__container">
         <ScrollReveal>
           <div className="section__header">
-            <p className="section__eyebrow"><i className="fa-solid fa-quote-left" /> Endorsements</p>
+            <p className="section__eyebrow"><i className="fa-light fa-sharp fa-quote-left" /> Endorsements</p>
             <h2 className="section__title">
               Innovators <span className="section__title-accent">Feedback</span>
             </h2>
@@ -365,7 +371,7 @@ const Testimonials = ({ testimonials }) => {
             onMouseLeave={() => setPaused(false)}
           >
             <div className="testimonials__card">
-              <i className="fa-solid fa-quote-left testimonials__quote-icon" />
+              <i className="fa-light fa-sharp fa-quote-left testimonials__quote-icon" />
               <motion.p
                 className="testimonials__text"
                 key={current}
@@ -377,12 +383,12 @@ const Testimonials = ({ testimonials }) => {
               </motion.p>
               <div className="testimonials__stars">
                 {Array.from({ length: 5 }).map((_, i) => (
-                  <i key={i} className={`fa-${i < (t.rating || 5) ? 'solid' : 'regular'} fa-star`} />
+                  <i key={i} className={`fa-${i < (t.rating || 5) ? 'solid' : 'regular'} fa-star`} style={{ color: 'var(--accent-primary)' }} />
                 ))}
               </div>
               <div className="testimonials__author">
                 <div className="testimonials__author-avatar">
-                  <i className="fa-solid fa-circle-user" />
+                  <i className="fa-light fa-sharp fa-circle-user" />
                 </div>
                 <div>
                   <h4 className="testimonials__author-name">{t.client_name}</h4>
@@ -410,14 +416,14 @@ const Testimonials = ({ testimonials }) => {
                 onClick={() => goTo((current - 1 + items.length) % items.length)}
                 aria-label="Previous"
               >
-                <i className="fa-solid fa-chevron-left" />
+                <i className="fa-light fa-sharp fa-chevron-left" />
               </button>
               <button
                 className="testimonials__arrow"
                 onClick={() => goTo((current + 1) % items.length)}
                 aria-label="Next"
               >
-                <i className="fa-solid fa-chevron-right" />
+                <i className="fa-light fa-sharp fa-chevron-right" />
               </button>
             </div>
           </div>
@@ -477,7 +483,7 @@ const Contact = ({ content }) => {
       <div className="section__container">
         <ScrollReveal>
           <div className="section__header">
-            <p className="section__eyebrow"><i className="fa-solid fa-paper-plane" /> {content?.contact_title || 'Get In Touch'}</p>
+            <p className="section__eyebrow"><i className="fa-light fa-sharp fa-paper-plane" /> {content?.contact_title || 'Get In Touch'}</p>
             <h2 className="section__title">
               Request <span className="section__title-accent">Consultation</span>
             </h2>
@@ -497,7 +503,7 @@ const Contact = ({ content }) => {
                   animate={{ opacity: 1, scale: 1 }}
                   transition={{ ease: [0.16, 1, 0.3, 1], duration: 0.6 }}
                 >
-                  <i className="fa-solid fa-circle-check" />
+                  <i className="fa-light fa-sharp fa-circle-check" />
                   <h3>Transmission Successful</h3>
                   <p>Thank you for reaching out. We will review your prompt immediately.</p>
                   <button className="btn btn--outline" onClick={() => setSubmitted(false)}>
@@ -507,7 +513,7 @@ const Contact = ({ content }) => {
               ) : (
                 <form className="contact__form" onSubmit={handleSubmit} noValidate>
                   <div className={`form-group ${errors.name ? 'form-group--error' : ''}`}>
-                    <label htmlFor="name"><i className="fa-solid fa-user" /> Client Name</label>
+                    <label htmlFor="name"><i className="fa-light fa-sharp fa-user" /> Client Name</label>
                     <input
                       type="text"
                       id="name"
@@ -520,7 +526,7 @@ const Contact = ({ content }) => {
                   </div>
 
                   <div className={`form-group ${errors.email ? 'form-group--error' : ''}`}>
-                    <label htmlFor="email"><i className="fa-solid fa-envelope" /> Email Coordinates</label>
+                    <label htmlFor="email"><i className="fa-light fa-sharp fa-envelope" /> Email Coordinates</label>
                     <input
                       type="email"
                       id="email"
@@ -533,7 +539,7 @@ const Contact = ({ content }) => {
                   </div>
 
                   <div className={`form-group ${errors.subject ? 'form-group--error' : ''}`}>
-                    <label htmlFor="subject"><i className="fa-solid fa-tag" /> Subject Domain</label>
+                    <label htmlFor="subject"><i className="fa-light fa-sharp fa-tag" /> Subject Domain</label>
                     <input
                       type="text"
                       id="subject"
@@ -546,7 +552,7 @@ const Contact = ({ content }) => {
                   </div>
 
                   <div className={`form-group ${errors.message ? 'form-group--error' : ''}`}>
-                    <label htmlFor="message"><i className="fa-solid fa-message" /> Message Specifications</label>
+                    <label htmlFor="message"><i className="fa-light fa-sharp fa-message" /> Message Specifications</label>
                     <textarea
                       id="message"
                       name="message"
@@ -559,9 +565,9 @@ const Contact = ({ content }) => {
 
                   <button type="submit" className="btn btn--gold btn--full" disabled={sending}>
                     {sending ? (
-                      <><i className="fa-solid fa-spinner fa-spin" /> Transmitting...</>
+                      <><i className="fa-light fa-sharp fa-spinner fa-spin" /> Transmitting...</>
                     ) : (
-                      <><i className="fa-solid fa-paper-plane" /> Transmit Message</>
+                      <><i className="fa-light fa-sharp fa-paper-plane" /> Transmit Message</>
                     )}
                   </button>
                 </form>
@@ -581,7 +587,7 @@ const Contact = ({ content }) => {
               <div className="contact__info-items">
                 <div className="contact__info-item">
                   <div className="contact__info-icon">
-                    <i className="fa-solid fa-envelope" />
+                    <i className="fa-light fa-sharp fa-envelope" />
                   </div>
                   <div>
                     <p className="contact__info-label">Direct Mail</p>
@@ -591,7 +597,7 @@ const Contact = ({ content }) => {
 
                 <div className="contact__info-item">
                   <div className="contact__info-icon">
-                    <i className="fa-solid fa-phone" />
+                    <i className="fa-light fa-sharp fa-phone" />
                   </div>
                   <div>
                     <p className="contact__info-label">Phone Support</p>
@@ -601,7 +607,7 @@ const Contact = ({ content }) => {
 
                 <div className="contact__info-item">
                   <div className="contact__info-icon">
-                    <i className="fa-solid fa-location-dot" />
+                    <i className="fa-light fa-sharp fa-location-dot" />
                   </div>
                   <div>
                     <p className="contact__info-label">Base Location</p>
@@ -650,6 +656,7 @@ const Landing = () => {
             <Stats content={data?.content?.stats} />
             <Testimonials testimonials={data?.testimonials} />
             <Contact content={data?.content?.contact} />
+            <Footer />
           </main>
         </SmoothScroll>
       )}

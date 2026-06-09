@@ -1,20 +1,22 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { useAuth } from '../context/AuthContext';
+import { useTheme } from '../context/ThemeContext';
 import { useNavigate } from 'react-router-dom';
+import ImageUploadZone from '../components/ImageUploadZone';
 
 const API_URL = 'http://localhost:5001/api';
 
 const NAV_ITEMS = [
-  { id: 'dashboard', label: 'Dashboard', icon: 'fa-solid fa-gauge-high' },
-  { id: 'hero', label: 'Hero Section', icon: 'fa-solid fa-trophy' },
-  { id: 'about', label: 'About', icon: 'fa-solid fa-building' },
-  { id: 'services', label: 'Services', icon: 'fa-solid fa-microchip' },
-  { id: 'team', label: 'Team', icon: 'fa-solid fa-users' },
-  { id: 'testimonials', label: 'Testimonials', icon: 'fa-solid fa-quote-right' },
-  { id: 'stats', label: 'Stats', icon: 'fa-solid fa-chart-line' },
-  { id: 'contact', label: 'Contact Info', icon: 'fa-solid fa-envelope' },
-  { id: 'settings', label: 'Settings', icon: 'fa-solid fa-gear' },
-  { id: 'messages', label: 'Messages', icon: 'fa-solid fa-inbox' },
+  { id: 'dashboard', label: 'Dashboard', icon: 'fa-light fa-sharp fa-gauge-high' },
+  { id: 'hero', label: 'Hero Section', icon: 'fa-light fa-sharp fa-trophy' },
+  { id: 'about', label: 'About', icon: 'fa-light fa-sharp fa-building' },
+  { id: 'services', label: 'Services', icon: 'fa-light fa-sharp fa-microchip' },
+  { id: 'team', label: 'Team', icon: 'fa-light fa-sharp fa-users' },
+  { id: 'testimonials', label: 'Testimonials', icon: 'fa-light fa-sharp fa-quote-right' },
+  { id: 'stats', label: 'Stats', icon: 'fa-light fa-sharp fa-chart-line' },
+  { id: 'contact', label: 'Contact Info', icon: 'fa-light fa-sharp fa-envelope' },
+  { id: 'settings', label: 'Settings', icon: 'fa-light fa-sharp fa-gear' },
+  { id: 'messages', label: 'Messages', icon: 'fa-light fa-sharp fa-inbox' },
 ];
 
 const EMPTY_SERVICE = {
@@ -49,6 +51,14 @@ const EMPTY_TESTIMONIAL = {
   is_active: true,
 };
 
+/* ─── Helper: Convert Generic Icons to Light Sharp ───────────────── */
+const getIconClass = (cls) => {
+  if (!cls) return 'fa-light fa-sharp fa-cube';
+  return cls
+    .replace('fa-solid', 'fa-light fa-sharp')
+    .replace('fa-regular', 'fa-light fa-sharp');
+};
+
 /* ─── Toast ────────────────────────────────────────────────────── */
 function Toast({ toasts, onRemove }) {
   return (
@@ -58,8 +68,9 @@ function Toast({ toasts, onRemove }) {
           key={t.id}
           className={`admin-toast admin-toast-${t.type}`}
           onClick={() => onRemove(t.id)}
+          style={{ cursor: 'pointer' }}
         >
-          <i className={t.type === 'success' ? 'fa-solid fa-circle-check' : 'fa-solid fa-circle-exclamation'} />
+          <i className={t.type === 'success' ? 'fa-light fa-sharp fa-circle-check' : 'fa-light fa-sharp fa-circle-exclamation'} />
           <span>{t.message}</span>
         </div>
       ))}
@@ -83,8 +94,8 @@ function Modal({ isOpen, onClose, title, children }) {
       <div className="admin-modal-content" onClick={(e) => e.stopPropagation()}>
         <div className="admin-modal-header">
           <h3>{title}</h3>
-          <button className="admin-btn-close" onClick={onClose}>
-            <i className="fa-solid fa-xmark" />
+          <button className="admin-btn-close" onClick={onClose} style={{ background: 'none', border: 'none', cursor: 'pointer' }}>
+            <i className="fa-light fa-sharp fa-xmark" />
           </button>
         </div>
         <div className="admin-modal-body">{children}</div>
@@ -103,9 +114,9 @@ function ConfirmDialog({ isOpen, onClose, onConfirm, title, message }) {
           <h3>{title}</h3>
         </div>
         <div className="admin-modal-body">
-          <p style={{ color: '#ccc', marginBottom: '1.5rem' }}>{message}</p>
+          <p style={{ color: 'var(--text-secondary)', marginBottom: '1.5rem', fontSize: '0.9rem' }}>{message}</p>
           <div style={{ display: 'flex', gap: '0.75rem', justifyContent: 'flex-end' }}>
-            <button className="admin-btn" onClick={onClose}>Cancel</button>
+            <button className="admin-btn admin-btn-secondary" onClick={onClose}>Cancel</button>
             <button className="admin-btn admin-btn-danger" onClick={onConfirm}>Delete</button>
           </div>
         </div>
@@ -143,12 +154,17 @@ function LoginScreen({ login }) {
           <h2>HIMALIX LABS</h2>
           <span className="admin-badge">ADMIN</span>
         </div>
-        <h3>Sign In</h3>
-        {error && <div className="admin-alert admin-alert-error"><i className="fa-solid fa-circle-exclamation" /> {error}</div>}
+        <h3 style={{ fontWeight: 400 }}>Sign In</h3>
+        {error && (
+          <div className="admin-toast admin-toast-error" style={{ position: 'relative', bottom: 'auto', right: 'auto', marginBottom: '1.5rem', width: '100%' }}>
+            <i className="fa-light fa-sharp fa-circle-exclamation" />
+            <span>{error}</span>
+          </div>
+        )}
         <form onSubmit={handleSubmit}>
           <div className="admin-form-group">
             <label className="admin-form-label">
-              <i className="fa-solid fa-envelope" /> Email
+              <i className="fa-light fa-sharp fa-envelope" /> Email
             </label>
             <input
               type="email"
@@ -161,7 +177,7 @@ function LoginScreen({ login }) {
           </div>
           <div className="admin-form-group">
             <label className="admin-form-label">
-              <i className="fa-solid fa-lock" /> Password
+              <i className="fa-light fa-sharp fa-lock" /> Password
             </label>
             <input
               type="password"
@@ -173,9 +189,9 @@ function LoginScreen({ login }) {
           </div>
           <button type="submit" className="admin-btn admin-btn-primary admin-btn-full" disabled={loading}>
             {loading ? (
-              <><i className="fa-solid fa-spinner fa-spin" /> Signing in...</>
+              <><i className="fa-light fa-sharp fa-spinner fa-spin" /> Signing in...</>
             ) : (
-              <><i className="fa-solid fa-right-to-bracket" /> Sign In</>
+              <><i className="fa-light fa-sharp fa-right-to-bracket" /> Sign In</>
             )}
           </button>
         </form>
@@ -187,6 +203,7 @@ function LoginScreen({ login }) {
 /* ─── Main Admin Component ────────────────────────────────────── */
 export default function Admin() {
   const { user, token, login, logout } = useAuth();
+  const { theme, toggleTheme } = useTheme();
   const navigate = useNavigate();
 
   const [activeTab, setActiveTab] = useState('dashboard');
@@ -204,6 +221,10 @@ export default function Admin() {
   const [testimonials, setTestimonials] = useState([]);
   const [settings, setSettings] = useState([]);
   const [messages, setMessages] = useState([]);
+
+  // Drag and Drop reordering refs
+  const dragItem = useRef();
+  const dragOverItem = useRef();
 
   // Hero state
   const [heroForm, setHeroForm] = useState({ headline: '', subline: '', cta_text: '', cta_link: '' });
@@ -243,7 +264,7 @@ export default function Admin() {
   // Settings form
   const [settingsForm, setSettingsForm] = useState({
     site_name: '', site_tagline: '', logo_url: '',
-    primary_color: '#d4a017', secondary_color: '#c9a227',
+    primary_color: '#e0af3c', secondary_color: '#cba02f',
     social_facebook: '', social_twitter: '', social_instagram: '',
     social_linkedin: '', social_github: '',
   });
@@ -337,71 +358,80 @@ export default function Admin() {
   useEffect(() => {
     if (!content.length) return;
     const getVal = (section, key) => {
-      const item = content.find((c) => c.section_name === section);
-      if (!item) return '';
-      try {
-        const parsed = typeof item.content_value === 'string' ? JSON.parse(item.content_value) : item.content_value;
-        return parsed[key] || '';
-      } catch { return ''; }
+      const item = content.find((c) => c.section === section && c.content_key === key);
+      return item ? item.content_value : '';
     };
     setHeroForm({
-      headline: getVal('hero', 'headline'),
-      subline: getVal('hero', 'subline'),
-      cta_text: getVal('hero', 'cta_text'),
-      cta_link: getVal('hero', 'cta_link'),
+      headline: getVal('hero', 'hero_headline'),
+      subline: getVal('hero', 'hero_subline'),
+      cta_text: getVal('hero', 'hero_cta_text'),
+      cta_link: getVal('hero', 'hero_cta_link'),
     });
     setAboutForm({
-      title: getVal('about', 'title'),
-      description: getVal('about', 'description'),
-      mission: getVal('about', 'mission'),
-      vision: getVal('about', 'vision'),
+      title: getVal('about', 'about_title'),
+      description: getVal('about', 'about_description'),
+      mission: getVal('about', 'about_mission'),
+      vision: getVal('about', 'about_vision'),
     });
     setContactForm({
-      title: getVal('contact', 'title'),
-      email: getVal('contact', 'email'),
-      phone: getVal('contact', 'phone'),
-      address: getVal('contact', 'address'),
+      title: getVal('contact', 'contact_title'),
+      email: getVal('contact', 'contact_email'),
+      phone: getVal('contact', 'contact_phone'),
+      address: getVal('contact', 'contact_address'),
     });
     setStatsForm({
-      projects_completed: getVal('stats', 'projects_completed'),
-      happy_clients: getVal('stats', 'happy_clients'),
-      products_available: getVal('stats', 'products_available'),
-      years_experience: getVal('stats', 'years_experience'),
+      projects_completed: getVal('stats', 'stats_projects'),
+      happy_clients: getVal('stats', 'stats_clients'),
+      products_available: getVal('stats', 'stats_products'),
+      years_experience: getVal('stats', 'stats_years'),
     });
   }, [content]);
 
   /* ─── Content Save ───────────────────────────────────────── */
-  const saveContent = async (section, data) => {
-    const item = content.find((c) => c.section_name === section);
-    if (!item) {
-      addToast('Content section not found', 'error');
-      return;
-    }
-    const res = await authFetch(`${API_URL}/admin/content/${item.id}`, {
-      method: 'PUT',
-      body: JSON.stringify({ content_value: data }),
-    });
-    if (res && res.ok) {
-      addToast(`${section.charAt(0).toUpperCase() + section.slice(1)} saved successfully`);
-      fetchAll();
-    } else {
+  const saveContent = async (section, dataMap) => {
+    try {
+      const updates = [];
+      Object.entries(dataMap).forEach(([key, value]) => {
+        // Find DB key name mapping
+        let dbKey = key;
+        if (section === 'hero') dbKey = `hero_${key}`;
+        if (section === 'about') dbKey = `about_${key}`;
+        if (section === 'contact') dbKey = `contact_${key}`;
+        if (section === 'stats') {
+          if (key === 'projects_completed') dbKey = 'stats_projects';
+          if (key === 'happy_clients') dbKey = 'stats_clients';
+          if (key === 'products_available') dbKey = 'stats_products';
+          if (key === 'years_experience') dbKey = 'stats_years';
+        }
+
+        const item = content.find((c) => c.section === section && c.content_key === dbKey);
+        if (item) {
+          updates.push({ id: item.id, content_value: value });
+        }
+      });
+
+      if (updates.length === 0) {
+        addToast('No parameters updated', 'error');
+        return;
+      }
+
+      const res = await authFetch(`${API_URL}/admin/content/bulk`, {
+        method: 'PUT',
+        body: JSON.stringify({ updates }),
+      });
+
+      if (res && res.ok) {
+        addToast(`${section.charAt(0).toUpperCase() + section.slice(1)} configuration saved`);
+        fetchAll();
+      } else {
+        addToast('Failed to save config', 'error');
+      }
+    } catch {
       addToast('Failed to save content', 'error');
     }
   };
 
   /* ─── Settings Save ──────────────────────────────────────── */
-  const saveSetting = async (key, value) => {
-    const res = await authFetch(`${API_URL}/admin/settings/${key}`, {
-      method: 'PUT',
-      body: JSON.stringify({ setting_value: value }),
-    });
-    if (res && res.ok) {
-      addToast(`${key.replace(/_/g, ' ')} saved`);
-    } else {
-      addToast('Failed to save setting', 'error');
-    }
-  };
-
   const saveAllSettings = async () => {
     const promises = Object.entries(settingsForm).map(([key, value]) =>
       authFetch(`${API_URL}/admin/settings/${key}`, {
@@ -490,7 +520,63 @@ export default function Admin() {
     });
   };
 
-  /* ─── Team CRUD ──────────────────────────────────────────── */
+  /* ─── Team CRUD & Drag-and-Drop Reordering ───────────────── */
+  const dragStart = (e, position) => {
+    dragItem.current = position;
+    e.dataTransfer.effectAllowed = 'move';
+  };
+
+  const dragEnter = (e, position) => {
+    dragOverItem.current = position;
+  };
+
+  const drop = async (e) => {
+    e.preventDefault();
+    if (dragItem.current === null || dragOverItem.current === null || dragItem.current === dragOverItem.current) {
+      return;
+    }
+
+    const copyListItems = [...team];
+    const dragItemContent = copyListItems[dragItem.current];
+    copyListItems.splice(dragItem.current, 1);
+    copyListItems.splice(dragOverItem.current, 0, dragItemContent);
+    dragItem.current = null;
+    dragOverItem.current = null;
+
+    // Dynamically assign display orders based on new index
+    const updatedList = copyListItems.map((item, index) => ({
+      ...item,
+      display_order: index + 1
+    }));
+    
+    // Update local state first for immediate UI response
+    setTeam(updatedList);
+
+    // Call backend API sequentially for each updated display order
+    try {
+      await Promise.all(
+        updatedList.map((m) =>
+          authFetch(`${API_URL}/admin/team/${m.id}`, {
+            method: 'PUT',
+            body: JSON.stringify({
+              name: m.name,
+              role: m.role,
+              bio: m.bio,
+              image_url: m.image_url,
+              social_links: typeof m.social_links === 'string' ? JSON.parse(m.social_links) : m.social_links,
+              display_order: m.display_order,
+              is_active: m.is_active !== false,
+            })
+          })
+        )
+      );
+      addToast('Team reordered successfully');
+      fetchAll();
+    } catch {
+      addToast('Failed to save display orders', 'error');
+    }
+  };
+
   const openAddMember = () => {
     setEditingMember(null);
     setMemberForm({ ...EMPTY_MEMBER, social_links: { twitter: '', linkedin: '', github: '' } });
@@ -647,28 +733,6 @@ export default function Admin() {
     });
   };
 
-  /* ─── Image Upload ───────────────────────────────────────── */
-  const uploadImage = async (file, callback) => {
-    const formData = new FormData();
-    formData.append('image', file);
-    try {
-      const res = await fetch(`${API_URL}/admin/upload`, {
-        method: 'POST',
-        headers: { Authorization: `Bearer ${token}` },
-        body: formData,
-      });
-      const data = await res.json();
-      if (res.ok && data.url) {
-        callback(data.url);
-        addToast('Image uploaded');
-      } else {
-        addToast('Upload failed', 'error');
-      }
-    } catch {
-      addToast('Upload failed', 'error');
-    }
-  };
-
   /* ─── Not Auth ───────────────────────────────────────────── */
   if (!user) {
     return (
@@ -683,8 +747,10 @@ export default function Admin() {
   const renderSidebar = () => (
     <aside className={`admin-sidebar ${sidebarOpen ? 'admin-sidebar--open' : ''}`}>
       <div className="admin-sidebar-header">
-        <h2 className="admin-sidebar-logo">HIMALIX LABS</h2>
-        <span className="admin-badge">ADMIN</span>
+        <div>
+          <h2 className="admin-sidebar-logo">HIMALIX LABS</h2>
+          <span className="admin-badge">ADMIN</span>
+        </div>
       </div>
 
       <nav className="admin-sidebar-nav">
@@ -705,14 +771,25 @@ export default function Admin() {
 
       <div className="admin-sidebar-footer">
         <div className="admin-sidebar-user">
-          <i className="fa-solid fa-circle-user" />
+          <i className="fa-light fa-sharp fa-circle-user" />
           <span>{user.name || user.email}</span>
         </div>
+        
         <button
           className="admin-btn admin-btn-sm"
-          onClick={() => { logout(); navigate('/'); }}
+          onClick={toggleTheme}
+          style={{ justifyContent: 'center' }}
         >
-          <i className="fa-solid fa-right-from-bracket" /> Logout
+          <i className={theme === 'light' ? 'fa-light fa-sharp fa-moon' : 'fa-light fa-sharp fa-sun'} /> 
+          {theme === 'light' ? 'Dark Mode' : 'Light Mode'}
+        </button>
+
+        <button
+          className="admin-btn admin-btn-sm admin-btn-danger"
+          onClick={() => { logout(); navigate('/'); }}
+          style={{ justifyContent: 'center' }}
+        >
+          <i className="fa-light fa-sharp fa-right-from-bracket" /> Logout
         </button>
       </div>
     </aside>
@@ -723,15 +800,15 @@ export default function Admin() {
     <div>
       <div className="admin-header">
         <h1 className="admin-header-title">Dashboard</h1>
-        <p style={{ color: '#888', marginTop: '0.25rem' }}>
-          Welcome back, <span style={{ color: '#d4a017' }}>{user.name || 'Admin'}</span>
+        <p style={{ color: 'var(--text-muted)', marginTop: '0.25rem', fontSize: '0.85rem' }}>
+          Welcome back, <span style={{ color: 'var(--accent-primary)' }}>{user.name || 'Admin'}</span>
         </p>
       </div>
 
       <div className="admin-stats-grid">
         <div className="admin-stat-card">
-          <div className="admin-stat-icon" style={{ background: 'rgba(212,160,23,0.15)', color: '#d4a017' }}>
-            <i className="fa-solid fa-microchip" />
+          <div className="admin-stat-icon" style={{ background: 'var(--accent-glow)', color: 'var(--accent-primary)' }}>
+            <i className="fa-light fa-sharp fa-microchip" />
           </div>
           <div className="admin-stat-info">
             <span className="admin-stat-value">{stats?.total_services ?? '-'}</span>
@@ -739,8 +816,8 @@ export default function Admin() {
           </div>
         </div>
         <div className="admin-stat-card">
-          <div className="admin-stat-icon" style={{ background: 'rgba(59,130,246,0.15)', color: '#3b82f6' }}>
-            <i className="fa-solid fa-users" />
+          <div className="admin-stat-icon" style={{ background: 'rgba(59,130,246,0.1)', color: '#3b82f6' }}>
+            <i className="fa-light fa-sharp fa-users" />
           </div>
           <div className="admin-stat-info">
             <span className="admin-stat-value">{stats?.total_team ?? '-'}</span>
@@ -748,8 +825,8 @@ export default function Admin() {
           </div>
         </div>
         <div className="admin-stat-card">
-          <div className="admin-stat-icon" style={{ background: 'rgba(16,185,129,0.15)', color: '#10b981' }}>
-            <i className="fa-solid fa-quote-right" />
+          <div className="admin-stat-icon" style={{ background: 'rgba(16,185,129,0.1)', color: '#10b981' }}>
+            <i className="fa-light fa-sharp fa-quote-right" />
           </div>
           <div className="admin-stat-info">
             <span className="admin-stat-value">{stats?.total_testimonials ?? '-'}</span>
@@ -758,10 +835,10 @@ export default function Admin() {
         </div>
         <div className={`admin-stat-card ${stats && stats.unread_messages > 0 ? 'admin-stat-card--highlight' : ''}`}>
           <div className="admin-stat-icon" style={{
-            background: stats && stats.unread_messages > 0 ? 'rgba(239,68,68,0.15)' : 'rgba(168,85,247,0.15)',
+            background: stats && stats.unread_messages > 0 ? 'rgba(239,68,68,0.1)' : 'rgba(168,85,247,0.1)',
             color: stats && stats.unread_messages > 0 ? '#ef4444' : '#a855f7',
           }}>
-            <i className="fa-solid fa-inbox" />
+            <i className="fa-light fa-sharp fa-inbox" />
           </div>
           <div className="admin-stat-info">
             <span className="admin-stat-value">{stats?.unread_messages ?? '-'}</span>
@@ -772,10 +849,10 @@ export default function Admin() {
 
       <div style={{ display: 'flex', gap: '1rem', marginTop: '2rem', flexWrap: 'wrap' }}>
         <button className="admin-btn admin-btn-primary" onClick={() => setActiveTab('hero')}>
-          <i className="fa-solid fa-trophy" /> Edit Hero
+          <i className="fa-light fa-sharp fa-trophy" /> Edit Hero Section
         </button>
-        <button className="admin-btn" onClick={() => setActiveTab('messages')}>
-          <i className="fa-solid fa-inbox" /> View Messages
+        <button className="admin-btn admin-btn-secondary" onClick={() => setActiveTab('messages')}>
+          <i className="fa-light fa-sharp fa-inbox" /> View Inbox Messages
         </button>
       </div>
     </div>
@@ -785,7 +862,7 @@ export default function Admin() {
   const renderHero = () => (
     <div>
       <div className="admin-header">
-        <h1 className="admin-header-title"><i className="fa-solid fa-trophy" /> Hero Section</h1>
+        <h1 className="admin-header-title"><i className="fa-light fa-sharp fa-trophy" /> Hero Section</h1>
       </div>
 
       <div className="admin-card">
@@ -832,20 +909,20 @@ export default function Admin() {
           </div>
         </div>
 
-        <div className="admin-card" style={{ marginTop: '1.5rem', background: '#0a0a0a' }}>
-          <h4 className="admin-card-title" style={{ fontSize: '0.9rem' }}>Preview</h4>
-          <div style={{ padding: '1rem', borderRadius: '4px', background: '#111', border: '1px solid #222' }}>
-            <p style={{ color: '#d4a017', fontSize: '0.75rem', letterSpacing: '0.1em', textTransform: 'uppercase', marginBottom: '0.5rem' }}>
-              <i className="fa-solid fa-microchip" /> Embedded Innovation
+        <div className="admin-card" style={{ marginTop: '1.5rem', background: 'var(--bg-secondary)' }}>
+          <h4 className="admin-card-title" style={{ fontSize: '0.9rem' }}>Live Preview</h4>
+          <div style={{ padding: '2rem', background: 'var(--bg-primary)', border: '1px solid var(--border-color)' }}>
+            <p style={{ color: 'var(--accent-primary)', fontSize: '0.75rem', letterSpacing: '0.1em', textTransform: 'uppercase', marginBottom: '0.5rem' }}>
+              <i className="fa-light fa-sharp fa-microchip" /> Hardware & Custom IoT Solutions
             </p>
-            <h2 style={{ color: '#fff', fontFamily: 'Playfair Display, serif', fontSize: '1.5rem', marginBottom: '0.5rem' }}>
+            <h2 style={{ color: 'var(--text-primary)', fontFamily: 'var(--font-heading)', fontSize: '1.5rem', marginBottom: '0.5rem', fontWeight: 500 }}>
               {heroForm.headline || 'Headline preview'}
             </h2>
-            <p style={{ color: '#aaa', fontSize: '0.85rem', marginBottom: '1rem' }}>
+            <p style={{ color: 'var(--text-muted)', fontSize: '0.85rem', marginBottom: '1.5rem' }}>
               {heroForm.subline || 'Subline preview'}
             </p>
             {heroForm.cta_text && (
-              <span className="admin-btn admin-btn-primary admin-btn-sm" style={{ pointerEvents: 'none' }}>
+              <span className="btn btn--gold btn--sm" style={{ pointerEvents: 'none', padding: '0.65rem 1.25rem', fontSize: '0.75rem' }}>
                 {heroForm.cta_text}
               </span>
             )}
@@ -854,7 +931,7 @@ export default function Admin() {
 
         <div style={{ marginTop: '1.5rem' }}>
           <button className="admin-btn admin-btn-primary" onClick={() => saveContent('hero', heroForm)}>
-            <i className="fa-solid fa-floppy-disk" /> Save Hero
+            <i className="fa-light fa-sharp fa-floppy-disk" /> Save Hero Section
           </button>
         </div>
       </div>
@@ -865,7 +942,7 @@ export default function Admin() {
   const renderAbout = () => (
     <div>
       <div className="admin-header">
-        <h1 className="admin-header-title"><i className="fa-solid fa-building" /> About Section</h1>
+        <h1 className="admin-header-title"><i className="fa-light fa-sharp fa-building" /> About Section</h1>
       </div>
 
       <div className="admin-card">
@@ -915,7 +992,7 @@ export default function Admin() {
         </div>
         <div style={{ marginTop: '1.5rem' }}>
           <button className="admin-btn admin-btn-primary" onClick={() => saveContent('about', aboutForm)}>
-            <i className="fa-solid fa-floppy-disk" /> Save About
+            <i className="fa-light fa-sharp fa-floppy-disk" /> Save About Section
           </button>
         </div>
       </div>
@@ -926,13 +1003,13 @@ export default function Admin() {
   const renderServices = () => (
     <div>
       <div className="admin-header">
-        <h1 className="admin-header-title"><i className="fa-solid fa-microchip" /> Services</h1>
+        <h1 className="admin-header-title"><i className="fa-light fa-sharp fa-microchip" /> Services</h1>
         <button className="admin-btn admin-btn-primary" onClick={openAddService}>
-          <i className="fa-solid fa-plus" /> Add Service
+          <i className="fa-light fa-sharp fa-plus" /> Add Service
         </button>
       </div>
 
-      <div className="admin-table-wrap">
+      <div className="admin-table-container">
         <table className="admin-table">
           <thead>
             <tr>
@@ -947,29 +1024,29 @@ export default function Admin() {
           <tbody>
             {services.map((svc) => (
               <tr key={svc.id}>
-                <td><i className={svc.icon_class} style={{ color: '#d4a017', fontSize: '1.1rem' }} /></td>
-                <td style={{ color: '#fff', fontWeight: 500 }}>{svc.title}</td>
-                <td style={{ color: '#aaa' }}>{svc.subtitle}</td>
-                <td style={{ fontFamily: 'JetBrains Mono, monospace', color: '#888' }}>{svc.display_order}</td>
+                <td><i className={getIconClass(svc.icon_class)} style={{ color: 'var(--accent-primary)', fontSize: '1.1rem' }} /></td>
+                <td style={{ color: 'var(--text-primary)', fontWeight: 500 }}>{svc.title}</td>
+                <td style={{ color: 'var(--text-muted)' }}>{svc.subtitle}</td>
+                <td style={{ fontFamily: 'var(--font-mono)', color: 'var(--text-muted)' }}>{svc.display_order}</td>
                 <td>
                   <span className={`admin-badge ${svc.is_active ? 'admin-badge-active' : 'admin-badge-inactive'}`}>
                     {svc.is_active ? 'Active' : 'Inactive'}
                   </span>
                 </td>
                 <td>
-                  <div style={{ display: 'flex', gap: '0.5rem' }}>
-                    <button className="admin-btn admin-btn-sm" onClick={() => openEditService(svc)}>
-                      <i className="fa-solid fa-pen" />
+                  <div className="admin-table-actions">
+                    <button className="admin-btn admin-btn-sm admin-btn-secondary" onClick={() => openEditService(svc)}>
+                      <i className="fa-light fa-sharp fa-pen" />
                     </button>
                     <button className="admin-btn admin-btn-sm admin-btn-danger" onClick={() => deleteService(svc)}>
-                      <i className="fa-solid fa-trash" />
+                      <i className="fa-light fa-sharp fa-trash" />
                     </button>
                   </div>
                 </td>
               </tr>
             ))}
             {services.length === 0 && (
-              <tr><td colSpan={6} style={{ textAlign: 'center', color: '#666', padding: '2rem' }}>No services yet</td></tr>
+              <tr><td colSpan={6} style={{ textAlign: 'center', color: 'var(--text-dark)', padding: '3rem' }}>No services configured.</td></tr>
             )}
           </tbody>
         </table>
@@ -977,65 +1054,91 @@ export default function Admin() {
     </div>
   );
 
-  /* ─── Tab: Team ──────────────────────────────────────────── */
+  /* ─── Tab: Team (Draggable Reorder Card List) ────────────── */
   const renderTeam = () => (
     <div>
       <div className="admin-header">
-        <h1 className="admin-header-title"><i className="fa-solid fa-users" /> Team</h1>
+        <h1 className="admin-header-title"><i className="fa-light fa-sharp fa-users" /> Team Section</h1>
         <button className="admin-btn admin-btn-primary" onClick={openAddMember}>
-          <i className="fa-solid fa-plus" /> Add Member
+          <i className="fa-light fa-sharp fa-plus" /> Add Member
         </button>
       </div>
 
-      <div className="admin-table-wrap">
-        <table className="admin-table">
-          <thead>
-            <tr>
-              <th>Avatar</th>
-              <th>Name</th>
-              <th>Role</th>
-              <th>Order</th>
-              <th>Status</th>
-              <th>Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            {team.map((m) => (
-              <tr key={m.id}>
-                <td>
-                  <div className="admin-avatar-sm">
-                    {m.image_url ? (
-                      <img src={m.image_url} alt={m.name} />
-                    ) : (
-                      <i className="fa-solid fa-user" />
-                    )}
-                  </div>
-                </td>
-                <td style={{ color: '#fff', fontWeight: 500 }}>{m.name}</td>
-                <td style={{ color: '#aaa' }}>{m.role}</td>
-                <td style={{ fontFamily: 'JetBrains Mono, monospace', color: '#888' }}>{m.display_order}</td>
-                <td>
-                  <span className={`admin-badge ${m.is_active ? 'admin-badge-active' : 'admin-badge-inactive'}`}>
-                    {m.is_active ? 'Active' : 'Inactive'}
-                  </span>
-                </td>
-                <td>
-                  <div style={{ display: 'flex', gap: '0.5rem' }}>
-                    <button className="admin-btn admin-btn-sm" onClick={() => openEditMember(m)}>
-                      <i className="fa-solid fa-pen" />
-                    </button>
-                    <button className="admin-btn admin-btn-sm admin-btn-danger" onClick={() => deleteMember(m)}>
-                      <i className="fa-solid fa-trash" />
-                    </button>
-                  </div>
-                </td>
-              </tr>
-            ))}
-            {team.length === 0 && (
-              <tr><td colSpan={6} style={{ textAlign: 'center', color: '#666', padding: '2rem' }}>No team members yet</td></tr>
-            )}
-          </tbody>
-        </table>
+      <div style={{ marginBottom: '1.5rem', fontSize: '0.8rem', color: 'var(--text-muted)', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+        <i className="fa-light fa-sharp fa-circle-info" style={{ color: 'var(--accent-primary)' }} />
+        <span>Drag and drop the cards below to instantly reorder their layout position on the landing page.</span>
+      </div>
+
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '0.85rem' }}>
+        {team.map((m, idx) => {
+          return (
+            <div
+              key={m.id}
+              draggable
+              onDragStart={(e) => dragStart(e, idx)}
+              onDragEnter={(e) => dragEnter(e, idx)}
+              onDragEnd={drop}
+              onDragOver={(e) => e.preventDefault()}
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                padding: '1.25rem 2rem',
+                background: 'var(--bg-glass)',
+                border: '1px solid var(--border-color)',
+                cursor: 'grab',
+                transition: 'var(--transition-fast)'
+              }}
+              className="admin-draggable-card"
+            >
+              <div style={{ display: 'flex', alignItems: 'center', gap: '1.5rem' }}>
+                <div style={{ color: 'var(--text-dark)', cursor: 'grab' }}>
+                  <i className="fa-light fa-sharp fa-grip-vertical" style={{ fontSize: '1.1rem' }} />
+                </div>
+                <div style={{ width: '48px', height: '48px', overflow: 'hidden', border: '1px solid var(--border-color)' }}>
+                  {m.image_url ? (
+                    <img src={m.image_url.startsWith('/') ? `${API_URL.replace('/api', '')}${m.image_url}` : m.image_url} alt={m.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                  ) : (
+                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100%', background: 'rgba(255,255,255,0.02)', color: 'var(--accent-primary)' }}>
+                      <i className="fa-light fa-sharp fa-user" />
+                    </div>
+                  )}
+                </div>
+                <div>
+                  <h4 style={{ margin: 0, fontWeight: 500, color: 'var(--text-primary)' }}>{m.name}</h4>
+                  <span style={{ fontSize: '0.8rem', color: 'var(--accent-primary)', fontFamily: 'var(--font-mono)' }}>{m.role}</span>
+                </div>
+              </div>
+
+              <div style={{ display: 'flex', alignItems: 'center', gap: '2rem' }}>
+                <span className={`admin-badge ${m.is_active ? 'admin-badge-active' : 'admin-badge-inactive'}`}>
+                  {m.is_active ? 'Active' : 'Inactive'}
+                </span>
+                
+                <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>
+                  Order: <strong style={{ color: 'var(--text-primary)', fontFamily: 'var(--font-mono)' }}>{m.display_order}</strong>
+                </div>
+
+                <div style={{ display: 'flex', gap: '0.5rem' }}>
+                  <button className="admin-btn admin-btn-sm admin-btn-secondary" onClick={() => openEditMember(m)}>
+                    <i className="fa-light fa-sharp fa-pen" />
+                  </button>
+                  <button className="admin-btn admin-btn-sm admin-btn-danger" onClick={() => deleteMember(m)}>
+                    <i className="fa-light fa-sharp fa-trash" />
+                  </button>
+                </div>
+              </div>
+            </div>
+          );
+        })}
+        
+        {team.length === 0 && (
+          <div className="admin-empty">
+            <i className="fa-light fa-sharp fa-users" />
+            <h3>No Members Configured</h3>
+            <p>Add co-founders and team members using the "Add Member" button.</p>
+          </div>
+        )}
       </div>
     </div>
   );
@@ -1044,13 +1147,13 @@ export default function Admin() {
   const renderTestimonials = () => (
     <div>
       <div className="admin-header">
-        <h1 className="admin-header-title"><i className="fa-solid fa-quote-right" /> Testimonials</h1>
+        <h1 className="admin-header-title"><i className="fa-light fa-sharp fa-quote-right" /> Testimonials</h1>
         <button className="admin-btn admin-btn-primary" onClick={openAddTestimonial}>
-          <i className="fa-solid fa-plus" /> Add Testimonial
+          <i className="fa-light fa-sharp fa-plus" /> Add Testimonial
         </button>
       </div>
 
-      <div className="admin-table-wrap">
+      <div className="admin-table-container">
         <table className="admin-table">
           <thead>
             <tr>
@@ -1065,35 +1168,35 @@ export default function Admin() {
           <tbody>
             {testimonials.map((t) => (
               <tr key={t.id}>
-                <td style={{ color: '#fff', fontWeight: 500 }}>{t.client_name}</td>
-                <td style={{ color: '#aaa' }}>{t.company}</td>
+                <td style={{ color: 'var(--text-primary)', fontWeight: 500 }}>{t.client_name}</td>
+                <td style={{ color: 'var(--text-muted)' }}>{t.company}</td>
                 <td>
-                  <div style={{ display: 'flex', gap: '2px' }}>
+                  <div className="admin-star-rating">
                     {Array.from({ length: 5 }).map((_, i) => (
-                      <i key={i} className={`fa-${i < t.rating ? 'solid' : 'regular'} fa-star`} style={{ color: '#d4a017', fontSize: '0.8rem' }} />
+                      <i key={i} className={`fa-light fa-sharp fa-star ${i < t.rating ? 'active' : ''}`} style={{ fontSize: '0.8rem' }} />
                     ))}
                   </div>
                 </td>
-                <td style={{ fontFamily: 'JetBrains Mono, monospace', color: '#888' }}>{t.display_order}</td>
+                <td style={{ fontFamily: 'var(--font-mono)', color: 'var(--text-muted)' }}>{t.display_order}</td>
                 <td>
                   <span className={`admin-badge ${t.is_active ? 'admin-badge-active' : 'admin-badge-inactive'}`}>
                     {t.is_active ? 'Active' : 'Inactive'}
                   </span>
                 </td>
                 <td>
-                  <div style={{ display: 'flex', gap: '0.5rem' }}>
-                    <button className="admin-btn admin-btn-sm" onClick={() => openEditTestimonial(t)}>
-                      <i className="fa-solid fa-pen" />
+                  <div className="admin-table-actions">
+                    <button className="admin-btn admin-btn-sm admin-btn-secondary" onClick={() => openEditTestimonial(t)}>
+                      <i className="fa-light fa-sharp fa-pen" />
                     </button>
                     <button className="admin-btn admin-btn-sm admin-btn-danger" onClick={() => deleteTestimonial(t)}>
-                      <i className="fa-solid fa-trash" />
+                      <i className="fa-light fa-sharp fa-trash" />
                     </button>
                   </div>
                 </td>
               </tr>
             ))}
             {testimonials.length === 0 && (
-              <tr><td colSpan={6} style={{ textAlign: 'center', color: '#666', padding: '2rem' }}>No testimonials yet</td></tr>
+              <tr><td colSpan={6} style={{ textAlign: 'center', color: 'var(--text-dark)', padding: '3rem' }}>No testimonials received yet.</td></tr>
             )}
           </tbody>
         </table>
@@ -1105,17 +1208,17 @@ export default function Admin() {
   const renderStats = () => (
     <div>
       <div className="admin-header">
-        <h1 className="admin-header-title"><i className="fa-solid fa-chart-line" /> Stats</h1>
+        <h1 className="admin-header-title"><i className="fa-light fa-sharp fa-chart-line" /> Statistics</h1>
       </div>
 
       <div className="admin-card">
-        <h3 className="admin-card-title">Edit Statistics Values</h3>
+        <h3 className="admin-card-title">Edit Statistics Configurations</h3>
         <div className="admin-form">
           {[
-            { key: 'projects_completed', label: 'Projects Completed', icon: 'fa-solid fa-rocket', placeholder: '500+' },
-            { key: 'happy_clients', label: 'Happy Clients', icon: 'fa-solid fa-face-smile', placeholder: '200+' },
-            { key: 'products_available', label: 'Products Available', icon: 'fa-solid fa-box-open', placeholder: '1000+' },
-            { key: 'years_experience', label: 'Years Experience', icon: 'fa-solid fa-calendar-check', placeholder: '10+' },
+            { key: 'projects_completed', label: 'Projects Completed', icon: 'fa-light fa-sharp fa-rocket', placeholder: '500+' },
+            { key: 'happy_clients', label: 'Happy Clients', icon: 'fa-light fa-sharp fa-heart', placeholder: '200+' },
+            { key: 'products_available', label: 'Components Supplied', icon: 'fa-light fa-sharp fa-microchip', placeholder: '1000+' },
+            { key: 'years_experience', label: 'Years Experience', icon: 'fa-light fa-sharp fa-calendar-check', placeholder: '5+' },
           ].map((s) => (
             <div key={s.key} className="admin-form-group">
               <label className="admin-form-label">
@@ -1123,7 +1226,7 @@ export default function Admin() {
               </label>
               <input
                 className="admin-form-input"
-                value={statsForm[s.key]}
+                value={statsForm[s.key] || ''}
                 onChange={(e) => setStatsForm({ ...statsForm, [s.key]: e.target.value })}
                 placeholder={s.placeholder}
               />
@@ -1131,11 +1234,8 @@ export default function Admin() {
           ))}
         </div>
         <div style={{ marginTop: '1.5rem' }}>
-          <button
-            className="admin-btn admin-btn-primary"
-            onClick={() => saveContent('stats', statsForm)}
-          >
-            <i className="fa-solid fa-floppy-disk" /> Save Stats
+          <button className="admin-btn admin-btn-primary" onClick={() => saveContent('stats', statsForm)}>
+            <i className="fa-light fa-sharp fa-floppy-disk" /> Save Stats Config
           </button>
         </div>
       </div>
@@ -1146,14 +1246,14 @@ export default function Admin() {
   const renderContact = () => (
     <div>
       <div className="admin-header">
-        <h1 className="admin-header-title"><i className="fa-solid fa-envelope" /> Contact Info</h1>
+        <h1 className="admin-header-title"><i className="fa-light fa-sharp fa-envelope" /> Contact details</h1>
       </div>
 
       <div className="admin-card">
-        <h3 className="admin-card-title">Edit Contact Information</h3>
+        <h3 className="admin-card-title">Edit Contact Block</h3>
         <div className="admin-form">
           <div className="admin-form-group">
-            <label className="admin-form-label">Contact Section Title</label>
+            <label className="admin-form-label">Contact Section Eyebrow</label>
             <input
               className="admin-form-input"
               value={contactForm.title}
@@ -1163,32 +1263,26 @@ export default function Admin() {
           </div>
           <div className="admin-form-row">
             <div className="admin-form-group">
-              <label className="admin-form-label">
-                <i className="fa-solid fa-envelope" /> Email
-              </label>
+              <label className="admin-form-label"><i className="fa-light fa-sharp fa-envelope" /> Email Coordinates</label>
               <input
                 className="admin-form-input"
                 value={contactForm.email}
                 onChange={(e) => setContactForm({ ...contactForm, email: e.target.value })}
-                placeholder="info@himalixlabs.com"
+                placeholder="info@himalixlab.com"
               />
             </div>
             <div className="admin-form-group">
-              <label className="admin-form-label">
-                <i className="fa-solid fa-phone" /> Phone
-              </label>
+              <label className="admin-form-label"><i className="fa-light fa-sharp fa-phone" /> Support Phone</label>
               <input
                 className="admin-form-input"
                 value={contactForm.phone}
                 onChange={(e) => setContactForm({ ...contactForm, phone: e.target.value })}
-                placeholder="+977-1-XXXXXXX"
+                placeholder="+977-9800000000"
               />
             </div>
           </div>
           <div className="admin-form-group">
-            <label className="admin-form-label">
-              <i className="fa-solid fa-location-dot" /> Address
-            </label>
+            <label className="admin-form-label"><i className="fa-light fa-sharp fa-location-dot" /> Base Address</label>
             <input
               className="admin-form-input"
               value={contactForm.address}
@@ -1199,7 +1293,7 @@ export default function Admin() {
         </div>
         <div style={{ marginTop: '1.5rem' }}>
           <button className="admin-btn admin-btn-primary" onClick={() => saveContent('contact', contactForm)}>
-            <i className="fa-solid fa-floppy-disk" /> Save Contact Info
+            <i className="fa-light fa-sharp fa-floppy-disk" /> Save Contact Settings
           </button>
         </div>
       </div>
@@ -1210,15 +1304,15 @@ export default function Admin() {
   const renderSettings = () => (
     <div>
       <div className="admin-header">
-        <h1 className="admin-header-title"><i className="fa-solid fa-gear" /> Settings</h1>
+        <h1 className="admin-header-title"><i className="fa-light fa-sharp fa-gear" /> Global Settings</h1>
       </div>
 
       <div className="admin-card">
-        <h3 className="admin-card-title">Site Settings</h3>
+        <h3 className="admin-card-title">Site Brand Configuration</h3>
         <div className="admin-form">
           <div className="admin-form-row">
             <div className="admin-form-group">
-              <label className="admin-form-label">Site Name</label>
+              <label className="admin-form-label">Site Title</label>
               <input
                 className="admin-form-input"
                 value={settingsForm.site_name || ''}
@@ -1232,67 +1326,56 @@ export default function Admin() {
                 className="admin-form-input"
                 value={settingsForm.site_tagline || ''}
                 onChange={(e) => setSettingsForm({ ...settingsForm, site_tagline: e.target.value })}
-                placeholder="Building the Future of Electronics"
+                placeholder="Innovating Nepal's Tech Future"
               />
             </div>
           </div>
 
-          <div className="admin-form-group">
-            <label className="admin-form-label">Logo URL</label>
-            <input
-              className="admin-form-input"
-              value={settingsForm.logo_url || ''}
-              onChange={(e) => setSettingsForm({ ...settingsForm, logo_url: e.target.value })}
-              placeholder="https://example.com/logo.png"
-            />
-            {settingsForm.logo_url && (
-              <div style={{ marginTop: '0.5rem' }}>
-                <img src={settingsForm.logo_url} alt="Logo preview" style={{ maxHeight: '40px', borderRadius: '4px' }} onError={(e) => e.target.style.display = 'none'} />
-              </div>
-            )}
-          </div>
+          <ImageUploadZone
+            label="Upload Site Logo"
+            value={settingsForm.logo_url}
+            onChange={(url) => setSettingsForm({ ...settingsForm, logo_url: url })}
+            token={token}
+            apiUrl={API_URL}
+          />
 
           <div className="admin-form-row">
             <div className="admin-form-group">
-              <label className="admin-form-label">Primary Color</label>
-              <div style={{ display: 'flex', gap: '0.75rem', alignItems: 'center' }}>
+              <label className="admin-form-label">Primary Brand Color</label>
+              <div className="admin-color-picker">
                 <input
                   type="color"
-                  value={settingsForm.primary_color || '#d4a017'}
+                  value={settingsForm.primary_color || '#e0af3c'}
                   onChange={(e) => setSettingsForm({ ...settingsForm, primary_color: e.target.value })}
-                  style={{ width: '48px', height: '40px', border: 'none', borderRadius: '4px', cursor: 'pointer', background: 'transparent' }}
                 />
                 <input
                   className="admin-form-input"
                   value={settingsForm.primary_color || ''}
                   onChange={(e) => setSettingsForm({ ...settingsForm, primary_color: e.target.value })}
-                  placeholder="#d4a017"
-                  style={{ flex: 1 }}
+                  placeholder="#e0af3c"
                 />
               </div>
             </div>
             <div className="admin-form-group">
-              <label className="admin-form-label">Secondary Color</label>
-              <div style={{ display: 'flex', gap: '0.75rem', alignItems: 'center' }}>
+              <label className="admin-form-label">Secondary Brand Color</label>
+              <div className="admin-color-picker">
                 <input
                   type="color"
-                  value={settingsForm.secondary_color || '#c9a227'}
+                  value={settingsForm.secondary_color || '#cba02f'}
                   onChange={(e) => setSettingsForm({ ...settingsForm, secondary_color: e.target.value })}
-                  style={{ width: '48px', height: '40px', border: 'none', borderRadius: '4px', cursor: 'pointer', background: 'transparent' }}
                 />
                 <input
                   className="admin-form-input"
                   value={settingsForm.secondary_color || ''}
                   onChange={(e) => setSettingsForm({ ...settingsForm, secondary_color: e.target.value })}
-                  placeholder="#c9a227"
-                  style={{ flex: 1 }}
+                  placeholder="#cba02f"
                 />
               </div>
             </div>
           </div>
 
           <h4 className="admin-card-title" style={{ marginTop: '1.5rem', fontSize: '0.95rem' }}>
-            <i className="fa-solid fa-share-nodes" /> Social Media Links
+            <i className="fa-light fa-sharp fa-share-nodes" /> Social Coordinates
           </h4>
 
           {[
@@ -1304,7 +1387,7 @@ export default function Admin() {
           ].map((s) => (
             <div key={s.key} className="admin-form-group">
               <label className="admin-form-label">
-                <i className={s.icon} /> {s.label} URL
+                <i className={s.icon} /> {s.label} Link
               </label>
               <input
                 className="admin-form-input"
@@ -1318,7 +1401,7 @@ export default function Admin() {
 
         <div style={{ marginTop: '1.5rem' }}>
           <button className="admin-btn admin-btn-primary" onClick={saveAllSettings}>
-            <i className="fa-solid fa-floppy-disk" /> Save Settings
+            <i className="fa-light fa-sharp fa-floppy-disk" /> Save Settings Config
           </button>
         </div>
       </div>
@@ -1329,36 +1412,40 @@ export default function Admin() {
   const renderMessages = () => (
     <div>
       <div className="admin-header">
-        <h1 className="admin-header-title"><i className="fa-solid fa-inbox" /> Messages</h1>
-        <span style={{ color: '#888' }}>{messages.length} total, {messages.filter((m) => !m.is_read).length} unread</span>
+        <h1 className="admin-header-title"><i className="fa-light fa-sharp fa-inbox" /> Consultation Inbox</h1>
+        <span style={{ color: 'var(--text-muted)', fontSize: '0.85rem' }}>{messages.length} received, {messages.filter((m) => !m.is_read).length} unread</span>
       </div>
 
-      <div className="admin-messages-list">
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
         {messages.length === 0 && (
-          <div className="admin-card" style={{ textAlign: 'center', color: '#666', padding: '3rem' }}>
-            <i className="fa-solid fa-inbox" style={{ fontSize: '2rem', marginBottom: '1rem', display: 'block' }} />
-            No messages yet
+          <div className="admin-empty">
+            <i className="fa-light fa-sharp fa-inbox" />
+            <h3>Inbox Empty</h3>
+            <p>Consultation requests from the contact form will appear here.</p>
           </div>
         )}
+        
         {messages.map((msg) => (
           <div
             key={msg.id}
-            className={`admin-message-item ${!msg.is_read ? 'admin-message-item--unread' : ''} ${expandedMessage === msg.id ? 'admin-message-item--expanded' : ''}`}
-            onClick={() => setExpandedMessage(expandedMessage === msg.id ? null : msg.id)}
+            className={`admin-message-item ${!msg.is_read ? 'unread' : ''}`}
+            style={{ borderRadius: 0 }}
           >
-            <div className="admin-message-header">
+            <div className="admin-message-header" onClick={() => setExpandedMessage(expandedMessage === msg.id ? null : msg.id)} style={{ cursor: 'pointer' }}>
               <div className="admin-message-info">
-                {!msg.is_read && <span className="admin-unread-dot" />}
-                <div>
-                  <h4 className="admin-message-name">{msg.name}</h4>
-                  <span className="admin-message-email">{msg.email}</span>
+                <div className="admin-message-avatar">
+                  {msg.name.charAt(0).toUpperCase()}
+                </div>
+                <div className="admin-message-meta">
+                  <h4>{msg.name}</h4>
+                  <p>{msg.email}</p>
                 </div>
               </div>
-              <div className="admin-message-meta">
-                <span className="admin-message-subject">{msg.subject}</span>
-                <span className="admin-message-date">
+              <div style={{ textAlign: 'right', display: 'flex', flexDirection: 'column', gap: '0.25rem' }}>
+                <span style={{ fontSize: '0.85rem', fontWeight: 500, color: 'var(--text-primary)' }}>{msg.subject || '(No Subject)'}</span>
+                <span style={{ fontSize: '0.7rem', color: 'var(--text-muted)', fontFamily: 'var(--font-mono)' }}>
                   {new Date(msg.created_at).toLocaleDateString('en-US', {
-                    month: 'short', day: 'numeric', year: 'numeric',
+                    month: 'short', day: 'numeric', year: 'numeric', hour: '2-digit', minute: '2-digit'
                   })}
                 </span>
               </div>
@@ -1366,21 +1453,21 @@ export default function Admin() {
 
             {expandedMessage === msg.id && (
               <div className="admin-message-body">
-                <p className="admin-message-text">{msg.message}</p>
+                <p style={{ whiteSpace: 'pre-wrap', marginBottom: '1.5rem', color: 'var(--text-secondary)' }}>{msg.message}</p>
                 <div className="admin-message-actions">
                   {!msg.is_read && (
                     <button
-                      className="admin-btn admin-btn-sm admin-btn-primary"
-                      onClick={(e) => { e.stopPropagation(); markAsRead(msg); }}
+                      className="admin-btn admin-btn-sm admin-btn-success"
+                      onClick={() => markAsRead(msg)}
                     >
-                      <i className="fa-solid fa-check" /> Mark as Read
+                      <i className="fa-light fa-sharp fa-check" /> Mark Read
                     </button>
                   )}
                   <button
                     className="admin-btn admin-btn-sm admin-btn-danger"
-                    onClick={(e) => { e.stopPropagation(); deleteMessage(msg); }}
+                    onClick={() => deleteMessage(msg)}
                   >
-                    <i className="fa-solid fa-trash" /> Delete
+                    <i className="fa-light fa-sharp fa-trash" /> Delete Request
                   </button>
                 </div>
               </div>
@@ -1391,13 +1478,12 @@ export default function Admin() {
     </div>
   );
 
-  /* ─── Tab Content Renderer ───────────────────────────────── */
   const renderTabContent = () => {
     if (loading) {
       return (
-        <div className="admin-loading">
-          <i className="fa-solid fa-spinner fa-spin" />
-          <p>Loading...</p>
+        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', minHeight: '60vh', gap: '1rem', color: 'var(--accent-primary)' }}>
+          <i className="fa-light fa-sharp fa-spinner fa-spin" style={{ fontSize: '2rem' }} />
+          <span style={{ fontSize: '0.8rem', fontFamily: 'var(--font-mono)', letterSpacing: '1px' }}>FETCHING DATABASE INSTANCES...</span>
         </div>
       );
     }
@@ -1417,7 +1503,6 @@ export default function Admin() {
     }
   };
 
-  /* ─── Render ─────────────────────────────────────────────── */
   return (
     <div className="admin-layout">
       <Toast toasts={toasts} onRemove={removeToast} />
@@ -1429,28 +1514,51 @@ export default function Admin() {
         message={confirmDialog.message}
       />
 
-      <button className="admin-hamburger" onClick={() => setSidebarOpen(!sidebarOpen)}>
-        <i className={sidebarOpen ? 'fa-solid fa-xmark' : 'fa-solid fa-bars'} />
+      <button 
+        className="admin-mobile-toggle" 
+        onClick={() => setSidebarOpen(!sidebarOpen)}
+        style={{
+          position: 'fixed',
+          top: '1rem',
+          right: '1rem',
+          zIndex: 1100,
+          background: 'var(--bg-glass)',
+          border: '1px solid var(--border-color)',
+          width: '44px',
+          height: '44px',
+          display: 'none',
+          alignItems: 'center',
+          justifyContent: 'center'
+        }}
+      >
+        <i className={sidebarOpen ? 'fa-light fa-sharp fa-xmark' : 'fa-light fa-sharp fa-bars'} />
       </button>
 
-      {sidebarOpen && <div className="admin-sidebar-overlay" onClick={() => setSidebarOpen(false)} />}
+      {sidebarOpen && (
+        <div 
+          onClick={() => setSidebarOpen(false)} 
+          style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(0,0,0,0.5)', z-index: 999 }} 
+        />
+      )}
 
       {renderSidebar()}
 
       <main className="admin-content">
-        {renderTabContent()}
+        <div className="admin-body">
+          {renderTabContent()}
+        </div>
       </main>
 
       {/* ─── Service Modal ───────────────────────────────────── */}
       <Modal isOpen={serviceModal} onClose={() => setServiceModal(false)} title={editingService ? 'Edit Service' : 'Add Service'}>
         <div className="admin-form">
           <div className="admin-form-group">
-            <label className="admin-form-label">Title *</label>
+            <label className="admin-form-label">Service Title *</label>
             <input
               className="admin-form-input"
               value={serviceForm.title}
               onChange={(e) => setServiceForm({ ...serviceForm, title: e.target.value })}
-              placeholder="Embedded Systems"
+              placeholder="e.g. PCB Prototyping"
             />
           </div>
           <div className="admin-form-group">
@@ -1459,17 +1567,17 @@ export default function Admin() {
               className="admin-form-input"
               value={serviceForm.subtitle}
               onChange={(e) => setServiceForm({ ...serviceForm, subtitle: e.target.value })}
-              placeholder="Custom embedded solutions..."
+              placeholder="e.g. Fine pitch printing"
             />
           </div>
           <div className="admin-form-group">
-            <label className="admin-form-label">Description</label>
+            <label className="admin-form-label">Detailed Description</label>
             <textarea
               className="admin-form-input admin-form-textarea"
               rows={3}
               value={serviceForm.description}
               onChange={(e) => setServiceForm({ ...serviceForm, description: e.target.value })}
-              placeholder="Detailed description..."
+              placeholder="Explain specifications..."
             />
           </div>
           <div className="admin-form-group">
@@ -1478,16 +1586,16 @@ export default function Admin() {
               className="admin-form-input"
               value={serviceForm.icon_class}
               onChange={(e) => setServiceForm({ ...serviceForm, icon_class: e.target.value })}
-              placeholder="fa-solid fa-microchip"
+              placeholder="e.g. fa-light fa-sharp fa-microchip"
             />
             {serviceForm.icon_class && (
-              <div style={{ marginTop: '0.5rem', color: '#d4a017' }}>
-                Preview: <i className={serviceForm.icon_class} /> {serviceForm.icon_class}
+              <div style={{ marginTop: '0.5rem', color: 'var(--accent-primary)', fontSize: '0.85rem' }}>
+                Preview: <i className={getIconClass(serviceForm.icon_class)} /> {getIconClass(serviceForm.icon_class)}
               </div>
             )}
           </div>
           <div className="admin-form-group">
-            <label className="admin-form-label">Features</label>
+            <label className="admin-form-label">Service Key Features</label>
             <div className="admin-feature-list">
               {serviceForm.features.map((feat, idx) => (
                 <div key={idx} className="admin-feature-item">
@@ -1499,7 +1607,7 @@ export default function Admin() {
                       newFeatures[idx] = e.target.value;
                       setServiceForm({ ...serviceForm, features: newFeatures });
                     }}
-                    placeholder={`Feature ${idx + 1}`}
+                    placeholder={`e.g. Custom designs`}
                   />
                   {serviceForm.features.length > 1 && (
                     <button
@@ -1509,23 +1617,23 @@ export default function Admin() {
                         setServiceForm({ ...serviceForm, features: newFeatures });
                       }}
                     >
-                      <i className="fa-solid fa-xmark" />
+                      <i className="fa-light fa-sharp fa-xmark" />
                     </button>
                   )}
                 </div>
               ))}
             </div>
             <button
-              className="admin-btn admin-btn-sm"
+              className="admin-btn admin-btn-sm admin-btn-secondary"
               style={{ marginTop: '0.5rem' }}
               onClick={() => setServiceForm({ ...serviceForm, features: [...serviceForm.features, ''] })}
             >
-              <i className="fa-solid fa-plus" /> Add Feature
+              <i className="fa-light fa-sharp fa-plus" /> Add Feature Line
             </button>
           </div>
           <div className="admin-form-row">
             <div className="admin-form-group">
-              <label className="admin-form-label">Link URL</label>
+              <label className="admin-form-label">Service Direct Link</label>
               <input
                 className="admin-form-input"
                 value={serviceForm.link_url}
@@ -1544,87 +1652,77 @@ export default function Admin() {
             </div>
           </div>
           <div className="admin-form-group">
-            <label className="admin-form-label" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+            <label className="admin-form-label" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer' }}>
               <input
                 type="checkbox"
                 checked={serviceForm.is_active}
                 onChange={(e) => setServiceForm({ ...serviceForm, is_active: e.target.checked })}
-                style={{ accentColor: '#d4a017' }}
               />
-              Active
+              <span>Render as Active</span>
             </label>
           </div>
         </div>
         <div className="admin-modal-footer">
-          <button className="admin-btn" onClick={() => setServiceModal(false)}>Cancel</button>
+          <button className="admin-btn admin-btn-secondary" onClick={() => setServiceModal(false)}>Cancel</button>
           <button className="admin-btn admin-btn-primary" onClick={saveService} disabled={serviceSaving}>
             {serviceSaving ? (
-              <><i className="fa-solid fa-spinner fa-spin" /> Saving...</>
+              <><i className="fa-light fa-sharp fa-spinner fa-spin" /> Saving...</>
             ) : (
-              <><i className="fa-solid fa-floppy-disk" /> {editingService ? 'Update' : 'Create'}</>
+              <><i className="fa-light fa-sharp fa-floppy-disk" /> {editingService ? 'Update Service' : 'Create Service'}</>
             )}
           </button>
         </div>
       </Modal>
 
       {/* ─── Team Modal ──────────────────────────────────────── */}
-      <Modal isOpen={teamModal} onClose={() => setTeamModal(false)} title={editingMember ? 'Edit Member' : 'Add Member'}>
+      <Modal isOpen={teamModal} onClose={() => setTeamModal(false)} title={editingMember ? 'Edit Team Member' : 'Add Team Member'}>
         <div className="admin-form">
           <div className="admin-form-row">
             <div className="admin-form-group">
-              <label className="admin-form-label">Name *</label>
+              <label className="admin-form-label">Member Name *</label>
               <input
                 className="admin-form-input"
                 value={memberForm.name}
                 onChange={(e) => setMemberForm({ ...memberForm, name: e.target.value })}
-                placeholder="John Doe"
+                placeholder="e.g. Zenith Kandel"
               />
             </div>
             <div className="admin-form-group">
-              <label className="admin-form-label">Role *</label>
+              <label className="admin-form-label">Professional Role *</label>
               <input
                 className="admin-form-input"
                 value={memberForm.role}
                 onChange={(e) => setMemberForm({ ...memberForm, role: e.target.value })}
-                placeholder="Lead Engineer"
+                placeholder="e.g. Co-Founder"
               />
             </div>
           </div>
+          
           <div className="admin-form-group">
-            <label className="admin-form-label">Bio</label>
+            <label className="admin-form-label">Biography Details</label>
             <textarea
               className="admin-form-input admin-form-textarea"
               rows={3}
               value={memberForm.bio}
               onChange={(e) => setMemberForm({ ...memberForm, bio: e.target.value })}
-              placeholder="Brief bio..."
+              placeholder="Brief professional profile..."
             />
           </div>
-          <div className="admin-form-group">
-            <label className="admin-form-label">Image URL</label>
-            <input
-              className="admin-form-input"
-              value={memberForm.image_url}
-              onChange={(e) => setMemberForm({ ...memberForm, image_url: e.target.value })}
-              placeholder="https://example.com/photo.jpg"
-            />
-            {memberForm.image_url && (
-              <div style={{ marginTop: '0.5rem' }}>
-                <img
-                  src={memberForm.image_url}
-                  alt="Preview"
-                  style={{ width: '64px', height: '64px', objectFit: 'cover', borderRadius: '4px' }}
-                  onError={(e) => e.target.style.display = 'none'}
-                />
-              </div>
-            )}
-          </div>
+
+          <ImageUploadZone
+            label="Upload Avatar Photo"
+            value={memberForm.image_url}
+            onChange={(url) => setMemberForm({ ...memberForm, image_url: url })}
+            token={token}
+            apiUrl={API_URL}
+          />
+
           <h4 className="admin-card-title" style={{ fontSize: '0.9rem', marginTop: '1rem' }}>
-            <i className="fa-solid fa-share-nodes" /> Social Links
+            <i className="fa-light fa-sharp fa-share-nodes" /> Social Profile Coordinates
           </h4>
           <div className="admin-form-row">
             <div className="admin-form-group">
-              <label className="admin-form-label"><i className="fa-brands fa-twitter" /> Twitter</label>
+              <label className="admin-form-label"><i className="fa-brands fa-twitter" /> Twitter URL</label>
               <input
                 className="admin-form-input"
                 value={memberForm.social_links.twitter}
@@ -1636,7 +1734,7 @@ export default function Admin() {
               />
             </div>
             <div className="admin-form-group">
-              <label className="admin-form-label"><i className="fa-brands fa-linkedin-in" /> LinkedIn</label>
+              <label className="admin-form-label"><i className="fa-brands fa-linkedin-in" /> LinkedIn URL</label>
               <input
                 className="admin-form-input"
                 value={memberForm.social_links.linkedin}
@@ -1649,7 +1747,7 @@ export default function Admin() {
             </div>
           </div>
           <div className="admin-form-group">
-            <label className="admin-form-label"><i className="fa-brands fa-github" /> GitHub</label>
+            <label className="admin-form-label"><i className="fa-brands fa-github" /> GitHub URL</label>
             <input
               className="admin-form-input"
               value={memberForm.social_links.github}
@@ -1662,7 +1760,7 @@ export default function Admin() {
           </div>
           <div className="admin-form-row">
             <div className="admin-form-group">
-              <label className="admin-form-label">Display Order</label>
+              <label className="admin-form-label">Display Position Order</label>
               <input
                 type="number"
                 className="admin-form-input"
@@ -1671,25 +1769,24 @@ export default function Admin() {
               />
             </div>
             <div className="admin-form-group">
-              <label className="admin-form-label" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+              <label className="admin-form-label" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer', marginTop: '2rem' }}>
                 <input
                   type="checkbox"
                   checked={memberForm.is_active}
                   onChange={(e) => setMemberForm({ ...memberForm, is_active: e.target.checked })}
-                  style={{ accentColor: '#d4a017' }}
                 />
-                Active
+                <span>Render as Active</span>
               </label>
             </div>
           </div>
         </div>
         <div className="admin-modal-footer">
-          <button className="admin-btn" onClick={() => setTeamModal(false)}>Cancel</button>
+          <button className="admin-btn admin-btn-secondary" onClick={() => setTeamModal(false)}>Cancel</button>
           <button className="admin-btn admin-btn-primary" onClick={saveMember} disabled={memberSaving}>
             {memberSaving ? (
-              <><i className="fa-solid fa-spinner fa-spin" /> Saving...</>
+              <><i className="fa-light fa-sharp fa-spinner fa-spin" /> Saving...</>
             ) : (
-              <><i className="fa-solid fa-floppy-disk" /> {editingMember ? 'Update' : 'Create'}</>
+              <><i className="fa-light fa-sharp fa-floppy-disk" /> {editingMember ? 'Update Member' : 'Add Member'}</>
             )}
           </button>
         </div>
@@ -1705,40 +1802,40 @@ export default function Admin() {
                 className="admin-form-input"
                 value={testimonialForm.client_name}
                 onChange={(e) => setTestimonialForm({ ...testimonialForm, client_name: e.target.value })}
-                placeholder="John Smith"
+                placeholder="e.g. Anita Gurung"
               />
             </div>
             <div className="admin-form-group">
-              <label className="admin-form-label">Client Title</label>
+              <label className="admin-form-label">Client Position Title</label>
               <input
                 className="admin-form-input"
                 value={testimonialForm.client_title}
                 onChange={(e) => setTestimonialForm({ ...testimonialForm, client_title: e.target.value })}
-                placeholder="CTO"
+                placeholder="e.g. Hardware Lead"
               />
             </div>
           </div>
           <div className="admin-form-group">
-            <label className="admin-form-label">Company</label>
+            <label className="admin-form-label">Client Company Name</label>
             <input
               className="admin-form-input"
               value={testimonialForm.company}
               onChange={(e) => setTestimonialForm({ ...testimonialForm, company: e.target.value })}
-              placeholder="Tech Corp"
+              placeholder="e.g. Nepal Telecom"
             />
           </div>
           <div className="admin-form-group">
-            <label className="admin-form-label">Content *</label>
+            <label className="admin-form-label">Testimonial Content *</label>
             <textarea
               className="admin-form-input admin-form-textarea"
-              rows={4}
+              rows={3}
               value={testimonialForm.content}
               onChange={(e) => setTestimonialForm({ ...testimonialForm, content: e.target.value })}
-              placeholder="What the client said..."
+              placeholder="Detailed testimonial statement..."
             />
           </div>
           <div className="admin-form-group">
-            <label className="admin-form-label">Rating</label>
+            <label className="admin-form-label">Client Feedback Star Rating</label>
             <div style={{ display: 'flex', gap: '0.25rem' }}>
               {Array.from({ length: 5 }).map((_, i) => (
                 <button
@@ -1747,20 +1844,20 @@ export default function Admin() {
                   onClick={() => setTestimonialForm({ ...testimonialForm, rating: i + 1 })}
                   style={{ background: 'none', border: 'none', cursor: 'pointer', padding: '0.25rem', fontSize: '1.25rem' }}
                 >
-                  <i className={`fa-${i < testimonialForm.rating ? 'solid' : 'regular'} fa-star`} style={{ color: '#d4a017' }} />
+                  <i className={`fa-light fa-sharp fa-star ${i < testimonialForm.rating ? 'active' : ''}`} style={{ color: 'var(--accent-primary)' }} />
                 </button>
               ))}
             </div>
           </div>
-          <div className="admin-form-group">
-            <label className="admin-form-label">Image URL</label>
-            <input
-              className="admin-form-input"
-              value={testimonialForm.image_url}
-              onChange={(e) => setTestimonialForm({ ...testimonialForm, image_url: e.target.value })}
-              placeholder="https://example.com/photo.jpg"
-            />
-          </div>
+
+          <ImageUploadZone
+            label="Upload Client Photo"
+            value={testimonialForm.image_url}
+            onChange={(url) => setTestimonialForm({ ...testimonialForm, image_url: url })}
+            token={token}
+            apiUrl={API_URL}
+          />
+
           <div className="admin-form-row">
             <div className="admin-form-group">
               <label className="admin-form-label">Display Order</label>
@@ -1772,25 +1869,24 @@ export default function Admin() {
               />
             </div>
             <div className="admin-form-group">
-              <label className="admin-form-label" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+              <label className="admin-form-label" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer', marginTop: '2rem' }}>
                 <input
                   type="checkbox"
                   checked={testimonialForm.is_active}
                   onChange={(e) => setTestimonialForm({ ...testimonialForm, is_active: e.target.checked })}
-                  style={{ accentColor: '#d4a017' }}
                 />
-                Active
+                <span>Render as Active</span>
               </label>
             </div>
           </div>
         </div>
         <div className="admin-modal-footer">
-          <button className="admin-btn" onClick={() => setTestimonialModal(false)}>Cancel</button>
+          <button className="admin-btn admin-btn-secondary" onClick={() => setTestimonialModal(false)}>Cancel</button>
           <button className="admin-btn admin-btn-primary" onClick={saveTestimonial} disabled={testimonialSaving}>
             {testimonialSaving ? (
-              <><i className="fa-solid fa-spinner fa-spin" /> Saving...</>
+              <><i className="fa-light fa-sharp fa-spinner fa-spin" /> Saving...</>
             ) : (
-              <><i className="fa-solid fa-floppy-disk" /> {editingTestimonial ? 'Update' : 'Create'}</>
+              <><i className="fa-light fa-sharp fa-floppy-disk" /> {editingTestimonial ? 'Update Testimonial' : 'Add Testimonial'}</>
             )}
           </button>
         </div>

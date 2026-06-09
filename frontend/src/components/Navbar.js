@@ -1,10 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useTheme } from '../context/ThemeContext';
 
 const Navbar = () => {
   const [scrolled, setScrolled] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
+  const { theme, toggleTheme } = useTheme();
   const location = useLocation();
   const isHome = location.pathname === '/';
 
@@ -34,7 +36,6 @@ const Navbar = () => {
     }
     const el = document.querySelector(href);
     if (el) {
-      // Offset scrolling slightly to account for the sticky header
       const headerOffset = 100;
       const elementPosition = el.getBoundingClientRect().top;
       const offsetPosition = elementPosition + window.pageYOffset - headerOffset;
@@ -52,15 +53,7 @@ const Navbar = () => {
       <nav className={`navbar ${scrolled ? 'navbar--scrolled' : ''}`}>
         <div className="navbar__container">
           <Link to="/" className="navbar__logo">
-            <span style={{
-              fontFamily: "var(--font-heading)",
-              fontWeight: 500,
-              fontSize: '1rem',
-              letterSpacing: '3px',
-              color: 'var(--text-primary)'
-            }}>
-              HIMALIX <span style={{ color: 'var(--accent-primary)' }}>LABS</span>
-            </span>
+            <img src="/logo.png" alt="Himalix Labs" className="navbar__logo-img" style={{ height: '30px', width: 'auto' }} />
           </Link>
 
           <div className="navbar__links">
@@ -74,26 +67,52 @@ const Navbar = () => {
                 {link.label}
               </a>
             ))}
+            
+            <button
+              onClick={toggleTheme}
+              className="navbar__link"
+              aria-label="Toggle Theme"
+              style={{ background: 'none', border: 'none', display: 'flex', alignItems: 'center', cursor: 'pointer' }}
+            >
+              <i 
+                className={theme === 'light' ? 'fa-light fa-sharp fa-moon' : 'fa-light fa-sharp fa-sun'} 
+                style={{ fontSize: '1.1rem', color: 'var(--accent-primary)' }} 
+              />
+            </button>
+
             <Link to="/admin" className="navbar__link navbar__link--admin">
               Console
             </Link>
           </div>
 
-          <button
-            className="navbar__hamburger"
-            onClick={() => setMobileOpen(!mobileOpen)}
-            aria-label="Toggle menu"
-          >
-            <span className={`navbar__hamburger-line ${mobileOpen ? 'open' : ''}`} style={{
-              transform: mobileOpen ? 'rotate(45deg) translate(5px, 5px)' : 'none'
-            }} />
-            <span className={`navbar__hamburger-line ${mobileOpen ? 'open' : ''}`} style={{
-              opacity: mobileOpen ? 0 : 1
-            }} />
-            <span className={`navbar__hamburger-line ${mobileOpen ? 'open' : ''}`} style={{
-              transform: mobileOpen ? 'rotate(-45deg) translate(5px, -5px)' : 'none'
-            }} />
-          </button>
+          <div style={{ display: 'flex', gap: '1.25rem', alignItems: 'center' }} className="navbar__hamburger-wrap">
+            <button
+              onClick={toggleTheme}
+              className="navbar__mobile-theme-btn"
+              aria-label="Toggle Theme"
+              style={{ display: 'none', background: 'none', border: 'none', cursor: 'pointer' }}
+            >
+              <i 
+                className={theme === 'light' ? 'fa-light fa-sharp fa-moon' : 'fa-light fa-sharp fa-sun'} 
+                style={{ fontSize: '1.1rem', color: 'var(--accent-primary)' }} 
+              />
+            </button>
+            <button
+              className="navbar__hamburger"
+              onClick={() => setMobileOpen(!mobileOpen)}
+              aria-label="Toggle menu"
+            >
+              <span className={`navbar__hamburger-line ${mobileOpen ? 'open' : ''}`} style={{
+                transform: mobileOpen ? 'rotate(45deg) translate(5px, 5px)' : 'none'
+              }} />
+              <span className={`navbar__hamburger-line ${mobileOpen ? 'open' : ''}`} style={{
+                opacity: mobileOpen ? 0 : 1
+              }} />
+              <span className={`navbar__hamburger-line ${mobileOpen ? 'open' : ''}`} style={{
+                transform: mobileOpen ? 'rotate(-45deg) translate(5px, -5px)' : 'none'
+              }} />
+            </button>
+          </div>
         </div>
       </nav>
 
@@ -115,20 +134,13 @@ const Navbar = () => {
               transition={{ type: 'tween', ease: 'easeOut', duration: 0.3 }}
             >
               <div className="navbar__sidebar-header">
-                <span style={{
-                  fontFamily: "var(--font-heading)",
-                  fontWeight: 500,
-                  fontSize: '1rem',
-                  letterSpacing: '2px'
-                }}>
-                  HIMALIX <span style={{ color: 'var(--accent-primary)' }}>LABS</span>
-                </span>
+                <img src="/logo.png" alt="Himalix Labs" className="navbar__logo-img" style={{ height: '26px', width: 'auto' }} />
                 <button
                   className="navbar__sidebar-close"
                   onClick={() => setMobileOpen(false)}
                   aria-label="Close menu"
                 >
-                  <i className="fa-solid fa-xmark" />
+                  <i className="fa-light fa-sharp fa-xmark" />
                 </button>
               </div>
 
@@ -146,12 +158,25 @@ const Navbar = () => {
                     {link.label}
                   </motion.a>
                 ))}
+                
+                <motion.button
+                  onClick={toggleTheme}
+                  className="navbar__sidebar-link"
+                  style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', textAlign: 'left', width: '100%' }}
+                  initial={{ opacity: 0, x: 20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ delay: navLinks.length * 0.05 }}
+                >
+                  <i className={theme === 'light' ? 'fa-light fa-sharp fa-moon' : 'fa-light fa-sharp fa-sun'} /> {theme === 'light' ? 'Dark Mode' : 'Light Mode'}
+                </motion.button>
+
                 <motion.div
                   className="navbar__sidebar-divider"
                   initial={{ scaleX: 0 }}
                   animate={{ scaleX: 1 }}
                   transition={{ delay: 0.25 }}
                 />
+                
                 <motion.div
                   initial={{ opacity: 0, x: 20 }}
                   animate={{ opacity: 1, x: 0 }}
@@ -161,7 +186,7 @@ const Navbar = () => {
                     to="/admin"
                     className="navbar__sidebar-link navbar__sidebar-link--admin"
                   >
-                    <i className="fa-solid fa-gauge-high" style={{ marginRight: '8px' }} /> Console
+                    <i className="fa-light fa-sharp fa-gauge-high" style={{ marginRight: '8px' }} /> Console
                   </Link>
                 </motion.div>
               </div>
