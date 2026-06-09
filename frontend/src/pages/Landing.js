@@ -190,6 +190,8 @@ const About = ({ content }) => (
         <ScrollReveal direction="right" delay={0.2}>
           <div className="about__visual">
             <div className="about__visual-grid">
+              <div className="about__visual-crosshair-v" />
+              <div className="about__visual-crosshair-h" />
               <div className="radar-circle radar-circle--1 circular-decor" />
               <div className="radar-circle radar-circle--2 circular-decor" />
               <div className="radar-circle radar-circle--3 circular-decor" />
@@ -203,7 +205,7 @@ const About = ({ content }) => (
               ].map((item, i) => (
                 <motion.div
                   key={item.label}
-                  className="about__visual-item"
+                  className={`about__visual-item about__visual-item--${i + 1}`}
                   animate={{ y: [0, -10, 0] }}
                   transition={{ duration: 4 + i * 0.8, repeat: Infinity, ease: 'easeInOut' }}
                 >

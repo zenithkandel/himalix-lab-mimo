@@ -206,7 +206,14 @@ export default function Admin() {
   const { theme, toggleTheme } = useTheme();
   const navigate = useNavigate();
 
-  const [activeTab, setActiveTab] = useState('dashboard');
+  const [activeTab, setActiveTab] = useState(() => {
+    return sessionStorage.getItem('himalix_admin_tab') || 'dashboard';
+  });
+
+  useEffect(() => {
+    sessionStorage.setItem('himalix_admin_tab', activeTab);
+  }, [activeTab]);
+
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [loading, setLoading] = useState(true);
 
@@ -1173,7 +1180,11 @@ export default function Admin() {
                 <td>
                   <div className="admin-star-rating">
                     {Array.from({ length: 5 }).map((_, i) => (
-                      <i key={i} className={`fa-light fa-sharp fa-star ${i < t.rating ? 'active' : ''}`} style={{ fontSize: '0.8rem' }} />
+                      <i 
+                        key={i} 
+                        className={`${i < t.rating ? 'fa-solid' : 'fa-light'} fa-sharp fa-star`} 
+                        style={{ fontSize: '0.8rem', color: i < t.rating ? 'var(--accent-primary)' : 'var(--text-dark)' }} 
+                      />
                     ))}
                   </div>
                 </td>
@@ -1844,7 +1855,10 @@ export default function Admin() {
                   onClick={() => setTestimonialForm({ ...testimonialForm, rating: i + 1 })}
                   style={{ background: 'none', border: 'none', cursor: 'pointer', padding: '0.25rem', fontSize: '1.25rem' }}
                 >
-                  <i className={`fa-light fa-sharp fa-star ${i < testimonialForm.rating ? 'active' : ''}`} style={{ color: 'var(--accent-primary)' }} />
+                  <i 
+                    className={`${i < testimonialForm.rating ? 'fa-solid' : 'fa-light'} fa-sharp fa-star`} 
+                    style={{ color: i < testimonialForm.rating ? 'var(--accent-primary)' : 'var(--text-dark)' }} 
+                  />
                 </button>
               ))}
             </div>

@@ -64,7 +64,11 @@
   margin: 0;
   padding: 0;
   box-sizing: border-box;
-  border-radius: 0 !important; /* Force all border-radius to zero */
+  border-radius: 0;
+}
+
+.circular-decor {
+  border-radius: 50% !important;
 }
 
 html {
@@ -112,6 +116,7 @@ button {
   border: none;
   background: none;
   font-family: inherit;
+  color: inherit;
   outline: none;
 }
 
@@ -158,11 +163,11 @@ button {
   font-family: var(--font-mono);
   font-size: 0.7rem;
   letter-spacing: 2px;
-  color: var(--text-muted);
+  color: rgba(255, 255, 255, 0.45);
 }
 
 .loader-brand {
-  color: var(--accent-primary);
+  color: #e0af3c;
   font-weight: 600;
 }
 
@@ -183,14 +188,14 @@ button {
   font-weight: 300;
   font-size: 7.5rem;
   line-height: 1;
-  color: var(--text-primary);
+  color: #ffffff;
   letter-spacing: -3px;
 }
 
 .loader-percent {
   font-family: var(--font-mono);
   font-size: 1.5rem;
-  color: var(--accent-primary);
+  color: #e0af3c;
   margin-left: 0.5rem;
 }
 
@@ -204,18 +209,18 @@ button {
 
 .loader-bar-fill {
   height: 100%;
-  background: var(--accent-primary);
+  background: #e0af3c;
   position: absolute;
   top: 0;
   left: 0;
-  box-shadow: 0 0 10px var(--accent-primary);
+  box-shadow: 0 0 10px #e0af3c;
 }
 
 .loader-logs {
   font-family: var(--font-mono);
   font-size: 0.65rem;
   letter-spacing: 1px;
-  color: var(--text-muted);
+  color: rgba(255, 255, 255, 0.45);
   min-height: 90px;
   display: flex;
   flex-direction: column;
@@ -615,42 +620,7 @@ button {
   flex-wrap: wrap;
 }
 
-.hero__scroll-indicator {
-  position: absolute;
-  bottom: 3rem;
-  left: 50%;
-  transform: translateX(-50%);
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 0.75rem;
-  cursor: pointer;
-  z-index: 2;
-}
-
-.hero__scroll-indicator span {
-  font-family: var(--font-mono);
-  font-size: 0.65rem;
-  letter-spacing: 2px;
-  text-transform: uppercase;
-  color: var(--text-muted);
-}
-
-.hero__scroll-arrow {
-  width: 1.25rem;
-  height: 2rem;
-  border: 1px solid rgba(255, 255, 255, 0.15);
-  position: relative;
-}
-
-.hero__scroll-arrow i {
-  position: absolute;
-  top: 4px;
-  left: 50%;
-  transform: translateX(-50%);
-  font-size: 0.5rem;
-  color: var(--accent-primary);
-}
+/* Scroll indicator removed */
 
 /* ─── SERVICES (Glass Cards) ────────────────────────────────────── */
 .services {
@@ -851,8 +821,8 @@ button {
   height: 100%;
   border: 1px solid var(--border-color);
   background-image: 
-    linear-gradient(rgba(255, 255, 255, 0.015) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(255, 255, 255, 0.015) 1px, transparent 1px);
+    linear-gradient(var(--border-color) 1px, transparent 1px),
+    linear-gradient(90deg, var(--border-color) 1px, transparent 1px);
   background-size: 50px 50px;
   background-position: center;
   position: relative;
@@ -866,7 +836,75 @@ button {
   left: 0;
   width: 100%;
   height: 100%;
-  background: radial-gradient(circle, rgba(224,175,60,0.02) 0%, transparent 70%);
+  background: radial-gradient(circle, rgba(224,175,60,0.03) 0%, transparent 70%);
+}
+
+/* Crosshairs & Radar Schematic elements */
+.about__visual-crosshair-v {
+  position: absolute;
+  top: 0;
+  left: 50%;
+  width: 1px;
+  height: 100%;
+  background: linear-gradient(180deg, transparent, var(--border-color) 20%, var(--border-color) 80%, transparent);
+  pointer-events: none;
+}
+
+.about__visual-crosshair-h {
+  position: absolute;
+  top: 50%;
+  left: 0;
+  width: 100%;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, var(--border-color) 20%, var(--border-color) 80%, transparent);
+  pointer-events: none;
+}
+
+.radar-circle {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  border: 1px dashed var(--border-color);
+  pointer-events: none;
+}
+
+.radar-circle--1 {
+  width: 150px;
+  height: 150px;
+  border-color: var(--border-gold);
+}
+
+.radar-circle--2 {
+  width: 300px;
+  height: 300px;
+}
+
+.radar-circle--3 {
+  width: 450px;
+  height: 450px;
+}
+
+.radar-line-sweep {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 225px;
+  height: 225px;
+  background: conic-gradient(from 0deg, var(--accent-glow-strong) 0deg, transparent 90deg, transparent 360deg);
+  transform-origin: 0% 0%;
+  animation: radarSweep 8s linear infinite;
+  pointer-events: none;
+  border-radius: 0 0 100% 0;
+}
+
+@keyframes radarSweep {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
 }
 
 .about__visual-item {
@@ -883,6 +921,7 @@ button {
   font-size: 1.25rem;
   box-shadow: 0 10px 30px rgba(0,0,0,0.3);
   transition: var(--transition-normal);
+  z-index: 5;
 }
 
 .about__visual-item:hover {
@@ -899,11 +938,11 @@ button {
   color: var(--text-muted);
 }
 
-.about__visual-item:nth-child(1) { width: 90px; height: 90px; top: 12%; left: 15%; }
-.about__visual-item:nth-child(2) { width: 110px; height: 110px; top: 45%; right: 12%; }
-.about__visual-item:nth-child(3) { width: 85px; height: 85px; bottom: 12%; left: 25%; }
-.about__visual-item:nth-child(4) { width: 95px; height: 95px; top: 25%; left: 52%; }
-.about__visual-item:nth-child(5) { width: 80px; height: 80px; bottom: 18%; right: 45%; }
+.about__visual-item--1 { width: 90px; height: 90px; top: 12%; left: 15%; }
+.about__visual-item--2 { width: 110px; height: 110px; top: 45%; right: 12%; }
+.about__visual-item--3 { width: 85px; height: 85px; bottom: 12%; left: 25%; }
+.about__visual-item--4 { width: 95px; height: 95px; top: 25%; left: 52%; }
+.about__visual-item--5 { width: 80px; height: 80px; bottom: 18%; right: 45%; }
 
 /* ─── TEAM SECTION ──────────────────────────────────────────────── */
 .team {
@@ -1402,6 +1441,14 @@ button {
   border-top: 1px solid var(--border-color);
 }
 
+.footer__container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 2rem;
+  position: relative;
+  z-index: 2;
+}
+
 .footer__grid {
   display: grid;
   grid-template-columns: 1.5fr 0.8fr 0.8fr 0.9fr;
@@ -1855,16 +1902,27 @@ button {
   text-transform: uppercase;
   letter-spacing: 1.5px;
   transition: var(--transition-normal);
+  background: var(--bg-glass);
+  border: 1px solid var(--border-color);
+  color: var(--text-primary);
+}
+
+.admin-btn:hover {
+  background: var(--bg-glass-hover);
+  border-color: var(--border-gold-hover);
+  color: var(--accent-primary);
 }
 
 .admin-btn-primary {
   background: var(--accent-primary);
   color: #000000;
+  border-color: var(--accent-primary);
 }
 
 .admin-btn-primary:hover {
   background: var(--text-primary);
   color: var(--bg-primary);
+  border-color: var(--text-primary);
   transform: translateY(-2px);
   box-shadow: 0 10px 20px rgba(224, 175, 60, 0.2);
 }
@@ -1872,6 +1930,7 @@ button {
 .admin-btn-secondary {
   border: 1px solid var(--border-color);
   color: var(--text-primary);
+  background: transparent;
 }
 
 .admin-btn-secondary:hover {
@@ -1879,27 +1938,37 @@ button {
 }
 
 .admin-btn-danger {
+  background: rgba(239, 68, 68, 0.02);
   border: 1px solid rgba(239, 68, 68, 0.3);
   color: #ef4444;
 }
 
 .admin-btn-danger:hover {
   background: rgba(239, 68, 68, 0.1);
+  border-color: #ef4444;
+  color: #ef4444;
   transform: translateY(-2px);
 }
 
 .admin-btn-success {
   background: #10b981;
   color: #ffffff;
+  border-color: #10b981;
 }
 
 .admin-btn-success:hover {
   background: #0ea472;
+  border-color: #0ea472;
+  color: #ffffff;
 }
 
 .admin-btn-sm {
   padding: 0.5rem 1.1rem;
   font-size: 0.75rem;
+}
+
+.admin-mobile-toggle {
+  color: var(--text-primary) !important;
 }
 
 .admin-btn-full {
@@ -2289,6 +2358,11 @@ button {
   .admin-stats-grid {
     grid-template-columns: repeat(2, 1fr);
   }
+
+  .footer__grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 2.5rem;
+  }
 }
 
 @media (max-width: 860px) {
@@ -2312,12 +2386,11 @@ button {
   .navbar__mobile-theme-btn {
     display: block !important;
   }
-  
   .about__grid,
   .contact__grid,
   .footer__grid {
     grid-template-columns: 1fr;
-    gap: 4rem;
+    gap: 2.5rem;
   }
   
   .services__grid,
@@ -2345,6 +2418,7 @@ button {
   }
   .admin-mobile-toggle {
     display: flex !important;
+    color: var(--text-primary) !important;
   }
   .admin-body {
     padding: 1.5rem;
