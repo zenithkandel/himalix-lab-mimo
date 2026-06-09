@@ -1,97 +1,65 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import ScrollReveal from '../components/ScrollReveal';
 import AnimatedCounter from '../components/AnimatedCounter';
+import LoadingScreen from '../components/LoadingScreen';
+import SmoothScroll from '../components/SmoothScroll';
+import InteractiveCanvas from '../components/InteractiveCanvas';
 
 /* ─── Hero Section ──────────────────────────────────────────────── */
 const Hero = ({ content }) => {
-  const particles = Array.from({ length: 40 }, (_, i) => ({
-    id: i,
-    x: Math.random() * 100,
-    y: Math.random() * 100,
-    size: Math.random() * 3 + 1,
-    duration: Math.random() * 8 + 6,
-    delay: Math.random() * 4,
-  }));
-
-  const shapes = [
-    { type: 'circle', size: 300, x: '10%', y: '20%', delay: 0 },
-    { type: 'square', size: 200, x: '75%', y: '15%', delay: 1.5 },
-    { type: 'circle', size: 150, x: '85%', y: '70%', delay: 3 },
-    { type: 'square', size: 180, x: '5%', y: '75%', delay: 2 },
-  ];
-
   const scrollTo = (id) => {
-    document.querySelector(id)?.scrollIntoView({ behavior: 'smooth' });
+    const el = document.querySelector(id);
+    if (el) {
+      const headerOffset = 100;
+      const elementPosition = el.getBoundingClientRect().top;
+      const offsetPosition = elementPosition + window.pageYOffset - headerOffset;
+      window.scrollTo({ top: offsetPosition, behavior: 'smooth' });
+    }
   };
 
   return (
     <section className="hero" id="home">
-      <div className="hero__bg">
-        {particles.map((p) => (
-          <motion.div
-            key={p.id}
-            className="hero__particle"
-            style={{ left: `${p.x}%`, top: `${p.y}%`, width: p.size, height: p.size }}
-            animate={{ opacity: [0.15, 0.6, 0.15] }}
-            transition={{ duration: p.duration, delay: p.delay, repeat: Infinity }}
-          />
-        ))}
-
-        {shapes.map((s, i) => (
-          <motion.div
-            key={i}
-            className={`hero__shape hero__shape--${s.type}`}
-            style={{ width: s.size, height: s.size, left: s.x, top: s.y }}
-            animate={{
-              y: [0, -20, 0],
-              rotate: s.type === 'square' ? [0, 90, 0] : [0, 360, 0],
-              opacity: [0.04, 0.08, 0.04],
-            }}
-            transition={{ duration: 12 + i * 2, delay: s.delay, repeat: Infinity, ease: 'easeInOut' }}
-          />
-        ))}
-      </div>
-
+      <HeroBackground />
       <div className="hero__content">
-        <motion.p
+        <motion.div
           className="hero__eyebrow"
-          initial={{ opacity: 0, y: 20 }}
+          initial={{ opacity: 0, y: 15 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.3 }}
+          transition={{ delay: 1.2, duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
         >
-          <i className="fa-solid fa-microchip" /> Embedded Innovation
-        </motion.p>
+          <i className="fa-solid fa-microchip" style={{ fontSize: '0.85rem' }} /> Hardware & Custom IoT Solutions
+        </motion.div>
 
         <motion.h1
           className="hero__title"
           initial={{ opacity: 0, y: 30 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.5, duration: 0.7 }}
+          transition={{ delay: 1.4, duration: 1.0, ease: [0.16, 1, 0.3, 1] }}
         >
           {content?.hero_headline || 'Innovating Nepal\'s Tech Future'}
         </motion.h1>
 
         <motion.p
           className="hero__subtitle"
-          initial={{ opacity: 0, y: 30 }}
+          initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.7, duration: 0.6 }}
+          transition={{ delay: 1.6, duration: 0.9, ease: [0.16, 1, 0.3, 1] }}
         >
-          {content?.hero_subline || 'Empowering Nepalese innovators with cutting-edge electronics, 3D printing, and custom tech solutions'}
+          {content?.hero_subline || 'Empowering Nepalese innovators with cutting-edge electronics, 3D printing, and custom tech solutions.'}
         </motion.p>
 
         <motion.div
           className="hero__actions"
-          initial={{ opacity: 0, y: 30 }}
+          initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.9, duration: 0.6 }}
+          transition={{ delay: 1.8, duration: 0.9, ease: [0.16, 1, 0.3, 1] }}
         >
-          <button className="btn btn--gold" onClick={() => scrollTo(content?.hero_cta_link || '#services')}>
-            {content?.hero_cta_text || 'Explore Our Services'} <i className="fa-solid fa-arrow-right" />
+          <button className="btn btn--gold" onClick={() => scrollTo('#services')}>
+            {content?.hero_cta_text || 'Explore Our Services'} <i className="fa-solid fa-arrow-right" style={{ fontSize: '0.8rem' }} />
           </button>
           <button className="btn btn--outline" onClick={() => scrollTo('#contact')}>
-            Contact Us
+            Get in touch
           </button>
         </motion.div>
 
@@ -99,14 +67,14 @@ const Hero = ({ content }) => {
           className="hero__scroll-indicator"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
-          transition={{ delay: 1.5 }}
+          transition={{ delay: 2.2 }}
           onClick={() => scrollTo('#services')}
         >
-          <span>Scroll Down</span>
+          <span>Explore</span>
           <motion.div
             className="hero__scroll-arrow"
-            animate={{ y: [0, 8, 0] }}
-            transition={{ duration: 1.5, repeat: Infinity }}
+            animate={{ y: [0, 6, 0] }}
+            transition={{ duration: 2, repeat: Infinity, ease: 'easeInOut' }}
           >
             <i className="fa-solid fa-chevron-down" />
           </motion.div>
@@ -116,48 +84,62 @@ const Hero = ({ content }) => {
   );
 };
 
+// Seperate background canvas layer to optimize renders
+const HeroBackground = React.memo(() => {
+  return (
+    <div className="hero__bg">
+      <InteractiveCanvas />
+      {/* Decorative ambient lighting overlays */}
+      <div className="ambient-glow ambient-glow--top-left" />
+      <div className="ambient-glow ambient-glow--bottom-right" />
+    </div>
+  );
+});
+
 /* ─── Services Section ──────────────────────────────────────────── */
 const Services = ({ services }) => (
   <section className="services" id="services">
+    <div className="ambient-glow ambient-glow--center" style={{ opacity: 0.05 }} />
     <div className="section__container">
       <ScrollReveal>
         <div className="section__header">
-          <p className="section__eyebrow"><i className="fa-solid fa-gear" /> What We Do</p>
+          <p className="section__eyebrow"><i className="fa-solid fa-gear" /> Solutions</p>
           <h2 className="section__title">
             Our <span className="section__title-accent">Services</span>
           </h2>
           <p className="section__subtitle">
-            Comprehensive hardware and software solutions powered by deep technical expertise.
+            Bespoke hardware engineering and digital fabrication powered by premium technical support.
           </p>
         </div>
       </ScrollReveal>
 
       <div className="services__grid">
         {(services || []).map((s, i) => {
-          const features = typeof s.features === 'string' ? JSON.parse(s.features) : (s.features || []);
+          let features = [];
+          try {
+            features = typeof s.features === 'string' ? JSON.parse(s.features) : (s.features || []);
+          } catch {
+            features = [];
+          }
           return (
             <ScrollReveal key={s.id || i} delay={i * 0.1}>
-              <motion.div
-                className="service-card"
-                whileHover={{ y: -8, boxShadow: '0 0 30px rgba(212,160,23,0.15)' }}
-                transition={{ duration: 0.3 }}
-              >
+              <div className="service-card">
                 <div className="service-card__icon">
-                  <i className={s.icon_class} />
+                  <i className={s.icon_class || 'fa-solid fa-cube'} />
                 </div>
                 <h3 className="service-card__title">{s.title}</h3>
                 <p className="service-card__desc">{s.description}</p>
                 <ul className="service-card__features">
-                  {features.map((f) => (
-                    <li key={f}>
-                      <i className="fa-solid fa-check" /> {f}
+                  {features.map((f, index) => (
+                    <li key={index}>
+                      <i className="fa-solid fa-circle-notch" /> {f}
                     </li>
                   ))}
                 </ul>
                 <a href={s.link_url || '#contact'} className="service-card__link">
-                  Learn More <i className="fa-solid fa-arrow-right" />
+                  Request Service <i className="fa-solid fa-arrow-right-long" />
                 </a>
-              </motion.div>
+              </div>
             </ScrollReveal>
           )
         })}
@@ -173,7 +155,7 @@ const About = ({ content }) => (
       <div className="about__grid">
         <div className="about__text">
           <ScrollReveal>
-            <p className="section__eyebrow"><i className="fa-solid fa-building" /> Who We Are</p>
+            <p className="section__eyebrow"><i className="fa-solid fa-compass" /> Mission & Vision</p>
             <h2 className="section__title">
               {content?.about_title || 'About Himalix Labs'}
             </h2>
@@ -221,17 +203,16 @@ const About = ({ content }) => (
             <div className="about__visual-grid">
               {[
                 { icon: 'fa-solid fa-microchip', label: 'Hardware' },
-                { icon: 'fa-solid fa-code', label: 'Software' },
-                { icon: 'fa-solid fa-cloud', label: 'Cloud' },
-                { icon: 'fa-solid fa-shield-halved', label: 'Security' },
-                { icon: 'fa-solid fa-robot', label: 'AI/ML' },
-                { icon: 'fa-solid fa-network-wired', label: 'Networking' },
+                { icon: 'fa-solid fa-cube', label: '3D Printing' },
+                { icon: 'fa-solid fa-diagram-project', label: 'IoT Config' },
+                { icon: 'fa-solid fa-code', label: 'Firmware' },
+                { icon: 'fa-solid fa-robot', label: 'Automation' },
               ].map((item, i) => (
                 <motion.div
                   key={item.label}
                   className="about__visual-item"
-                  animate={{ y: [0, -6, 0] }}
-                  transition={{ duration: 3 + i * 0.5, repeat: Infinity, ease: 'easeInOut' }}
+                  animate={{ y: [0, -10, 0] }}
+                  transition={{ duration: 4 + i * 0.8, repeat: Infinity, ease: 'easeInOut' }}
                 >
                   <i className={item.icon} />
                   <span>{item.label}</span>
@@ -251,26 +232,27 @@ const Team = ({ members }) => (
     <div className="section__container">
       <ScrollReveal>
         <div className="section__header">
-          <p className="section__eyebrow"><i className="fa-solid fa-users" /> The People</p>
+          <p className="section__eyebrow"><i className="fa-solid fa-users" /> Co-Founders</p>
           <h2 className="section__title">
             Our <span className="section__title-accent">Team</span>
           </h2>
           <p className="section__subtitle">
-            A dedicated group of engineers, designers, and innovators building tomorrow's technology.
+            A core group of engineers and enthusiasts driving technology hardware design in Nepal.
           </p>
         </div>
       </ScrollReveal>
 
       <div className="team__grid">
         {(members || []).map((member, i) => {
-          const socials = typeof member.social_links === 'string' ? JSON.parse(member.social_links) : (member.social_links || {});
+          let socials = {};
+          try {
+            socials = typeof member.social_links === 'string' ? JSON.parse(member.social_links) : (member.social_links || {});
+          } catch {
+            socials = {};
+          }
           return (
             <ScrollReveal key={member.id || i} delay={i * 0.15}>
-              <motion.div
-                className="team-card"
-                whileHover={{ y: -6 }}
-                transition={{ duration: 0.3 }}
-              >
+              <div className="team-card">
                 <div className="team-card__avatar">
                   {member.image_url ? (
                     <img src={member.image_url} alt={member.name} className="team-card__avatar-img" />
@@ -284,11 +266,11 @@ const Team = ({ members }) => (
                 <p className="team-card__role">{member.role}</p>
                 <p className="team-card__bio">{member.bio}</p>
                 <div className="team-card__socials">
-                  {socials.linkedin && <a href={socials.linkedin} className="team-card__social" aria-label="LinkedIn"><i className="fa-brands fa-linkedin-in" /></a>}
-                  {socials.github && <a href={socials.github} className="team-card__social" aria-label="GitHub"><i className="fa-brands fa-github" /></a>}
-                  {socials.twitter && <a href={socials.twitter} className="team-card__social" aria-label="Twitter"><i className="fa-brands fa-twitter" /></a>}
+                  {socials.linkedin && <a href={socials.linkedin} className="team-card__social" aria-label="LinkedIn" target="_blank" rel="noreferrer"><i className="fa-brands fa-linkedin-in" /></a>}
+                  {socials.github && <a href={socials.github} className="team-card__social" aria-label="GitHub" target="_blank" rel="noreferrer"><i className="fa-brands fa-github" /></a>}
+                  {socials.twitter && <a href={socials.twitter} className="team-card__social" aria-label="Twitter" target="_blank" rel="noreferrer"><i className="fa-brands fa-twitter" /></a>}
                 </div>
-              </motion.div>
+              </div>
             </ScrollReveal>
           );
         })}
@@ -299,16 +281,27 @@ const Team = ({ members }) => (
 
 /* ─── Stats Section ─────────────────────────────────────────────── */
 const Stats = ({ content }) => {
+  const parseStatValue = (val) => {
+    if (!val) return { num: 0, suffix: '' };
+    const num = parseInt(val.replace(/[^\d]/g, ''), 10) || 0;
+    const suffix = val.replace(/[\d]/g, '');
+    return { num, suffix };
+  };
+
+  const pProjects = parseStatValue(content?.stats_projects || '500+');
+  const pClients = parseStatValue(content?.stats_clients || '200+');
+  const pProducts = parseStatValue(content?.stats_products || '1000+');
+  const pYears = parseStatValue(content?.stats_years || '5+');
+
   const statsData = [
-    { value: content?.stats_projects || '500+', label: 'Projects Completed', icon: 'fa-solid fa-rocket' },
-    { value: content?.stats_clients || '200+', label: 'Happy Clients', icon: 'fa-solid fa-face-smile' },
-    { value: content?.stats_products || '1000+', label: 'Products Available', icon: 'fa-solid fa-box-open' },
-    { value: content?.stats_years || '5+', label: 'Years Experience', icon: 'fa-solid fa-calendar-check' },
+    { num: pProjects.num, suffix: pProjects.suffix, label: 'Projects Completed', icon: 'fa-solid fa-rocket' },
+    { num: pClients.num, suffix: pClients.suffix, label: 'Happy Clients', icon: 'fa-solid fa-heart' },
+    { num: pProducts.num, suffix: pProducts.suffix, label: 'Components Supplied', icon: 'fa-solid fa-microchip' },
+    { num: pYears.num, suffix: pYears.suffix, label: 'Years Experience', icon: 'fa-solid fa-calendar-check' },
   ];
 
   return (
     <section className="stats" id="stats">
-      <div className="stats__pattern" />
       <div className="section__container">
         <div className="stats__grid">
           {statsData.map((stat, i) => (
@@ -318,7 +311,7 @@ const Stats = ({ content }) => {
                   <i className={stat.icon} />
                 </div>
                 <div className="stat-card__number">
-                  {stat.value}
+                  <AnimatedCounter end={stat.num} suffix={stat.suffix} duration={1.8} />
                 </div>
                 <p className="stat-card__label">{stat.label}</p>
               </div>
@@ -347,9 +340,10 @@ const Testimonials = ({ testimonials }) => {
 
   const goTo = (i) => {
     setCurrent(i);
-    clearInterval(intervalRef.current);
+    if (intervalRef.current) clearInterval(intervalRef.current);
   };
 
+  if (items.length === 0) return null;
   const t = items[current] || {};
 
   return (
@@ -357,9 +351,9 @@ const Testimonials = ({ testimonials }) => {
       <div className="section__container">
         <ScrollReveal>
           <div className="section__header">
-            <p className="section__eyebrow"><i className="fa-solid fa-quote-left" /> Testimonials</p>
+            <p className="section__eyebrow"><i className="fa-solid fa-quote-left" /> Endorsements</p>
             <h2 className="section__title">
-              What Our <span className="section__title-accent">Clients</span> Say
+              Innovators <span className="section__title-accent">Feedback</span>
             </h2>
           </div>
         </ScrollReveal>
@@ -375,11 +369,11 @@ const Testimonials = ({ testimonials }) => {
               <motion.p
                 className="testimonials__text"
                 key={current}
-                initial={{ opacity: 0, y: 10 }}
+                initial={{ opacity: 0, y: 15 }}
                 animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.4 }}
+                transition={{ duration: 0.5, ease: 'easeOut' }}
               >
-                {t.content}
+                "{t.content}"
               </motion.p>
               <div className="testimonials__stars">
                 {Array.from({ length: 5 }).map((_, i) => (
@@ -388,12 +382,12 @@ const Testimonials = ({ testimonials }) => {
               </div>
               <div className="testimonials__author">
                 <div className="testimonials__author-avatar">
-                  <i className="fa-solid fa-user" />
+                  <i className="fa-solid fa-circle-user" />
                 </div>
                 <div>
                   <h4 className="testimonials__author-name">{t.client_name}</h4>
                   <p className="testimonials__author-title">
-                    {t.client_title}, {t.company}
+                    {t.client_title}{t.company ? `, ${t.company}` : ''}
                   </p>
                 </div>
               </div>
@@ -434,7 +428,7 @@ const Testimonials = ({ testimonials }) => {
 };
 
 /* ─── Contact Section ───────────────────────────────────────────── */
-const Contact = ({ content, settings }) => {
+const Contact = ({ content }) => {
   const [form, setForm] = useState({ name: '', email: '', subject: '', message: '' });
   const [errors, setErrors] = useState({});
   const [submitted, setSubmitted] = useState(false);
@@ -444,9 +438,9 @@ const Contact = ({ content, settings }) => {
     const errs = {};
     if (!form.name.trim()) errs.name = 'Name is required';
     if (!form.email.trim()) errs.email = 'Email is required';
-    else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email)) errs.email = 'Invalid email';
+    else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email)) errs.email = 'Invalid email address';
     if (!form.subject.trim()) errs.subject = 'Subject is required';
-    if (!form.message.trim()) errs.message = 'Message is required';
+    if (!form.message.trim()) errs.message = 'Message body cannot be empty';
     return errs;
   };
 
@@ -471,18 +465,12 @@ const Contact = ({ content, settings }) => {
         body: JSON.stringify(form),
       });
     } catch {
-      // proceed anyway for demo
+      // Mock submit support for offline/isolated tests
     }
     setSending(false);
     setSubmitted(true);
     setForm({ name: '', email: '', subject: '', message: '' });
   };
-
-  const contactInfo = [
-    { icon: 'fa-solid fa-envelope', label: 'Email', value: content?.contact_email || 'info@himalixlab.com' },
-    { icon: 'fa-solid fa-phone', label: 'Phone', value: content?.contact_phone || '+977-9800000000' },
-    { icon: 'fa-solid fa-location-dot', label: 'Address', value: content?.contact_address || 'Kathmandu, Nepal' },
-  ];
 
   return (
     <section className="contact" id="contact">
@@ -491,10 +479,10 @@ const Contact = ({ content, settings }) => {
           <div className="section__header">
             <p className="section__eyebrow"><i className="fa-solid fa-paper-plane" /> {content?.contact_title || 'Get In Touch'}</p>
             <h2 className="section__title">
-              Contact <span className="section__title-accent">Us</span>
+              Request <span className="section__title-accent">Consultation</span>
             </h2>
             <p className="section__subtitle">
-              Have a project in mind? We'd love to hear about it.
+              Send us your project outline or query. Our co-founders will reply within 24 hours.
             </p>
           </div>
         </ScrollReveal>
@@ -505,25 +493,26 @@ const Contact = ({ content, settings }) => {
               {submitted ? (
                 <motion.div
                   className="contact__success"
-                  initial={{ opacity: 0, scale: 0.9 }}
+                  initial={{ opacity: 0, scale: 0.95 }}
                   animate={{ opacity: 1, scale: 1 }}
+                  transition={{ ease: [0.16, 1, 0.3, 1], duration: 0.6 }}
                 >
                   <i className="fa-solid fa-circle-check" />
-                  <h3>Message Sent!</h3>
-                  <p>Thank you for reaching out. We'll get back to you soon.</p>
-                  <button className="btn btn--gold" onClick={() => setSubmitted(false)}>
-                    Send Another
+                  <h3>Transmission Successful</h3>
+                  <p>Thank you for reaching out. We will review your prompt immediately.</p>
+                  <button className="btn btn--outline" onClick={() => setSubmitted(false)}>
+                    Send New Prompt
                   </button>
                 </motion.div>
               ) : (
                 <form className="contact__form" onSubmit={handleSubmit} noValidate>
                   <div className={`form-group ${errors.name ? 'form-group--error' : ''}`}>
-                    <label htmlFor="name"><i className="fa-solid fa-user" /> Name</label>
+                    <label htmlFor="name"><i className="fa-solid fa-user" /> Client Name</label>
                     <input
                       type="text"
                       id="name"
                       name="name"
-                      placeholder="Your full name"
+                      placeholder="e.g. Priyesh Shah"
                       value={form.name}
                       onChange={handleChange}
                     />
@@ -531,12 +520,12 @@ const Contact = ({ content, settings }) => {
                   </div>
 
                   <div className={`form-group ${errors.email ? 'form-group--error' : ''}`}>
-                    <label htmlFor="email"><i className="fa-solid fa-envelope" /> Email</label>
+                    <label htmlFor="email"><i className="fa-solid fa-envelope" /> Email Coordinates</label>
                     <input
                       type="email"
                       id="email"
                       name="email"
-                      placeholder="you@example.com"
+                      placeholder="you@domain.com"
                       value={form.email}
                       onChange={handleChange}
                     />
@@ -544,12 +533,12 @@ const Contact = ({ content, settings }) => {
                   </div>
 
                   <div className={`form-group ${errors.subject ? 'form-group--error' : ''}`}>
-                    <label htmlFor="subject"><i className="fa-solid fa-tag" /> Subject</label>
+                    <label htmlFor="subject"><i className="fa-solid fa-tag" /> Subject Domain</label>
                     <input
                       type="text"
                       id="subject"
                       name="subject"
-                      placeholder="Project inquiry"
+                      placeholder="e.g. IoT Project Prototype"
                       value={form.subject}
                       onChange={handleChange}
                     />
@@ -557,12 +546,11 @@ const Contact = ({ content, settings }) => {
                   </div>
 
                   <div className={`form-group ${errors.message ? 'form-group--error' : ''}`}>
-                    <label htmlFor="message"><i className="fa-solid fa-message" /> Message</label>
+                    <label htmlFor="message"><i className="fa-solid fa-message" /> Message Specifications</label>
                     <textarea
                       id="message"
                       name="message"
-                      rows="5"
-                      placeholder="Tell us about your project..."
+                      placeholder="Explain your technical design requirements..."
                       value={form.message}
                       onChange={handleChange}
                     />
@@ -571,9 +559,9 @@ const Contact = ({ content, settings }) => {
 
                   <button type="submit" className="btn btn--gold btn--full" disabled={sending}>
                     {sending ? (
-                      <><i className="fa-solid fa-spinner fa-spin" /> Sending...</>
+                      <><i className="fa-solid fa-spinner fa-spin" /> Transmitting...</>
                     ) : (
-                      <><i className="fa-solid fa-paper-plane" /> Send Message</>
+                      <><i className="fa-solid fa-paper-plane" /> Transmit Message</>
                     )}
                   </button>
                 </form>
@@ -583,23 +571,43 @@ const Contact = ({ content, settings }) => {
 
           <ScrollReveal direction="right">
             <div className="contact__info">
-              <h3 className="contact__info-title">Let's Talk</h3>
-              <p className="contact__info-desc">
-                Ready to start your next project? Reach out and let's create something extraordinary together.
-              </p>
+              <div>
+                <h3 className="contact__info-title">Let's Connect</h3>
+                <p className="contact__info-desc">
+                  Visit our lab, call our helpline, or write directly. We have support modules ready for hardware components supply across Nepal.
+                </p>
+              </div>
 
               <div className="contact__info-items">
-                {contactInfo.map((item) => (
-                  <div key={item.label} className="contact__info-item">
-                    <div className="contact__info-icon">
-                      <i className={item.icon} />
-                    </div>
-                    <div>
-                      <p className="contact__info-label">{item.label}</p>
-                      <p className="contact__info-value">{item.value}</p>
-                    </div>
+                <div className="contact__info-item">
+                  <div className="contact__info-icon">
+                    <i className="fa-solid fa-envelope" />
                   </div>
-                ))}
+                  <div>
+                    <p className="contact__info-label">Direct Mail</p>
+                    <p className="contact__info-value">{content?.contact_email || 'info@himalixlab.com'}</p>
+                  </div>
+                </div>
+
+                <div className="contact__info-item">
+                  <div className="contact__info-icon">
+                    <i className="fa-solid fa-phone" />
+                  </div>
+                  <div>
+                    <p className="contact__info-label">Phone Support</p>
+                    <p className="contact__info-value">{content?.contact_phone || '+977-9800000000'}</p>
+                  </div>
+                </div>
+
+                <div className="contact__info-item">
+                  <div className="contact__info-icon">
+                    <i className="fa-solid fa-location-dot" />
+                  </div>
+                  <div>
+                    <p className="contact__info-label">Base Location</p>
+                    <p className="contact__info-value">{content?.contact_address || 'Kathmandu, Nepal'}</p>
+                  </div>
+                </div>
               </div>
 
               <div className="contact__socials">
@@ -619,6 +627,7 @@ const Contact = ({ content, settings }) => {
 /* ─── Main Landing Page ─────────────────────────────────────────── */
 const Landing = () => {
   const [data, setData] = useState(null);
+  const [loaderCompleted, setLoaderCompleted] = useState(false);
 
   useEffect(() => {
     fetch('http://localhost:5001/api/content')
@@ -628,15 +637,23 @@ const Landing = () => {
   }, []);
 
   return (
-    <main className="landing">
-      <Hero content={data?.content?.hero} />
-      <Services services={data?.services} />
-      <About content={data?.content?.about} />
-      <Team members={data?.team} />
-      <Stats content={data?.content?.stats} />
-      <Testimonials testimonials={data?.testimonials} />
-      <Contact content={data?.content?.contact} settings={data?.settings} />
-    </main>
+    <>
+      <LoadingScreen onComplete={() => setLoaderCompleted(true)} />
+      
+      {loaderCompleted && (
+        <SmoothScroll>
+          <main className="landing" style={{ opacity: 1 }}>
+            <Hero content={data?.content?.hero} />
+            <Services services={data?.services} />
+            <About content={data?.content?.about} />
+            <Team members={data?.team} />
+            <Stats content={data?.content?.stats} />
+            <Testimonials testimonials={data?.testimonials} />
+            <Contact content={data?.content?.contact} />
+          </main>
+        </SmoothScroll>
+      )}
+    </>
   );
 };
 
