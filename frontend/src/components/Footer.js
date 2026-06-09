@@ -12,11 +12,11 @@ const Footer = () => {
   ];
 
   const services = [
-    'Embedded Systems',
-    'IoT Solutions',
-    'PCB Design',
-    'Firmware Development',
-    'Product Prototyping',
+    'Embedded Electronics',
+    '3D Printing Services',
+    'Custom Embedded Systems',
+    'Science Prototyping',
+    'Hardware Consultation',
   ];
 
   const socialLinks = [
@@ -30,7 +30,16 @@ const Footer = () => {
     if (href.startsWith('#')) {
       e.preventDefault();
       const el = document.querySelector(href);
-      if (el) el.scrollIntoView({ behavior: 'smooth' });
+      if (el) {
+        const headerOffset = 100;
+        const elementPosition = el.getBoundingClientRect().top;
+        const offsetPosition = elementPosition + window.pageYOffset - headerOffset;
+
+        window.scrollTo({
+          top: offsetPosition,
+          behavior: 'smooth'
+        });
+      }
     }
   };
 
@@ -43,11 +52,18 @@ const Footer = () => {
           <ScrollReveal direction="up" delay={0}>
             <div className="footer__col footer__col--brand">
               <Link to="/" className="footer__logo">
-                <img src="/logo.png" alt="Himalix Labs" className="footer__logo-img" />
+                <span style={{ 
+                  fontFamily: "var(--font-heading)", 
+                  fontWeight: 500, 
+                  fontSize: '1.2rem', 
+                  letterSpacing: '2.5px',
+                  color: 'var(--text-primary)'
+                }}>
+                  HIMALIX <span style={{ color: 'var(--accent-primary)' }}>LABS</span>
+                </span>
               </Link>
               <p className="footer__desc">
-                Pioneering the future of embedded electronics and IoT solutions.
-                We transform innovative ideas into reality with cutting-edge technology.
+                Democratizing advanced electronics, 3D printing, and bespoke tech solutions for innovators across Nepal.
               </p>
               <div className="footer__socials">
                 {socialLinks.map((s) => (
@@ -61,7 +77,7 @@ const Footer = () => {
 
           <ScrollReveal direction="up" delay={0.1}>
             <div className="footer__col">
-              <h4 className="footer__heading">Quick Links</h4>
+              <h4 className="footer__heading">Explore</h4>
               <ul className="footer__list">
                 {quickLinks.map((link) => (
                   <li key={link.label}>
@@ -76,11 +92,11 @@ const Footer = () => {
 
           <ScrollReveal direction="up" delay={0.2}>
             <div className="footer__col">
-              <h4 className="footer__heading">Services</h4>
+              <h4 className="footer__heading">Solutions</h4>
               <ul className="footer__list">
                 {services.map((s) => (
                   <li key={s}>
-                    <span className="footer__link">{s}</span>
+                    <span className="footer__link" style={{ cursor: 'default' }}>{s}</span>
                   </li>
                 ))}
               </ul>
@@ -101,7 +117,7 @@ const Footer = () => {
                 </li>
                 <li>
                   <i className="fa-solid fa-phone" />
-                  <span>+977-1-XXXXXXX</span>
+                  <span>+977-1-XXXXXXXX</span>
                 </li>
               </ul>
             </div>
@@ -112,7 +128,7 @@ const Footer = () => {
       <div className="footer__bottom">
         <div className="footer__bottom-inner">
           <p>&copy; {new Date().getFullYear()} Himalix Labs. All rights reserved.</p>
-          <p className="footer__bottom-tagline">Engineered with precision.</p>
+          <p className="footer__bottom-tagline">Designed for the future.</p>
         </div>
       </div>
     </footer>
