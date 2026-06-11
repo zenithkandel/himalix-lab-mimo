@@ -36,7 +36,7 @@ function App() {
 
               {/* Store Routes */}
               <Route path="/store/*" element={
-                <>
+                <div className="store-app">
                   <StoreNavbar />
                   <Routes>
                     <Route index element={<Storefront />} />
@@ -49,7 +49,7 @@ function App() {
                     <Route path="admin" element={<AdminRoute><StoreAdmin /></AdminRoute>} />
                     <Route path="*" element={<StoreNotFound />} />
                   </Routes>
-                </>
+                </div>
               } />
             </Routes>
           </Router>
