@@ -2832,6 +2832,10 @@ button {
   text-decoration: none;
   line-height: 1.2;
 }
+.store-app .btn::before {
+  content: none !important;
+  display: none !important;
+}
 .store-app .btn:disabled {
   opacity: 0.35;
   cursor: not-allowed;
@@ -2910,17 +2914,27 @@ button {
 .store-app .navbar {
   position: fixed;
   top: 0;
-  left: 0;
-  right: 0;
+  left: 0 !important;
+  right: 0 !important;
   z-index: 1000;
   background-color: rgba(255, 255, 255, 0.9);
   backdrop-filter: blur(16px);
   -webkit-backdrop-filter: blur(16px);
-  border-bottom: 1px solid var(--border);
+  border-bottom: 1px solid var(--border) !important;
   height: 68px;
   display: flex;
   align-items: center;
   transition: all 0.25s ease;
+  
+  /* Reset Himalix Labs .navbar layout styles */
+  width: 100% !important;
+  max-width: none !important;
+  transform: none !important;
+  padding: 0 !important;
+  border-left: none !important;
+  border-right: none !important;
+  border-top: none !important;
+  border-radius: 0 !important;
 }
 .store-app .navbar .container {
   display: flex;
