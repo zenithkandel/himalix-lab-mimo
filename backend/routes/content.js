@@ -27,7 +27,7 @@ router.get('/', async (req, res) => {
       'SELECT * FROM testimonials WHERE is_active = TRUE ORDER BY display_order ASC'
     );
 
-    const [settingsRows] = await pool.query('SELECT * FROM site_settings');
+    const [settingsRows] = await pool.query('SELECT * FROM labs_site_settings');
     const settings = {};
     settingsRows.forEach(row => {
       settings[row.setting_key] = row.setting_value;

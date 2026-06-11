@@ -319,7 +319,7 @@ router.delete('/testimonials/:id', async (req, res) => {
 // GET /settings
 router.get('/settings', async (req, res) => {
   try {
-    const [rows] = await pool.query('SELECT * FROM site_settings');
+    const [rows] = await pool.query('SELECT * FROM labs_site_settings');
     res.json(rows);
   } catch (error) {
     console.error('Get settings error:', error);
@@ -336,7 +336,7 @@ router.put('/settings/:key', async (req, res) => {
     }
 
     const [result] = await pool.query(
-      'UPDATE site_settings SET setting_value = ? WHERE setting_key = ?',
+      'UPDATE labs_site_settings SET setting_value = ? WHERE setting_key = ?',
       [setting_value, req.params.key]
     );
 
@@ -344,7 +344,7 @@ router.put('/settings/:key', async (req, res) => {
       return res.status(404).json({ error: 'Setting not found' });
     }
 
-    const [rows] = await pool.query('SELECT * FROM site_settings WHERE setting_key = ?', [req.params.key]);
+    const [rows] = await pool.query('SELECT * FROM labs_site_settings WHERE setting_key = ?', [req.params.key]);
     res.json(rows[0]);
   } catch (error) {
     console.error('Update setting error:', error);
