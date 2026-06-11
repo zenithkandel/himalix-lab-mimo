@@ -476,7 +476,7 @@ const Contact = ({ content }) => {
 
     setSending(true);
     try {
-      await fetch('http://localhost:5001/api/content/contact', {
+      await fetch('/api/content/contact', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(form),
@@ -647,7 +647,7 @@ const Landing = () => {
   const [loaderCompleted, setLoaderCompleted] = useState(false);
 
   useEffect(() => {
-    fetch('http://localhost:5001/api/content')
+    fetch('/api/content')
       .then((res) => res.json())
       .then(setData)
       .catch(() => { });

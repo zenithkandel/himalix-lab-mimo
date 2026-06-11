@@ -1,10 +1,10 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { useTheme } from '../context/ThemeContext';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Navigate } from 'react-router-dom';
 import ImageUploadZone from '../components/ImageUploadZone';
 
-const API_URL = 'http://localhost:5001/api';
+const API_URL = '/api';
 
 const NAV_ITEMS = [
   { id: 'dashboard', label: 'Dashboard', icon: 'fa-light fa-sharp fa-gauge-high' },
@@ -742,12 +742,11 @@ export default function Admin() {
 
   /* ─── Not Auth ───────────────────────────────────────────── */
   if (!user) {
-    return (
-      <>
-        <Toast toasts={toasts} onRemove={removeToast} />
-        <LoginScreen login={login} />
-      </>
-    );
+    return <Navigate to="/store/login?redirect=/admin" replace />;
+  }
+
+  if (user.role !== 'admin') {
+    return <Navigate to="/store" replace />;
   }
 
   /* ─── Sidebar ────────────────────────────────────────────── */

@@ -43,12 +43,17 @@ export default function Navbar() {
         </button>
 
         <div className={`navbar-links${mobileOpen ? ' open' : ''}`}>
-          <Link to="/store" className={`nav-link ${isActive('/') ? 'active' : ''}`} onClick={closeMobile}>
+          <Link to="/" className="nav-link" onClick={closeMobile}>
+            <i className="fa-sharp-duotone fa-light fa-arrow-left"></i>
+            Back to Home
+          </Link>
+
+          <Link to="/store" className={`nav-link ${isActive('/store') ? 'active' : ''}`} onClick={closeMobile}>
             <i className="fa-sharp-duotone fa-light fa-store"></i>
             Store
           </Link>
 
-          <Link to="/store/cart" className={`nav-link ${isActive('/cart') ? 'active' : ''}`} onClick={closeMobile}>
+          <Link to="/store/cart" className={`nav-link ${isActive('/store/cart') ? 'active' : ''}`} onClick={closeMobile}>
             <i className="fa-sharp-duotone fa-light fa-bag-shopping"></i>
             Cart
             {cartCount > 0 && <span className="nav-badge">{cartCount}</span>}
@@ -61,7 +66,7 @@ export default function Navbar() {
                 रु {Number(walletBalance || 0).toFixed(2)}
               </span>
 
-              <Link to="/store/profile" className={`nav-link ${isActive('/profile') ? 'active' : ''}`} onClick={closeMobile} style={{ display: 'inline-flex', alignItems: 'center' }}>
+              <Link to="/store/profile" className={`nav-link ${isActive('/store/profile') ? 'active' : ''}`} onClick={closeMobile} style={{ display: 'inline-flex', alignItems: 'center' }}>
                 {user.avatar_url ? (
                   <img src={user.avatar_url} alt="Avatar" style={{ width: '18px', height: '18px', objectFit: 'cover', marginRight: '6px' }} />
                 ) : (
@@ -71,7 +76,7 @@ export default function Navbar() {
               </Link>
 
               {user.role === 'admin' && (
-                <Link to="/store/admin" className={`nav-link ${isActive('/admin') ? 'active' : ''}`} onClick={closeMobile}>
+                <Link to="/store/admin" className={`nav-link ${isActive('/store/admin') ? 'active' : ''}`} onClick={closeMobile}>
                   <i className="fa-sharp-duotone fa-light fa-user-shield"></i>
                   Admin
                 </Link>
@@ -84,11 +89,11 @@ export default function Navbar() {
             </>
           ) : (
             <>
-              <Link to="/store/login" className={`nav-link ${isActive('/login') ? 'active' : ''}`} onClick={closeMobile}>
+              <Link to="/store/login" className={`nav-link ${isActive('/store/login') ? 'active' : ''}`} onClick={closeMobile}>
                 <i className="fa-sharp-duotone fa-light fa-right-to-bracket"></i>
                 Login
               </Link>
-              <Link to="/store/register" className={`nav-link ${isActive('/register') ? 'active' : ''}`} onClick={closeMobile}>
+              <Link to="/store/register" className={`nav-link ${isActive('/store/register') ? 'active' : ''}`} onClick={closeMobile}>
                 <i className="fa-sharp-duotone fa-light fa-user-plus"></i>
                 Register
               </Link>

@@ -67,6 +67,7 @@ const Navbar = () => {
                 {link.label}
               </a>
             ))}
+            <Link to="/store" className="navbar__link">Store</Link>
             
             <button
               onClick={toggleTheme}
@@ -155,7 +156,17 @@ const Navbar = () => {
                     {link.label}
                   </motion.a>
                 ))}
-                
+                <motion.div
+                  initial={{ opacity: 0, x: 20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ delay: navLinks.length * 0.05 }}
+                  style={{ display: 'flex', width: '100%' }}
+                >
+                  <Link to="/store" className="navbar__sidebar-link" onClick={() => setMobileOpen(false)} style={{ width: '100%' }}>
+                    Store
+                  </Link>
+                </motion.div>
+
                 <motion.button
                   onClick={toggleTheme}
                   className="navbar__sidebar-link"
