@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
-import { useAuth } from '../context/AuthContext';
-import { useCart } from '../context/CartContext';
-import ProductCard from '../components/ProductCard';
+import { useAuth } from '../../context/AuthContext';
+import { useCart } from '../../context/CartContext';
+import ProductCard from '../../components/store/ProductCard';
 
 const CATEGORIES = ['All', 'Microcontrollers', 'Sensors', 'ICs', 'Modules', 'Development Boards', 'Components'];
 
@@ -78,7 +78,7 @@ export default function Storefront() {
       if (token) {
         headers['Authorization'] = `Bearer ${token}`;
       }
-      const response = await fetch(`/api/products?${params.toString()}`, { headers });
+      const response = await fetch(`/api/store/products?${params.toString()}`, { headers });
       const data = await response.json();
 
       if (!response.ok) {

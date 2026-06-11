@@ -7,7 +7,7 @@ export default function Terms() {
       <div className="container" style={{ maxWidth: '800px', margin: '0 auto', backgroundColor: 'var(--bg-card)', border: '1px solid var(--border)', padding: '40px 32px', boxShadow: '0 4px 6px -1px rgba(0,0,0,0.05)' }}>
         
         <div style={{ borderBottom: '1px solid var(--border)', paddingBottom: '20px', marginBottom: '32px' }}>
-          <Link to="/" style={{ textDecoration: 'none', color: 'var(--text-secondary)', display: 'inline-flex', alignItems: 'center', gap: '8px', fontSize: '0.9rem', marginBottom: '16px', fontWeight: 600 }}>
+          <Link to="/store" style={{ textDecoration: 'none', color: 'var(--text-secondary)', display: 'inline-flex', alignItems: 'center', gap: '8px', fontSize: '0.9rem', marginBottom: '16px', fontWeight: 600 }}>
             <i className="fa-sharp-duotone fa-light fa-arrow-left"></i> Back to Storefront
           </Link>
           <h1 style={{ fontSize: '2.2rem', fontWeight: 800, letterSpacing: '-0.02em', margin: 0 }}>Terms & Conditions</h1>
@@ -72,7 +72,7 @@ export default function Terms() {
         </div>
         
         <div style={{ marginTop: '40px', paddingTop: '24px', borderTop: '1px solid var(--border)', display: 'flex', justifyContent: 'flex-end' }}>
-          <Link to="/" className="btn btn-primary" style={{ padding: '12px 24px', textDecoration: 'none' }}>
+          <Link to="/store" className="btn btn-primary" style={{ padding: '12px 24px', textDecoration: 'none' }}>
             I Understand
           </Link>
         </div>

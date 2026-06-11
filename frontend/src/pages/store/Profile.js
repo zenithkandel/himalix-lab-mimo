@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { useAuth } from '../context/AuthContext';
+import { useAuth } from '../../context/AuthContext';
 
 function getAuthHeaders() {
   const token = localStorage.getItem('token');
@@ -30,7 +30,7 @@ export default function Profile() {
 
   const fetchWalletHistory = async () => {
     try {
-      const response = await fetch('/api/wallet/history', {
+      const response = await fetch('/api/store/wallet/history', {
         headers: {
           'Authorization': `Bearer ${token}`
         }
@@ -50,7 +50,7 @@ export default function Profile() {
     setBindingReferral(true);
     setReferralMsg(null);
     try {
-      const res = await fetch('/api/wallet/referral', {
+      const res = await fetch('/api/store/wallet/referral', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -77,7 +77,7 @@ export default function Profile() {
     setClaimingSocial(true);
     setSocialMsg(null);
     try {
-      const res = await fetch('/api/wallet/claim-social', {
+      const res = await fetch('/api/store/wallet/claim-social', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -102,7 +102,7 @@ export default function Profile() {
   useEffect(() => {
     async function loadOrders() {
       try {
-        const res = await fetch(`/api/orders/history`, { headers: getAuthHeaders() });
+        const res = await fetch(`/api/store/orders/history`, { headers: getAuthHeaders() });
         if (!res.ok) throw new Error('Not available');
         const data = await res.json();
         setOrders(data);
@@ -303,7 +303,7 @@ export default function Profile() {
               </div>
               <h3>No orders yet</h3>
               <p>Start shopping to see your orders here.</p>
-              <Link to="/" className="btn btn-primary">
+              <Link to="/store" className="btn btn-primary">
                 <i className="fa-sharp-duotone fa-light fa-arrow-left" style={{ marginRight: '6px' }}></i>
                 Browse Products
               </Link>
@@ -317,7 +317,7 @@ export default function Profile() {
               </div>
               <h3>No orders yet</h3>
               <p>Your order history will appear here once you make a purchase.</p>
-              <Link to="/" className="btn btn-primary">
+              <Link to="/store" className="btn btn-primary">
                 <i className="fa-sharp-duotone fa-light fa-arrow-left" style={{ marginRight: '6px' }}></i>
                 Browse Products
               </Link>

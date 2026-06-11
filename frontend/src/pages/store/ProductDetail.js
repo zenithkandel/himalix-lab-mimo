@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
-import { useAuth } from '../context/AuthContext';
-import { useCart } from '../context/CartContext';
-import ProductCard from '../components/ProductCard';
+import { useAuth } from '../../context/AuthContext';
+import { useCart } from '../../context/CartContext';
+import ProductCard from '../../components/store/ProductCard';
 
 export default function ProductDetail() {
   const { id } = useParams();
@@ -30,7 +30,7 @@ export default function ProductDetail() {
 
   const fetchReviews = async () => {
     try {
-      const response = await fetch(`/api/reviews/${id}`);
+      const response = await fetch(`/api/store/reviews/${id}`);
       const data = await response.json();
       if (response.ok) {
         setReviews(data);
@@ -51,7 +51,7 @@ export default function ProductDetail() {
         if (token) {
           headers['Authorization'] = `Bearer ${token}`;
         }
-        const response = await fetch(`/api/products/${id}`, { headers });
+        const response = await fetch(`/api/store/products/${id}`, { headers });
         const data = await response.json();
 
         if (!response.ok) {
@@ -151,7 +151,7 @@ export default function ProductDetail() {
             </div>
             <h3>Product Not Found</h3>
             <p>{error || 'The product you are looking for does not exist or has been removed.'}</p>
-            <Link to="/" className="btn btn-primary">
+            <Link to="/store" className="btn btn-primary">
               <i className="fa-sharp-duotone fa-light fa-arrow-left" style={{ marginRight: '6px' }}></i>
               Back to Store
             </Link>
@@ -187,7 +187,7 @@ export default function ProductDetail() {
     setReviewSubmitting(true);
     setReviewMsg(null);
     try {
-      const response = await fetch(`/api/reviews/${id}`, {
+      const response = await fetch(`/api/store/reviews/${id}`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

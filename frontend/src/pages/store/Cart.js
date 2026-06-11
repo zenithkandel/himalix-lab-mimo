@@ -1,7 +1,7 @@
 import React, { useEffect, useState, useRef } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { useCart } from '../context/CartContext';
-import { useAuth } from '../context/AuthContext';
+import { useCart } from '../../context/CartContext';
+import { useAuth } from '../../context/AuthContext';
 const HQ_LAT = 27.7029;
 const HQ_LNG = 85.3072;
 
@@ -286,7 +286,7 @@ export default function Cart() {
     setSubmitting(true);
     setShowConfirmModal(false);
     try {
-      const response = await fetch(`/api/orders/checkout`, {
+      const response = await fetch(`/api/store/orders/checkout`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -363,11 +363,11 @@ export default function Cart() {
           </div>
           
           <div style={{ display: 'flex', gap: '12px', justifyContent: 'center' }}>
-            <Link to="/profile" className="btn btn-outline" style={{ flex: 1, padding: '12px 20px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px' }}>
+            <Link to="/store/profile" className="btn btn-outline" style={{ flex: 1, padding: '12px 20px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px' }}>
               <i className="fa-sharp-duotone fa-light fa-clock-history"></i>
               View Order History
             </Link>
-            <Link to="/" className="btn btn-primary" style={{ flex: 1, padding: '12px 20px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px' }}>
+            <Link to="/store" className="btn btn-primary" style={{ flex: 1, padding: '12px 20px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px' }}>
               <i className="fa-sharp-duotone fa-light fa-bag-shopping"></i>
               Continue Shopping
             </Link>
@@ -390,7 +390,7 @@ export default function Cart() {
             </div>
             <h3>Your cart is empty</h3>
             <p>Add some products to get started.</p>
-            <Link to="/" className="btn btn-primary">
+            <Link to="/store" className="btn btn-primary">
               <i className="fa-sharp-duotone fa-light fa-arrow-left" style={{ marginRight: '6px' }}></i>
               Browse Products
             </Link>
@@ -663,7 +663,7 @@ export default function Cart() {
                       style={{ width: '18px', height: '18px', borderRadius: 0 }}
                     />
                     <span>
-                      I agree to the <Link to="/terms" target="_blank" rel="noopener noreferrer" style={{ color: 'var(--accent)', fontWeight: 600, textDecoration: 'underline' }}>Terms & Conditions</Link> *
+                      I agree to the <Link to="/store/terms" target="_blank" rel="noopener noreferrer" style={{ color: 'var(--accent)', fontWeight: 600, textDecoration: 'underline' }}>Terms & Conditions</Link> *
                     </span>
                   </label>
                 </div>

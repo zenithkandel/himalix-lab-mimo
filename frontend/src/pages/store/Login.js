@@ -1,10 +1,12 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
-import { useAuth } from '../context/AuthContext';
+import { Link, useNavigate, useSearchParams } from 'react-router-dom';
+import { useAuth } from '../../context/AuthContext';
 
 export default function Login() {
   const { login, loginWithGoogle, systemConfig } = useAuth();
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const redirect = searchParams.get('redirect');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
@@ -21,10 +23,12 @@ export default function Login() {
             setError('');
             try {
               const data = await loginWithGoogle(response.credential);
-              if (data.user.role === 'admin') {
-                navigate('/admin');
+              if (redirect) {
+                navigate(redirect);
+              } else if (data.user.role === 'admin') {
+                navigate('/store/admin');
               } else {
-                navigate('/');
+                navigate('/store');
               }
             } catch (err) {
               setError(err.message || 'Google Sign-In failed.');
@@ -62,10 +66,12 @@ export default function Login() {
     setLoading(true);
     try {
       const data = await login(email, password);
-      if (data.user.role === 'admin') {
-        navigate('/admin');
+      if (redirect) {
+        navigate(redirect);
+      } else if (data.user.role === 'admin') {
+        navigate('/store/admin');
       } else {
-        navigate('/');
+        navigate('/store');
       }
     } catch (err) {
       setError(err.message || 'Login failed.');
@@ -145,7 +151,7 @@ export default function Login() {
         )}
 
         <div className="auth-footer">
-          Don't have an account? <Link to="/register">Register</Link>
+          Don't have an account? <Link to="/store/register">Register</Link>
         </div>
       </div>
     </div>

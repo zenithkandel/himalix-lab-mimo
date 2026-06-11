@@ -12,7 +12,7 @@ export default function NotFound() {
           <br />
           Verify the address and try again.
         </p>
-        <Link to="/" className="btn btn-primary">
+        <Link to="/store" className="btn btn-primary">
           RETURN TO STORE
         </Link>
       </div>

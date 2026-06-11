@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { useAuth } from '../context/AuthContext';
+import { useAuth } from '../../context/AuthContext';
 
 export default function Register() {
   const { register, loginWithGoogle, systemConfig } = useAuth();
@@ -24,9 +24,9 @@ export default function Register() {
             try {
               const data = await loginWithGoogle(response.credential);
               if (data.user.role === 'admin') {
-                navigate('/admin');
+                navigate('/store/admin');
               } else {
-                navigate('/');
+                navigate('/store');
               }
             } catch (err) {
               setError(err.message || 'Google Sign-In failed.');
@@ -74,7 +74,7 @@ export default function Register() {
     setLoading(true);
     try {
       await register(email, password, referralCode);
-      navigate('/');
+      navigate('/store');
     } catch (err) {
       setError(err.message || 'Registration failed.');
     } finally {
@@ -184,7 +184,7 @@ export default function Register() {
         )}
 
         <div className="auth-footer">
-          Already have an account? <Link to="/login">Sign In</Link>
+          Already have an account? <Link to="/store/login">Sign In</Link>
         </div>
       </div>
     </div>

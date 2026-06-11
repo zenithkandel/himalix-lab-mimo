@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { useAuth } from '../context/AuthContext';
+import { useAuth } from '../../context/AuthContext';
 import { Link, useNavigate } from 'react-router-dom';
 
 
@@ -193,7 +193,7 @@ export default function Admin() {
   const fetchProducts = useCallback(async () => {
     setLoading(true); setError('');
     try {
-      const res = await fetch(`/api/admin/products`, { headers: getAuthHeaders() });
+      const res = await fetch(`/api/store/admin/products`, { headers: getAuthHeaders() });
       const data = await res.json();
       if (!res.ok) throw new Error(data.message);
       setProducts(Array.isArray(data) ? data : data.products || []);
@@ -204,7 +204,7 @@ export default function Admin() {
   const fetchUsers = useCallback(async () => {
     setUsersLoading(true); setError('');
     try {
-      const res = await fetch(`/api/admin/users`, { headers: getAuthHeaders() });
+      const res = await fetch(`/api/store/admin/users`, { headers: getAuthHeaders() });
       const data = await res.json();
       if (!res.ok) throw new Error(data.message);
       setUsers(data);
@@ -215,7 +215,7 @@ export default function Admin() {
   const fetchCarts = useCallback(async () => {
     setCartsLoading(true); setError('');
     try {
-      const res = await fetch(`/api/admin/carts`, { headers: getAuthHeaders() });
+      const res = await fetch(`/api/store/admin/carts`, { headers: getAuthHeaders() });
       const data = await res.json();
       if (!res.ok) throw new Error(data.message);
       setCarts(data);
@@ -226,7 +226,7 @@ export default function Admin() {
   const fetchOrders = useCallback(async () => {
     setOrdersLoading(true); setError('');
     try {
-      const res = await fetch(`/api/admin/orders`, { headers: getAuthHeaders() });
+      const res = await fetch(`/api/store/admin/orders`, { headers: getAuthHeaders() });
       const data = await res.json();
       if (!res.ok) throw new Error(data.message);
       setOrders(data);
@@ -244,7 +244,7 @@ export default function Admin() {
 
   const fetchSettings = useCallback(async () => {
     try {
-      const res = await fetch(`/api/admin/settings`, { headers: getAuthHeaders() });
+      const res = await fetch(`/api/store/admin/settings`, { headers: getAuthHeaders() });
       const data = await res.json();
       if (res.ok) { setSettings(data); setSettingsForm(data); }
     } catch (err) { console.error(err); }
@@ -252,7 +252,7 @@ export default function Admin() {
 
   const fetchRawSettings = useCallback(async () => {
     try {
-      const res = await fetch(`/api/admin/settings/raw`, { headers: getAuthHeaders() });
+      const res = await fetch(`/api/store/admin/settings/raw`, { headers: getAuthHeaders() });
       const data = await res.json();
       if (res.ok) { setRawSettings(data); setRawSettingsEdits({}); }
     } catch (err) { console.error(err); }
@@ -261,7 +261,7 @@ export default function Admin() {
   const fetchAnalytics = useCallback(async () => {
     setAnalyticsLoading(true);
     try {
-      const res = await fetch(`/api/admin/analytics`, { headers: getAuthHeaders() });
+      const res = await fetch(`/api/store/admin/analytics`, { headers: getAuthHeaders() });
       const data = await res.json();
       if (res.ok) setAnalytics(data);
     } catch (err) { console.error(err); }
@@ -271,7 +271,7 @@ export default function Admin() {
   const fetchAllReviews = useCallback(async () => {
     setReviewsLoading(true); setError('');
     try {
-      const res = await fetch(`/api/admin/reviews`, { headers: getAuthHeaders() });
+      const res = await fetch(`/api/store/admin/reviews`, { headers: getAuthHeaders() });
       const data = await res.json();
       if (res.ok) setReviews(data);
     } catch (err) { console.error(err); }
@@ -282,7 +282,7 @@ export default function Admin() {
     if (!window.confirm('Are you sure you want to delete this review?')) return;
     setError('');
     try {
-      const res = await fetch(`/api/admin/reviews/${reviewId}`, { method: 'DELETE', headers: getAuthHeaders() });
+      const res = await fetch(`/api/store/admin/reviews/${reviewId}`, { method: 'DELETE', headers: getAuthHeaders() });
       if (!res.ok) {
         const data = await res.json();
         throw new Error(data.message || 'Failed to delete review');
@@ -294,7 +294,7 @@ export default function Admin() {
   const fetchTransactions = useCallback(async () => {
     setTransactionsLoading(true); setError('');
     try {
-      const res = await fetch(`/api/admin/wallet/transactions`, { headers: getAuthHeaders() });
+      const res = await fetch(`/api/store/admin/wallet/transactions`, { headers: getAuthHeaders() });
       const data = await res.json();
       if (res.ok) setTransactions(data);
     } catch (err) { console.error(err); }
@@ -304,7 +304,7 @@ export default function Admin() {
   const fetchSocialClaims = useCallback(async () => {
     setSocialClaimsLoading(true); setError('');
     try {
-      const res = await fetch(`/api/admin/social-claims`, { headers: getAuthHeaders() });
+      const res = await fetch(`/api/store/admin/social-claims`, { headers: getAuthHeaders() });
       const data = await res.json();
       if (res.ok) setSocialClaims(data);
     } catch (err) { console.error(err); }
@@ -314,7 +314,7 @@ export default function Admin() {
   const fetchReceivers = useCallback(async () => {
     setReceiversLoading(true);
     try {
-      const res = await fetch(`/api/admin/notification-receivers`, { headers: getAuthHeaders() });
+      const res = await fetch(`/api/store/admin/notification-receivers`, { headers: getAuthHeaders() });
       const data = await res.json();
       if (res.ok) setReceivers(data);
     } catch (err) { console.error(err); }
@@ -326,7 +326,7 @@ export default function Admin() {
     if (!newReceiver.email_address.trim()) return;
     setError('');
     try {
-      const res = await fetch(`/api/admin/notification-receivers`, {
+      const res = await fetch(`/api/store/admin/notification-receivers`, {
         method: 'POST',
         headers: getAuthHeaders(),
         body: JSON.stringify({
@@ -346,7 +346,7 @@ export default function Admin() {
   const handleToggleReceiverPref = async (id, field, currentValue) => {
     setError('');
     try {
-      const res = await fetch(`/api/admin/notification-receivers/${id}`, {
+      const res = await fetch(`/api/store/admin/notification-receivers/${id}`, {
         method: 'PUT',
         headers: getAuthHeaders(),
         body: JSON.stringify({ [field]: !currentValue })
@@ -363,7 +363,7 @@ export default function Admin() {
     if (!window.confirm('Delete this email receiver?')) return;
     setError('');
     try {
-      const res = await fetch(`/api/admin/notification-receivers/${id}`, { method: 'DELETE', headers: getAuthHeaders() });
+      const res = await fetch(`/api/store/admin/notification-receivers/${id}`, { method: 'DELETE', headers: getAuthHeaders() });
       if (!res.ok) {
         const d = await res.json();
         throw new Error(d.message || 'Failed to delete receiver');
@@ -411,7 +411,7 @@ export default function Admin() {
     setUploadingImage(true);
     setError('');
     try {
-      const res = await fetch(`/api/admin/upload-multiple`, {
+      const res = await fetch(`/api/store/admin/upload-multiple`, {
         method: 'POST', headers: { Authorization: `Bearer ${token}` }, body: fd,
       });
       const data = await res.json();
@@ -526,7 +526,7 @@ export default function Admin() {
         outsource_days: Number(formData.outsource_days || 0),
       };
       const isEdit = !!editingProduct;
-      const url = isEdit ? `/api/admin/products/${editingProduct.id}` : `/api/admin/products`;
+      const url = isEdit ? `/api/store/admin/products/${editingProduct.id}` : `/api/store/admin/products`;
       const res = await fetch(url, { method: isEdit ? 'PUT' : 'POST', headers: getAuthHeaders(), body: JSON.stringify(payload) });
       const data = await res.json();
       if (!res.ok) throw new Error(data.message);
@@ -539,7 +539,7 @@ export default function Admin() {
     if (!deleteProductTarget) return;
     setError('');
     try {
-      const res = await fetch(`/api/admin/products/${deleteProductTarget.id}`, { method: 'DELETE', headers: getAuthHeaders() });
+      const res = await fetch(`/api/store/admin/products/${deleteProductTarget.id}`, { method: 'DELETE', headers: getAuthHeaders() });
       const data = await res.json();
       if (!res.ok) throw new Error(data.message);
       setDeleteProductTarget(null); fetchProducts();
@@ -550,7 +550,7 @@ export default function Admin() {
     const qty = inlineStockEdits[productId];
     if (qty === undefined || qty === '') return;
     try {
-      const res = await fetch(`/api/admin/products/${productId}`, {
+      const res = await fetch(`/api/store/admin/products/${productId}`, {
         method: 'PUT', headers: getAuthHeaders(),
         body: JSON.stringify({ stock_quantity: Number(qty) }),
       });
@@ -582,7 +582,7 @@ export default function Admin() {
     setUserDetailOrders([]);
     setUserDetailOrdersLoading(true);
     try {
-      const res = await fetch(`/api/admin/users/${u.id}/orders`, { headers: getAuthHeaders() });
+      const res = await fetch(`/api/store/admin/users/${u.id}/orders`, { headers: getAuthHeaders() });
       const data = await res.json();
       if (res.ok) setUserDetailOrders(data);
     } catch (err) { console.error(err); }
@@ -607,7 +607,7 @@ export default function Admin() {
     }
     
     try {
-      const res = await fetch(`/api/admin/users/${userDetailTarget.id}/credit`, {
+      const res = await fetch(`/api/store/admin/users/${userDetailTarget.id}/credit`, {
         method: 'POST',
         headers: getAuthHeaders(),
         body: JSON.stringify({
@@ -636,7 +636,7 @@ export default function Admin() {
   const submitUserEdit = async (e) => {
     e.preventDefault(); setError('');
     try {
-      const res = await fetch(`/api/admin/users/${userDetailTarget.id}`, {
+      const res = await fetch(`/api/store/admin/users/${userDetailTarget.id}`, {
         method: 'PUT', headers: getAuthHeaders(),
         body: JSON.stringify({ email: userEditForm.email, role: userEditForm.role }),
       });
@@ -651,7 +651,7 @@ export default function Admin() {
     if (!newPassword || newPassword.length < 6) { setError('Password must be ≥ 6 characters'); return; }
     try {
       const userId = changingPasswordUser?.id || userDetailTarget?.id;
-      const res = await fetch(`/api/admin/users/${userId}/password`, {
+      const res = await fetch(`/api/store/admin/users/${userId}/password`, {
         method: 'PUT', headers: getAuthHeaders(), body: JSON.stringify({ password: newPassword }),
       });
       const data = await res.json();
@@ -663,7 +663,7 @@ export default function Admin() {
   const confirmDeleteUser = async () => {
     if (!deleteUserTarget) return; setError('');
     try {
-      const res = await fetch(`/api/admin/users/${deleteUserTarget.id}`, { method: 'DELETE', headers: getAuthHeaders() });
+      const res = await fetch(`/api/store/admin/users/${deleteUserTarget.id}`, { method: 'DELETE', headers: getAuthHeaders() });
       const data = await res.json();
       if (!res.ok) throw new Error(data.message);
       setDeleteUserTarget(null); fetchUsers();
@@ -679,7 +679,7 @@ export default function Admin() {
     setSavingOrderStatus(prev => ({ ...prev, [orderId]: true }));
     setError('');
     try {
-      const res = await fetch(`/api/admin/orders/${orderId}/status`, {
+      const res = await fetch(`/api/store/admin/orders/${orderId}/status`, {
         method: 'PUT', headers: getAuthHeaders(), body: JSON.stringify({ status, payment_status }),
       });
       if (!res.ok) { const d = await res.json(); throw new Error(d.message); }
@@ -691,7 +691,7 @@ export default function Admin() {
   const confirmDeleteOrder = async () => {
     if (!deleteOrderTarget) return; setError('');
     try {
-      const res = await fetch(`/api/admin/orders/${deleteOrderTarget.id}`, { method: 'DELETE', headers: getAuthHeaders() });
+      const res = await fetch(`/api/store/admin/orders/${deleteOrderTarget.id}`, { method: 'DELETE', headers: getAuthHeaders() });
       const data = await res.json();
       if (!res.ok) throw new Error(data.message);
       setDeleteOrderTarget(null); fetchOrders();
@@ -717,7 +717,7 @@ export default function Admin() {
   const handleSettingsSubmit = async (e) => {
     e.preventDefault(); setError(''); setSettingsSaved(false);
     try {
-      const res = await fetch(`/api/admin/settings`, {
+      const res = await fetch(`/api/store/admin/settings`, {
         method: 'PUT', headers: getAuthHeaders(), body: JSON.stringify(settingsForm),
       });
       const data = await res.json();
@@ -731,7 +731,7 @@ export default function Admin() {
   const saveRawSetting = async (key) => {
     const value = rawSettingsEdits[key] ?? rawSettings.find(r => r.key_name === key)?.key_value ?? '';
     try {
-      const res = await fetch(`/api/admin/settings/raw`, {
+      const res = await fetch(`/api/store/admin/settings/raw`, {
         method: 'POST', headers: getAuthHeaders(), body: JSON.stringify({ key_name: key, key_value: value }),
       });
       if (!res.ok) { const d = await res.json(); throw new Error(d.message); }
@@ -741,7 +741,7 @@ export default function Admin() {
 
   const deleteRawSetting = async (key) => {
     try {
-      const res = await fetch(`/api/admin/settings/raw/${encodeURIComponent(key)}`, { method: 'DELETE', headers: getAuthHeaders() });
+      const res = await fetch(`/api/store/admin/settings/raw/${encodeURIComponent(key)}`, { method: 'DELETE', headers: getAuthHeaders() });
       if (!res.ok) { const d = await res.json(); throw new Error(d.message); }
       fetchRawSettings();
     } catch (err) { setError(err.message); }
@@ -750,7 +750,7 @@ export default function Admin() {
   const addRawSetting = async () => {
     if (!newRawKey.trim()) return;
     try {
-      const res = await fetch(`/api/admin/settings/raw`, {
+      const res = await fetch(`/api/store/admin/settings/raw`, {
         method: 'POST', headers: getAuthHeaders(),
         body: JSON.stringify({ key_name: newRawKey.trim(), key_value: newRawValue }),
       });
@@ -873,10 +873,10 @@ export default function Admin() {
             <i className="fa-sharp-duotone fa-light fa-user-shield"></i>
             <span className="admin-sidebar-profile-email" title={user?.email}>{user?.email}</span>
           </div>
-          <Link to="/" className="admin-sidebar-storefront-btn" onClick={() => setSidebarOpen(false)}>
+          <Link to="/store" className="admin-sidebar-storefront-btn" onClick={() => setSidebarOpen(false)}>
             <i className="fa-sharp-duotone fa-light fa-store"></i> Visit Storefront
           </Link>
-          <button onClick={() => { logout(); navigate('/'); }} className="admin-sidebar-logout-btn">
+          <button onClick={() => { logout(); navigate('/store'); }} className="admin-sidebar-logout-btn">
             <i className="fa-sharp-duotone fa-light fa-right-from-bracket"></i> Logout
           </button>
         </div>
