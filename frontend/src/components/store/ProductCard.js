@@ -36,7 +36,7 @@ export default function ProductCard({ product }) {
 
   return (
     <div className="product-card">
-      <Link to={`/product/${id}`} className="product-card-link">
+      <Link to={`/store/product/${id}`} className="product-card-link">
         <div className="product-card-image">
           {image_url ? (
             <img src={image_url} alt={name} loading="lazy" />
