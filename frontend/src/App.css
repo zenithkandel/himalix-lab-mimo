@@ -1,3 +1,5 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Outfit:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap');
+
 /* ==========================================================================
    Himalix Labs Premium Design System
    ========================================================================== */
@@ -2611,12 +2613,17 @@ button {
     padding: 2rem 1.5rem;
   }
 }
-/* ============================================================
+
+
+
+/* Isolated Storefront CSS */
+.store-app {
+  /* ============================================================
    HIMALIX STORE - Handcrafted Premium Minimalist Light Theme
    Hand-polished light-mode dashboard styling system
    ============================================================ */
 
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Outfit:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap');
+
 
 .empty-state p {
   margin-bottom: 20px;
@@ -2675,14 +2682,14 @@ button {
   border-radius: 0 !important;
 }
 
-html {
+& {
   font-size: 16px;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   scroll-behavior: smooth;
 }
 
-body {
+& {
   font-family: 'Outfit', sans-serif;
   background-color: var(--bg-primary);
   color: var(--text-primary);
@@ -2692,7 +2699,7 @@ body {
 }
 
 /* --- Theme Variables --- */
-:root {
+.store-app {
   --bg-primary: #f8fafc;      /* Soft canvas off-white */
   --bg-card: #ffffff;         /* Pure white card containers */
   --bg-secondary: #f1f5f9;    /* Light grey hover backgrounds */
@@ -3352,7 +3359,7 @@ p {
   transform: scale(1.04);
 }
 
-.product-card-body {
+.product-card-& {
   padding: 20px;
   flex: 1;
   display: flex;
@@ -4578,7 +4585,7 @@ p {
   transform: rotate(90deg); /* Playful micro-rotation! */
 }
 
-.admin-modal-body {
+.admin-modal-& {
   padding: 28px;
   overflow-y: auto;
   flex-grow: 1;
@@ -5085,7 +5092,7 @@ p {
   gap: 16px;
 }
 
-.admin-content-body {
+.admin-content-& {
   padding: 40px;
   flex-grow: 1;
   max-width: 1400px;
@@ -5379,7 +5386,7 @@ p {
     gap: 16px;
   }
 
-  .admin-content-body {
+  .admin-content-& {
     padding: 24px;
   }
 }
@@ -5394,7 +5401,7 @@ p {
   .admin-content-header-actions {
     display: none; /* Hide status label on extra small screens */
   }
-  .admin-content-body {
+  .admin-content-& {
     padding: 16px;
   }
   .guide-step-card {
@@ -5750,3 +5757,5 @@ p {
 .recent-order-email { flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: var(--text-primary); }
 .recent-order-amount { font-family: var(--font-mono); font-weight: 700; flex-shrink: 0; }
 .cell-nowrap { white-space: nowrap; }
+
+}
