@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
-const pool = require('../config/db');
-const { authMiddleware } = require('../middleware/auth');
+const { pool } = require('../../config/db');
+const { authMiddleware } = require('../../middleware/auth');
 
 router.use(authMiddleware);
 
@@ -70,6 +70,7 @@ router.post('/referral', async (req, res) => {
     const referrerId = referrerRows[0].id;
 
     // Fetch referral bonus from settings
+    const [bonusRows] = await connection.query("SELECT key_value FROM settings WHERE key_name = 'referral_bonus_amount'");
     const bonusAmount = bonusRows.length > 0 ? parseFloat(bonusRows[0].key_value) : 5.00;
 
     // Update user: bind referred_by, add balance
@@ -138,6 +139,7 @@ router.post('/claim-social', async (req, res) => {
     }
 
     // Fetch social bonus amount from settings
+    const [bonusRows] = await connection.query("SELECT key_value FROM settings WHERE key_name = 'social_bonus_amount'");
     const bonusAmount = bonusRows.length > 0 ? parseFloat(bonusRows[0].key_value) : 5.00;
 
     // Log the claim

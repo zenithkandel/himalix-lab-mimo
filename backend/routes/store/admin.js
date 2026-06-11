@@ -1,8 +1,8 @@
 const express = require('express');
 const router = express.Router();
-const pool = require('../config/db');
-const { authMiddleware, adminMiddleware } = require('../middleware/auth');
-const { sendNotificationEmail } = require('../config/mail');
+const { pool } = require('../../config/db');
+const { authMiddleware, adminMiddleware } = require('../../middleware/auth');
+const { sendNotificationEmail } = require('../../config/mail');
 
 router.use(authMiddleware);
 router.use(adminMiddleware);
@@ -12,7 +12,7 @@ const path = require('path');
 const multer = require('multer');
 const bcrypt = require('bcryptjs');
 
-const uploadsDir = path.join(__dirname, '../uploads');
+const uploadsDir = path.join(__dirname, '../../uploads');
 if (!fs.existsSync(uploadsDir)) {
   fs.mkdirSync(uploadsDir, { recursive: true });
 }

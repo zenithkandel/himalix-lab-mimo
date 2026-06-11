@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
-const pool = require('../config/db');
-const { authMiddleware } = require('../middleware/auth');
+const { pool } = require('../../config/db');
+const { authMiddleware } = require('../../middleware/auth');
 
 // 1. Get Reviews for a Product
 router.get('/:product_id', async (req, res) => {
