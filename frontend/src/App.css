@@ -4577,6 +4577,12 @@ button {
   list-style: none;
   margin: 0;
   padding: 0;
+  position: sticky;
+  top: 0;
+}
+#root > div > div > aside > nav {
+  position: sticky;
+  top: 0;
 }
 .store-app .admin-sidebar-item {
   display: flex;
