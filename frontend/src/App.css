@@ -1,5 +1,7 @@
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Outfit:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap');
 
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Outfit:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap');
+
 /* ==========================================================================
    Himalix Labs Premium Design System
    ========================================================================== */
@@ -2617,10 +2619,6 @@ button {
 
 
 /* Isolated Storefront CSS */
-.store-app {
-  
-
-/* Scoped Storefront CSS */
 
 .store-app .empty-state p {
   margin-bottom: 20px;
@@ -2666,13 +2664,13 @@ button {
   padding: 0;
   border-radius: 0 !important;
 }
-.store-app & {
+.store-app {
   font-size: 16px;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   scroll-behavior: smooth;
 }
-.store-app & {
+.store-app {
   font-family: 'Outfit', sans-serif;
   background-color: var(--bg-primary);
   color: var(--text-primary);
@@ -2680,7 +2678,7 @@ button {
   min-height: 100vh;
   overflow-x: hidden;
 }
-.store-app .store-app {
+.store-app {
   --bg-primary: #f8fafc;      
   --bg-card: #ffffff;         
   --bg-secondary: #f1f5f9;    
@@ -3232,7 +3230,7 @@ button {
 .store-app .product-card:hover .product-card-image img {
   transform: scale(1.04);
 }
-.store-app .product-card-& {
+.store-app .product-card-body {
   padding: 20px;
   flex: 1;
   display: flex;
@@ -3367,13 +3365,13 @@ button {
   border-radius: 50% !important;
   animation: spin 0.8s infinite linear;
 }
-@keyframes spin {
-.store-app 0% { transform: rotate(0deg); }
-.store-app 100% { transform: rotate(360deg); }
 
 
-}
-.store-app .empty-state {
+@keyframes spin  {
+
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}.store-app .empty-state {
   text-align: center;
   padding: 48px 32px;
   background-color: var(--bg-card);
@@ -3743,13 +3741,13 @@ button {
   z-index: 1100;
   animation: slideIn 0.25s cubic-bezier(0.16, 1, 0.3, 1);
 }
-@keyframes slideIn {
-.store-app 0% { transform: translateX(120%); }
-.store-app 100% { transform: translateX(0); }
 
 
-}
-.store-app .toast {
+@keyframes slideIn  {
+
+  0% { transform: translateX(120%); }
+  100% { transform: translateX(0); }
+}.store-app .toast {
   padding: 14px 20px;
   background-color: var(--bg-card);
   border: 1px solid var(--border-dark);
@@ -4017,7 +4015,10 @@ button {
   font-weight: 700;
   text-decoration: underline;
 }
-@media (max-width: 1200px) {
+
+
+
+@media (max-width: 1200px)  {
 .store-app .product-detail-grid {
     gap: 32px;
   }
@@ -4027,7 +4028,9 @@ button {
 
 
 }
-@media (max-width: 1024px) {
+
+
+@media (max-width: 1024px)  {
 .store-app .store-layout {
     grid-template-columns: 1fr;
     gap: 24px;
@@ -4041,7 +4044,9 @@ button {
 
 
 }
-@media (max-width: 768px) {
+
+
+@media (max-width: 768px)  {
 .store-app .navbar-mobile-toggle {
     display: block;
   }
@@ -4083,7 +4088,9 @@ button {
 
 
 }
-@media (max-width: 480px) {
+
+
+@media (max-width: 480px)  {
 .store-app .page-title {
     font-size: 1.6rem;
   }
@@ -4204,13 +4211,13 @@ button {
   padding: 24px;
   animation: adminBackdropFade 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
-@keyframes adminBackdropFade {
-.store-app from { opacity: 0; }
-.store-app to { opacity: 1; }
 
 
-}
-.store-app .admin-modal {
+@keyframes adminBackdropFade  {
+
+  from { opacity: 0; }
+  to { opacity: 1; }
+}.store-app .admin-modal {
   background-color: var(--bg-card);
   border: 1px solid var(--border-dark);
   width: 100%;
@@ -4222,19 +4229,19 @@ button {
   position: relative;
   animation: adminModalScaleUp 0.35s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
-@keyframes adminModalScaleUp {
-.store-app from {
+
+
+@keyframes adminModalScaleUp  {
+
+  from {
     opacity: 0;
     transform: scale(0.96) translateY(12px);
   }
-.store-app to {
+  to {
     opacity: 1;
     transform: scale(1) translateY(0);
   }
-
-
-}
-.store-app .admin-modal-header {
+}.store-app .admin-modal-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -4265,7 +4272,7 @@ button {
   color: var(--text-primary);
   transform: rotate(90deg); 
 }
-.store-app .admin-modal-& {
+.store-app .admin-modal-body {
   padding: 28px;
   overflow-y: auto;
   flex-grow: 1;
@@ -4458,25 +4465,27 @@ button {
   background-color: #fcfcfc;
   animation: slideDownCart 0.25s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
-@keyframes slideDownCart {
-.store-app from {
+
+
+@keyframes slideDownCart  {
+
+  from {
     opacity: 0;
     transform: translateY(-8px);
   }
-.store-app to {
+  to {
     opacity: 1;
     transform: translateY(0);
   }
-
-
-}
-.store-app .order-details-grid {
+}.store-app .order-details-grid {
   display: grid;
   grid-template-columns: 1fr;
   gap: 24px;
   margin-bottom: 28px;
 }
-@media (min-width: 640px) {
+
+
+@media (min-width: 640px)  {
 .store-app .order-details-grid {
     grid-template-columns: 1fr 1fr;
   }
@@ -4704,7 +4713,7 @@ button {
   align-items: center;
   gap: 16px;
 }
-.store-app .admin-content-& {
+.store-app .admin-content-body {
   padding: 40px;
   flex-grow: 1;
   max-width: 1400px;
@@ -4784,7 +4793,9 @@ button {
   gap: 24px;
   margin-top: 12px;
 }
-@media (min-width: 1024px) {
+
+
+@media (min-width: 1024px)  {
 .store-app .settings-grid {
     grid-template-columns: repeat(2, 1fr);
   }
@@ -4931,7 +4942,9 @@ button {
   backdrop-filter: blur(4px);
   z-index: 99;
 }
-@media (max-width: 1024px) {
+
+
+@media (max-width: 1024px)  {
 .store-app .admin-sidebar-toggle {
     display: flex; 
   }
@@ -4951,13 +4964,15 @@ button {
     padding: 16px 24px;
     gap: 16px;
   }
-.store-app .admin-content-& {
+.store-app .admin-content-body {
     padding: 24px;
   }
 
 
 }
-@media (max-width: 768px) {
+
+
+@media (max-width: 768px)  {
 .store-app .admin-content-header {
     padding: 12px 16px;
   }
@@ -4967,7 +4982,7 @@ button {
 .store-app .admin-content-header-actions {
     display: none; 
   }
-.store-app .admin-content-& {
+.store-app .admin-content-body {
     padding: 16px;
   }
 .store-app .guide-step-card {
@@ -4989,7 +5004,9 @@ button {
 
 
 }
-@media (max-width: 600px) {
+
+
+@media (max-width: 600px)  {
 .store-app .admin-toolbar-row {
     flex-direction: column;
     align-items: stretch;
@@ -5273,5 +5290,3 @@ button {
 .store-app .recent-order-amount { font-family: var(--font-mono); font-weight: 700; flex-shrink: 0; }
 .store-app .cell-nowrap { white-space: nowrap; }
 
-
-}
