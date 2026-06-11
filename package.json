@@ -1,0 +1,11 @@
+{
+  "name": "himalix-unified-platform",
+  "version": "1.0.0",
+  "description": "Unified platform for Himalix Labs and Himalix Store",
+  "scripts": {
+    "dev": "concurrently \"npm run dev --prefix backend\" \"npm start --prefix frontend\""
+  },
+  "devDependencies": {
+    "concurrently": "^10.0.3"
+  }
+}
