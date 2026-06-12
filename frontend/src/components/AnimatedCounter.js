@@ -1,53 +1,51 @@
 import React, { useState, useEffect, useRef } from 'react';
 
-const AnimatedCounter = ({ end, suffix = '', duration = 2 }) => {
+/**
+ * AnimatedCounter — counts from 0 to `end` when scrolled into view.
+ *
+ * Props:
+ *   end      {number}  — target number
+ *   suffix   {string}  — appended after (e.g. '+', 'K', '%')
+ *   duration {number}  — animation duration in ms (default 1800)
+ */
+export default function AnimatedCounter({ end, suffix = '', duration = 1800 }) {
   const [count, setCount] = useState(0);
-  const [hasAnimated, setHasAnimated] = useState(false);
-  const ref = useRef(null);
+  const ref  = useRef(null);
+  const done = useRef(false);
 
   useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+
     const observer = new IntersectionObserver(
       ([entry]) => {
-        if (entry.isIntersecting && !hasAnimated) {
-          setHasAnimated(true);
+        if (entry.isIntersecting && !done.current) {
+          done.current = true;
+          const startTime = performance.now();
+
+          const tick = (now) => {
+            const elapsed  = now - startTime;
+            const progress = Math.min(elapsed / duration, 1);
+            // Ease-out cubic
+            const eased    = 1 - Math.pow(1 - progress, 3);
+            setCount(Math.round(eased * end));
+            if (progress < 1) requestAnimationFrame(tick);
+          };
+
+          requestAnimationFrame(tick);
+          observer.unobserve(el);
         }
       },
       { threshold: 0.3 }
     );
 
-    if (ref.current) observer.observe(ref.current);
+    observer.observe(el);
     return () => observer.disconnect();
-  }, [hasAnimated]);
-
-  useEffect(() => {
-    if (!hasAnimated) return;
-
-    const target = parseInt(end, 10);
-    const increment = target / (duration * 60);
-    let current = 0;
-
-    const timer = setInterval(() => {
-      current += increment;
-      if (current >= target) {
-        setCount(target);
-        clearInterval(timer);
-      } else {
-        setCount(Math.floor(current));
-      }
-    }, 1000 / 60);
-
-    return () => clearInterval(timer);
-  }, [hasAnimated, end, duration]);
-
-  const formatNumber = (num) => {
-    return num.toLocaleString('en-US');
-  };
+  }, [end, duration]);
 
   return (
-    <span className="animated-counter" ref={ref} style={{ fontFamily: "'JetBrains Mono', monospace" }}>
-      {formatNumber(count)}{suffix}
+    <span ref={ref}>
+      {count.toLocaleString()}{suffix}
     </span>
   );
-};
-
-export default AnimatedCounter;
+}

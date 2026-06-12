@@ -1,33 +1,56 @@
-import React from 'react';
-import { motion } from 'framer-motion';
+import React, { useEffect, useRef } from 'react';
 
-const ScrollReveal = ({ children, direction = 'up', delay = 0, duration = 0.6 }) => {
-  const variants = {
-    hidden: {
-      opacity: 0,
-      y: direction === 'up' ? 60 : direction === 'down' ? -60 : 0,
-      x: direction === 'left' ? 60 : direction === 'right' ? -60 : 0,
-      scale: direction === 'scale' ? 0.8 : 1,
-    },
-    visible: {
-      opacity: 1,
-      y: 0,
-      x: 0,
-      scale: 1,
-      transition: { duration, delay, ease: [0.25, 0.46, 0.45, 0.94] }
-    }
-  };
+/**
+ * ScrollReveal — wraps children and applies a CSS-based scroll reveal animation
+ * using the Intersection Observer API. No external library needed.
+ *
+ * Props:
+ *   delay   {number}  — CSS transition delay in ms (default: 0)
+ *   from    {string}  — 'bottom' | 'left' | 'right' (default: 'bottom')
+ *   distance {string} — CSS translate distance (default: '24px')
+ */
+export default function ScrollReveal({
+  children,
+  delay = 0,
+  from = 'bottom',
+  distance = '24px',
+  style = {},
+  className = '',
+}) {
+  const ref = useRef(null);
+
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+
+    const transforms = {
+      bottom: `translateY(${distance})`,
+      left:   `translateX(-${distance})`,
+      right:  `translateX(${distance})`,
+    };
+
+    el.style.opacity    = '0';
+    el.style.transform  = transforms[from] || transforms.bottom;
+    el.style.transition = `opacity 600ms ease ${delay}ms, transform 600ms ease ${delay}ms`;
+
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          el.style.opacity   = '1';
+          el.style.transform = 'none';
+          observer.unobserve(el);
+        }
+      },
+      { threshold: 0.1 }
+    );
+
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, [delay, from, distance]);
 
   return (
-    <motion.div
-      initial="hidden"
-      whileInView="visible"
-      viewport={{ once: true, margin: "-50px" }}
-      variants={variants}
-    >
+    <div ref={ref} className={className} style={style}>
       {children}
-    </motion.div>
+    </div>
   );
-};
-
-export default ScrollReveal;
+}

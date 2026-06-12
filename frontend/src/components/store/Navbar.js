@@ -2,105 +2,130 @@ import React, { useState } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { useCart } from '../../context/CartContext';
+import { useTheme } from '../../context/ThemeContext';
 
-export default function Navbar() {
-  const { user, logout, walletBalance } = useAuth();
-  const { cartCount } = useCart();
+export default function StoreNavbar() {
+  const { user, logout } = useAuth();
+  const { itemCount } = useCart();
+  const { theme, toggleTheme } = useTheme();
   const navigate = useNavigate();
   const location = useLocation();
   const [mobileOpen, setMobileOpen] = useState(false);
 
-  if (location.pathname.startsWith('/admin') || location.pathname.startsWith('/store/admin')) {
-    return null;
-  }
+  const isActive = (path) => location.pathname === path;
 
   const handleLogout = () => {
     logout();
-    setMobileOpen(false);
-    navigate('/store');
+    navigate('/signin');
   };
 
-  const closeMobile = () => setMobileOpen(false);
-
-  const isActive = (path) => location.pathname === path;
-
   return (
-    <nav className="navbar">
-      <div className="container">
-        <div className="navbar-brand">
-          <Link to="/store" className="nav-logo" onClick={closeMobile}>
-            <img src="/logo.png" alt="HIMALIX Logo" className="nav-logo-img" />
-            HIMALIX
+    <nav className="store-nav" aria-label="Store navigation">
+      <div className="store-nav__inner">
+        {/* Logo / Back to portfolio */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-4)' }}>
+          <Link to="/" className="store-nav__link store-nav__link--back" title="Back to Himalix Labs">
+            <i className="fa-light fa-sharp fa-arrow-left" />
+          </Link>
+          <Link to="/store" className="store-nav__logo">
+            HIMALIX <span style={{ color: 'var(--accent)', marginLeft: 4 }}>STORE</span>
           </Link>
         </div>
 
-        <button
-          className="navbar-mobile-toggle"
-          onClick={() => setMobileOpen(!mobileOpen)}
-          aria-label="Toggle menu"
-        >
-          {mobileOpen ? '✕' : '☰'}
-        </button>
-
-        <div className={`navbar-links${mobileOpen ? ' open' : ''}`}>
-          <Link to="/" className="nav-link" onClick={closeMobile}>
-            <i className="fa-sharp-duotone fa-light fa-arrow-left"></i>
-            Back to Home
+        {/* Desktop links */}
+        <div className="store-nav__links">
+          <Link
+            to="/store"
+            className={`store-nav__link${isActive('/store') ? ' store-nav__link--active' : ''}`}
+          >
+            <i className="fa-light fa-sharp fa-grid-2" /> Products
           </Link>
 
-          <Link to="/store" className={`nav-link ${isActive('/store') ? 'active' : ''}`} onClick={closeMobile}>
-            <i className="fa-sharp-duotone fa-light fa-store"></i>
-            Store
-          </Link>
-
-          <Link to="/store/cart" className={`nav-link ${isActive('/store/cart') ? 'active' : ''}`} onClick={closeMobile}>
-            <i className="fa-sharp-duotone fa-light fa-bag-shopping"></i>
-            Cart
-            {cartCount > 0 && <span className="nav-badge">{cartCount}</span>}
-          </Link>
-
-          {user ? (
+          {user && (
             <>
-              <span className="nav-link" style={{ cursor: 'default', color: 'var(--text-secondary)', fontFamily: 'var(--font-mono)', fontSize: '0.85rem', fontWeight: 600, display: 'inline-flex', alignItems: 'center', gap: '8px' }}>
-                <i className="fa-sharp-duotone fa-light fa-wallet" style={{ opacity: 0.8 }}></i>
-                रु {Number(walletBalance || 0).toFixed(2)}
-              </span>
-
-              <Link to="/store/profile" className={`nav-link ${isActive('/store/profile') ? 'active' : ''}`} onClick={closeMobile} style={{ display: 'inline-flex', alignItems: 'center' }}>
-                {user.avatar_url ? (
-                  <img src={user.avatar_url} alt="Avatar" style={{ width: '18px', height: '18px', objectFit: 'cover', marginRight: '6px' }} />
-                ) : (
-                  <i className="fa-sharp-duotone fa-light fa-user"></i>
+              <Link
+                to="/store/cart"
+                className={`store-nav__link${isActive('/store/cart') ? ' store-nav__link--active' : ''}`}
+                aria-label={`Cart — ${itemCount} items`}
+              >
+                <i className="fa-light fa-sharp fa-bag-shopping" />
+                {itemCount > 0 && (
+                  <span className="store-nav__badge">{itemCount}</span>
                 )}
-                Profile
+              </Link>
+
+              <Link
+                to="/store/profile"
+                className={`store-nav__link${isActive('/store/profile') ? ' store-nav__link--active' : ''}`}
+              >
+                <i className="fa-light fa-sharp fa-user" />
               </Link>
 
               {user.role === 'admin' && (
-                <Link to="/store/admin" className={`nav-link ${isActive('/store/admin') ? 'active' : ''}`} onClick={closeMobile}>
-                  <i className="fa-sharp-duotone fa-light fa-user-shield"></i>
-                  Admin
+                <Link
+                  to="/store/admin"
+                  className={`store-nav__link${location.pathname.startsWith('/store/admin') ? ' store-nav__link--active' : ''}`}
+                >
+                  <i className="fa-light fa-sharp fa-shield-halved" />
                 </Link>
               )}
 
-              <button onClick={handleLogout} className="nav-link nav-btn">
-                <i className="fa-sharp-duotone fa-light fa-right-from-bracket"></i>
-                Logout
+              <button className="store-nav__link" onClick={handleLogout} title="Sign out">
+                <i className="fa-light fa-sharp fa-right-from-bracket" />
+              </button>
+            </>
+          )}
+
+          {!user && (
+            <Link to="/signin" className="store-nav__link" style={{ color: 'var(--accent)', fontWeight: 600 }}>
+              <i className="fa-light fa-sharp fa-arrow-right-to-bracket" /> Sign In
+            </Link>
+          )}
+
+          <button className="store-nav__link" onClick={toggleTheme} aria-label="Toggle theme">
+            <i className={`fa-light fa-sharp fa-${theme === 'dark' ? 'sun' : 'moon'}`} />
+          </button>
+        </div>
+
+        {/* Mobile hamburger */}
+        <button
+          className="store-nav__hamburger"
+          onClick={() => setMobileOpen(o => !o)}
+          aria-label="Toggle menu"
+          aria-expanded={mobileOpen}
+        >
+          <span className="store-nav__hamburger-bar" />
+          <span className="store-nav__hamburger-bar" />
+          <span className="store-nav__hamburger-bar" />
+        </button>
+      </div>
+
+      {/* Mobile expanded links */}
+      {mobileOpen && (
+        <div className="store-nav__links store-nav__links--open">
+          <Link to="/store" className="store-nav__link" onClick={() => setMobileOpen(false)}>
+            <i className="fa-light fa-sharp fa-grid-2" /> Products
+          </Link>
+          {user ? (
+            <>
+              <Link to="/store/cart" className="store-nav__link" onClick={() => setMobileOpen(false)}>
+                <i className="fa-light fa-sharp fa-bag-shopping" /> Cart
+                {itemCount > 0 && <span className="store-nav__badge">{itemCount}</span>}
+              </Link>
+              <Link to="/store/profile" className="store-nav__link" onClick={() => setMobileOpen(false)}>
+                <i className="fa-light fa-sharp fa-user" /> Profile
+              </Link>
+              <button className="store-nav__link btn-danger" onClick={handleLogout}>
+                <i className="fa-light fa-sharp fa-right-from-bracket" /> Sign Out
               </button>
             </>
           ) : (
-            <>
-              <Link to="/store/login" className={`nav-link ${isActive('/store/login') ? 'active' : ''}`} onClick={closeMobile}>
-                <i className="fa-sharp-duotone fa-light fa-right-to-bracket"></i>
-                Login
-              </Link>
-              <Link to="/store/register" className={`nav-link ${isActive('/store/register') ? 'active' : ''}`} onClick={closeMobile}>
-                <i className="fa-sharp-duotone fa-light fa-user-plus"></i>
-                Register
-              </Link>
-            </>
+            <Link to="/signin" className="store-nav__link" onClick={() => setMobileOpen(false)}>
+              <i className="fa-light fa-sharp fa-arrow-right-to-bracket" /> Sign In
+            </Link>
           )}
         </div>
-      </div>
+      )}
     </nav>
   );
 }

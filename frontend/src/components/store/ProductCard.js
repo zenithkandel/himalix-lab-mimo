@@ -1,79 +1,107 @@
 import React from 'react';
-import { Link } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { useCart } from '../../context/CartContext';
+import { useAuth } from '../../context/AuthContext';
 
 export default function ProductCard({ product }) {
+  const navigate = useNavigate();
   const { addToCart } = useCart();
-  const { id, name, sku, price, stock_quantity, image_url, category, description, stock_type, outsource_days } = product;
+  const { user } = useAuth();
 
-  const getLowStockThreshold = () => {
-    try {
-      const stored = localStorage.getItem('himalix_settings');
-      if (stored) {
-        const parsed = JSON.parse(stored);
-        if (parsed && typeof parsed.lowStockThreshold === 'number') return parsed.lowStockThreshold;
-        if (parsed && typeof parsed.lowStockThreshold === 'string') return parseInt(parsed.lowStockThreshold, 10) || 5;
-      }
-    } catch (e) {}
-    return 5;
-  };
-  const threshold = getLowStockThreshold();
+  const {
+    id, name, description, price, original_price,
+    image_url, category, is_new, stock_quantity = 0
+  } = product;
 
-  const stockStatus =
-    stock_type === 'outsourced'
-      ? { label: `Outsourced (ETA: +${outsource_days || 0} days)`, className: 'badge-neutral', icon: 'fa-light fa-circle-notch' }
-      : stock_quantity === 0
-        ? { label: 'Available (On-Demand)', className: 'badge-info', icon: 'fa-light fa-circle-notch' }
-        : stock_quantity <= threshold
-          ? { label: 'Low Stock', className: 'badge-warning', icon: 'fa-circle-exclamation' }
-          : { label: 'In Stock', className: 'badge-success', icon: 'fa-circle-check' };
+  const isOutOfStock  = stock_quantity <= 0;
+  const isLowStock    = stock_quantity > 0 && stock_quantity <= 5;
+  const hasDiscount   = original_price && original_price > price;
+
+  const formatPrice = (n) =>
+    `Rs. ${Number(n).toLocaleString('en-NP')}`;
 
   const handleAddToCart = (e) => {
-    e.preventDefault();
     e.stopPropagation();
-    addToCart(product.id, 1);
+    if (isOutOfStock) return;
+    if (!user) { navigate('/signin'); return; }
+    addToCart(product, 1);
   };
 
   return (
-    <div className="product-card">
-      <Link to={`/store/product/${id}`} className="product-card-link">
-        <div className="product-card-image">
-          {image_url ? (
-            <img src={image_url} alt={name} loading="lazy" />
-          ) : (
-            <div className="product-card-placeholder">No Image</div>
-          )}
-        </div>
-
-        <div className="product-card-body">
-          {category && <span className="product-card-category">{category}</span>}
-          <h3 className="product-card-name">{name}</h3>
-          <p className="product-card-sku">{sku}</p>
-
-          <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', marginBottom: '12px' }}>
-            <span className={`badge ${stockStatus.className}`} style={{ marginBottom: 0 }}>
-              <i className={`fa-sharp-duotone fa-light ${stockStatus.icon}`}></i>
-              {stockStatus.label}
-            </span>
+    <article
+      className="product-card"
+      onClick={() => navigate(`/store/product/${id}`)}
+      role="button"
+      tabIndex={0}
+      onKeyDown={e => e.key === 'Enter' && navigate(`/store/product/${id}`)}
+      aria-label={`View ${name}`}
+    >
+      {/* Badges */}
+      <div className="product-card__badge">
+        {is_new && !isOutOfStock && (
+          <div className="product-card__badge-item product-card__badge-new">New</div>
+        )}
+        {isOutOfStock && (
+          <div className="product-card__badge-item product-card__badge-out">Out of Stock</div>
+        )}
+        {hasDiscount && !isOutOfStock && (
+          <div className="product-card__badge-item product-card__badge-sale">
+            {Math.round(((original_price - price) / original_price) * 100)}% OFF
           </div>
+        )}
+      </div>
 
-          {description && (
-            <p className="product-card-description">
-              {description.length > 80 ? description.substring(0, 80) + '...' : description}
-            </p>
+      {/* Image */}
+      <div className="product-card__img-wrap">
+        <img
+          className="product-card__img"
+          src={image_url || '/placeholder.png'}
+          alt={name}
+          loading="lazy"
+          onError={e => { e.target.src = '/placeholder.png'; }}
+        />
+      </div>
+
+      {/* Body */}
+      <div className="product-card__body">
+        {category && (
+          <span className="product-card__category">{category}</span>
+        )}
+        <h3 className="product-card__name">{name}</h3>
+        {description && (
+          <p className="product-card__desc">{description}</p>
+        )}
+        {isLowStock && (
+          <span style={{ fontSize: 'var(--text-xs)', color: 'var(--warning)', display: 'flex', alignItems: 'center', gap: 6 }}>
+            <i className="fa-light fa-sharp fa-circle-exclamation" />
+            Only {stock_quantity} left
+          </span>
+        )}
+      </div>
+
+      {/* Footer */}
+      <div className="product-card__footer">
+        <div className="product-card__price-wrap">
+          <span className={`product-card__price${hasDiscount ? ' product-card__price--sale' : ''}`}>
+            {formatPrice(price)}
+          </span>
+          {hasDiscount && (
+            <span className="product-card__price-original">
+              {formatPrice(original_price)}
+            </span>
           )}
-
-          <p className="product-card-price">रु {Number(price).toFixed(2)}</p>
         </div>
-      </Link>
 
-      <button
-        className="btn btn-primary product-card-btn"
-        onClick={handleAddToCart}
-      >
-        <i className="fa-sharp-duotone fa-light fa-cart-plus"></i>
-        {stock_quantity === 0 ? 'Pre-Order' : 'Add to Cart'}
-      </button>
-    </div>
+        <button
+          className={`product-card__add-btn${isOutOfStock ? ' product-card__add-btn--out' : ''}`}
+          onClick={handleAddToCart}
+          disabled={isOutOfStock}
+          aria-label={isOutOfStock ? 'Out of stock' : `Add ${name} to cart`}
+          title={isOutOfStock ? 'Out of stock' : 'Add to cart'}
+        >
+          <i className={`fa-light fa-sharp fa-${isOutOfStock ? 'ban' : 'plus'}`} />
+        </button>
+      </div>
+    </article>
   );
 }
