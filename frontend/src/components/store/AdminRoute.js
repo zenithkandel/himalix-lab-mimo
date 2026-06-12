@@ -3,10 +3,18 @@ import { Navigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 
 export default function AdminRoute({ children }) {
-  const { user } = useAuth();
+  const { user, loading } = useAuth();
+
+  if (loading) {
+    return (
+      <div className="loading-page">
+        <div className="spinner" role="status" aria-label="Loading" />
+      </div>
+    );
+  }
 
   if (!user || user.role !== 'admin') {
-    return <Navigate to="/store" replace />;
+    return <Navigate to="/" replace />;
   }
 
   return children;
