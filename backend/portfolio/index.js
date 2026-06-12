@@ -12,16 +12,28 @@ router.get('/', async (req, res) => {
       if (!content[row.section]) {
         content[row.section] = {};
       }
-      content[row.section][row.content_key] = row.content_value;
+      let val = row.content_value;
+      if (row.content_type === 'json' && typeof val === 'string') {
+        try { val = JSON.parse(val); } catch (e) {}
+      }
+      content[row.section][row.content_key] = val;
     });
 
     const [services] = await pool.query(
       'SELECT * FROM services WHERE is_active = TRUE ORDER BY display_order ASC'
     );
+    const parsedServices = services.map(s => ({
+      ...s,
+      features: typeof s.features === 'string' ? JSON.parse(s.features) : s.features
+    }));
 
     const [team] = await pool.query(
       'SELECT * FROM team_members WHERE is_active = TRUE ORDER BY display_order ASC'
     );
+    const parsedTeam = team.map(t => ({
+      ...t,
+      social_links: typeof t.social_links === 'string' ? JSON.parse(t.social_links) : t.social_links
+    }));
 
     const [testimonials] = await pool.query(
       'SELECT * FROM testimonials WHERE is_active = TRUE ORDER BY display_order ASC'
@@ -33,7 +45,7 @@ router.get('/', async (req, res) => {
       settings[row.setting_key] = row.setting_value;
     });
 
-    res.json({ content, services, team, testimonials, settings });
+    res.json({ content, services: parsedServices, team: parsedTeam, testimonials, settings });
   } catch (error) {
     console.error('Get content error:', error);
     res.status(500).json({ error: 'Server error' });
