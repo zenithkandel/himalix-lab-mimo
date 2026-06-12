@@ -1,7 +1,17 @@
+/* Import order matters: theme → reset → components */
+import './styles/theme.css';
+import './styles/reset.css';
+import './styles/navigation.css';
+import './styles/auth.css';
+import './styles/landing.css';
+import './styles/store.css';
+import './styles/cart.css';
+import './styles/profile.css';
+import './styles/admin.css';
+
 import React from 'react';
 import ReactDOM from 'react-dom/client';
 import App from './App';
-import './App.css';
 
 const root = ReactDOM.createRoot(document.getElementById('root'));
 root.render(

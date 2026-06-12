@@ -1,122 +1,118 @@
-import { createContext, useContext, useState, useMemo, useCallback } from 'react';
+import React, {
+  createContext, useContext, useState, useEffect, useCallback
+} from 'react';
+import { useAuth } from './AuthContext';
 
-const CartContext = createContext(null);
-
-function getAuthHeaders() {
-  const token = localStorage.getItem('token');
-  return {
-    'Content-Type': 'application/json',
-    Authorization: `Bearer ${token}`,
-  };
-}
+const CartContext = createContext();
 
 export function CartProvider({ children }) {
-  const [items, setItems] = useState([]);
+  const { user, authFetch } = useAuth();
+  const [items, setItems]   = useState([]);
   const [loading, setLoading] = useState(false);
 
+  const localKey = 'himalix-cart';
+
+  /* Load cart: server if logged in, localStorage if guest */
   const fetchCart = useCallback(async () => {
-    setLoading(true);
-    try {
-      const response = await fetch(`/api/store/cart`, {
-        headers: getAuthHeaders(),
-      });
-      const data = await response.json();
-      if (!response.ok) {
-        throw new Error(data.message || 'Failed to fetch cart');
-      }
-      setItems(data.items || data);
-    } catch (error) {
-      throw error;
-    } finally {
-      setLoading(false);
+    if (user) {
+      try {
+        setLoading(true);
+        const res  = await authFetch('/api/store/cart');
+        const data = await res.json();
+        if (data.success) setItems(data.cart || []);
+      } catch (e) { /* swallow */ }
+      finally { setLoading(false); }
+    } else {
+      try {
+        const saved = JSON.parse(localStorage.getItem(localKey) || '[]');
+        setItems(saved);
+      } catch { setItems([]); }
     }
-  }, []);
+  }, [user, authFetch]);
 
-  const addToCart = useCallback(async (productId, quantity = 1) => {
-    setLoading(true);
-    try {
-      const response = await fetch(`/api/store/cart/add`, {
+  useEffect(() => { fetchCart(); }, [fetchCart]);
+
+  /* Sync guest cart to localStorage */
+  useEffect(() => {
+    if (!user) localStorage.setItem(localKey, JSON.stringify(items));
+  }, [items, user]);
+
+  /* Add or increment */
+  const addToCart = useCallback(async (product, qty = 1) => {
+    if (user) {
+      await authFetch('/api/store/cart', {
         method: 'POST',
-        headers: getAuthHeaders(),
-        body: JSON.stringify({ productId, quantity }),
+        body: JSON.stringify({ product_id: product.id, quantity: qty })
       });
-      const data = await response.json();
-      if (!response.ok) {
-        throw new Error(data.message || 'Failed to add to cart');
-      }
-      await fetchCart();
-      return data;
-    } catch (error) {
-      throw error;
-    } finally {
-      setLoading(false);
+      fetchCart();
+    } else {
+      setItems(prev => {
+        const ex = prev.find(i => i.product_id === product.id);
+        if (ex) return prev.map(i =>
+          i.product_id === product.id
+            ? { ...i, quantity: i.quantity + qty }
+            : i
+        );
+        return [...prev, {
+          product_id: product.id,
+          quantity: qty,
+          product_name: product.name,
+          price: product.price,
+          image_url: product.image_url,
+        }];
+      });
     }
-  }, [fetchCart]);
+  }, [user, authFetch, fetchCart]);
 
-  const updateCartItem = useCallback(async (cartItemId, quantity) => {
-    setLoading(true);
-    try {
-      const response = await fetch(`/api/store/cart/update`, {
+  /* Update quantity */
+  const updateQty = useCallback(async (productId, qty) => {
+    if (qty < 1) return;
+    if (user) {
+      await authFetch(`/api/store/cart/${productId}`, {
         method: 'PUT',
-        headers: getAuthHeaders(),
-        body: JSON.stringify({ cartItemId, quantity }),
+        body: JSON.stringify({ quantity: qty })
       });
-      const data = await response.json();
-      if (!response.ok) {
-        throw new Error(data.message || 'Failed to update cart item');
-      }
-      await fetchCart();
-      return data;
-    } catch (error) {
-      throw error;
-    } finally {
-      setLoading(false);
+      fetchCart();
+    } else {
+      setItems(prev =>
+        prev.map(i => i.product_id === productId ? { ...i, quantity: qty } : i)
+      );
     }
-  }, [fetchCart]);
+  }, [user, authFetch, fetchCart]);
 
-  const removeFromCart = useCallback(async (cartItemId) => {
-    setLoading(true);
-    try {
-      const response = await fetch(`/api/store/cart/remove/${cartItemId}`, {
-        method: 'DELETE',
-        headers: getAuthHeaders(),
-      });
-      const data = await response.json();
-      if (!response.ok) {
-        throw new Error(data.message || 'Failed to remove from cart');
-      }
-      await fetchCart();
-      return data;
-    } catch (error) {
-      throw error;
-    } finally {
-      setLoading(false);
+  /* Remove item */
+  const removeItem = useCallback(async (productId) => {
+    if (user) {
+      await authFetch(`/api/store/cart/${productId}`, { method: 'DELETE' });
+      fetchCart();
+    } else {
+      setItems(prev => prev.filter(i => i.product_id !== productId));
     }
-  }, [fetchCart]);
+  }, [user, authFetch, fetchCart]);
 
-  const cartCount = useMemo(
-    () => items.reduce((sum, item) => sum + item.quantity, 0),
-    [items]
-  );
+  /* Clear cart */
+  const clearCart = useCallback(async () => {
+    if (user) {
+      await authFetch('/api/store/cart', { method: 'DELETE' });
+    }
+    setItems([]);
+  }, [user, authFetch]);
 
-  const cartTotal = useMemo(
-    () => items.reduce((sum, item) => sum + item.price * item.quantity, 0),
-    [items]
-  );
+  const itemCount   = items.reduce((sum, i) => sum + i.quantity, 0);
+  const totalAmount = items.reduce((sum, i) => sum + i.price * i.quantity, 0);
 
   return (
-    <CartContext.Provider
-      value={{ items, loading, fetchCart, addToCart, updateCartItem, removeFromCart, cartCount, cartTotal }}
-    >
+    <CartContext.Provider value={{
+      items, loading, itemCount, totalAmount,
+      addToCart, updateQty, removeItem, clearCart, fetchCart
+    }}>
       {children}
     </CartContext.Provider>
   );
 }
 
 export function useCart() {
-  const context = useContext(CartContext);
-  if (!context) {
-    throw new Error('useCart must be used within a CartProvider');
-  }
-  return context;
+  const ctx = useContext(CartContext);
+  if (!ctx) throw new Error('useCart must be used inside CartProvider');
+  return ctx;
 }

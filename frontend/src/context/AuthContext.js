@@ -1,150 +1,61 @@
-import { createContext, useContext, useState, useEffect } from 'react';
+import React, {
+  createContext, useContext, useState, useEffect, useCallback
+} from 'react';
 
-const AuthContext = createContext(null);
+const AuthContext = createContext();
 
 export function AuthProvider({ children }) {
-  const [user, setUser] = useState(null);
-  const [token, setToken] = useState(null);
-  const [walletBalance, setWalletBalance] = useState(0);
+  const [user, setUser]       = useState(null);
   const [loading, setLoading] = useState(true);
-  const [systemConfig, setSystemConfig] = useState(null);
+  const [token, setToken]     = useState(() => localStorage.getItem('himalix-token'));
 
-  const fetchWalletBalance = async (currentToken) => {
-    const activeToken = currentToken || token || localStorage.getItem('token');
-    if (!activeToken) return;
-    try {
-      const response = await fetch('/api/store/wallet/history', {
-        headers: {
-          'Authorization': `Bearer ${activeToken}`
-        }
-      });
-      const data = await response.json();
-      if (response.ok) {
-        setWalletBalance(data.walletBalance);
-        const savedUser = localStorage.getItem('user');
-        if (savedUser) {
-          const parsed = JSON.parse(savedUser);
-          parsed.wallet_balance = data.walletBalance;
-          localStorage.setItem('user', JSON.stringify(parsed));
-          setUser(parsed);
-        }
-      }
-    } catch (err) {
-      console.error('Failed to fetch wallet balance:', err);
-    }
-  };
-
-  const fetchSystemConfig = async () => {
-    try {
-      const response = await fetch(`/api/auth/config`);
-      const data = await response.json();
-      if (response.ok) {
-        setSystemConfig(data);
-        return data;
-      }
-    } catch (error) {
-      console.error('Failed to fetch system config:', error);
-    }
-    return null;
-  };
-
+  /* Verify token on mount */
   useEffect(() => {
-    const savedToken = localStorage.getItem('token');
-    const savedUser = localStorage.getItem('user');
-    if (savedToken && savedUser) {
-      setToken(savedToken);
-      setUser(JSON.parse(savedUser));
-      fetchWalletBalance(savedToken);
-    }
-    fetchSystemConfig();
-    setLoading(false);
+    if (!token) { setLoading(false); return; }
+    fetch('/api/auth/me', {
+      headers: { Authorization: `Bearer ${token}` }
+    })
+      .then(r => r.ok ? r.json() : Promise.reject())
+      .then(data => setUser(data.user))
+      .catch(() => { localStorage.removeItem('himalix-token'); setToken(null); })
+      .finally(() => setLoading(false));
+  }, [token]);
+
+  const login = useCallback((newToken, userData) => {
+    localStorage.setItem('himalix-token', newToken);
+    setToken(newToken);
+    setUser(userData);
   }, []);
 
-  const login = async (email, password) => {
-    try {
-      const response = await fetch(`/api/auth/login`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, password }),
-      });
-      const data = await response.json();
-      if (!response.ok) {
-        throw new Error(data.message || 'Login failed');
-      }
-      localStorage.setItem('token', data.token);
-      localStorage.setItem('user', JSON.stringify(data.user));
-      setToken(data.token);
-      setUser(data.user);
-      setWalletBalance(parseFloat(data.user.wallet_balance || 0));
-      return data;
-    } catch (error) {
-      throw error;
-    }
-  };
-
-  const register = async (email, password, referralCode) => {
-    try {
-      const response = await fetch(`/api/auth/register`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, password, referredByCode: referralCode }),
-      });
-      const data = await response.json();
-      if (!response.ok) {
-        throw new Error(data.message || 'Registration failed');
-      }
-      localStorage.setItem('token', data.token);
-      localStorage.setItem('user', JSON.stringify(data.user));
-      setToken(data.token);
-      setUser(data.user);
-      setWalletBalance(parseFloat(data.user.wallet_balance || 0));
-      return data;
-    } catch (error) {
-      throw error;
-    }
-  };
-
-  const loginWithGoogle = async (googleIdToken) => {
-    try {
-      const response = await fetch(`/api/auth/google`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ token: googleIdToken }),
-      });
-      const data = await response.json();
-      if (!response.ok) {
-        throw new Error(data.message || 'Google Login failed');
-      }
-      localStorage.setItem('token', data.token);
-      localStorage.setItem('user', JSON.stringify(data.user));
-      setToken(data.token);
-      setUser(data.user);
-      setWalletBalance(parseFloat(data.user.wallet_balance || 0));
-      return data;
-    } catch (error) {
-      throw error;
-    }
-  };
-
-  const logout = () => {
-    localStorage.removeItem('token');
-    localStorage.removeItem('user');
+  const logout = useCallback(() => {
+    localStorage.removeItem('himalix-token');
     setToken(null);
     setUser(null);
-    setWalletBalance(0);
-  };
+  }, []);
+
+  /* Helper: authenticated fetch */
+  const authFetch = useCallback((url, options = {}) => {
+    return fetch(url, {
+      ...options,
+      headers: {
+        'Content-Type': 'application/json',
+        ...(token ? { Authorization: `Bearer ${token}` } : {}),
+        ...options.headers,
+      }
+    });
+  }, [token]);
+
+  const isAdmin = user?.role === 'admin';
 
   return (
-    <AuthContext.Provider value={{ user, token, walletBalance, fetchWalletBalance, login, register, loginWithGoogle, logout, loading, systemConfig, fetchSystemConfig }}>
+    <AuthContext.Provider value={{ user, loading, token, login, logout, authFetch, isAdmin }}>
       {children}
     </AuthContext.Provider>
   );
 }
 
 export function useAuth() {
-  const context = useContext(AuthContext);
-  if (!context) {
-    throw new Error('useAuth must be used within an AuthProvider');
-  }
-  return context;
+  const ctx = useContext(AuthContext);
+  if (!ctx) throw new Error('useAuth must be used inside AuthProvider');
+  return ctx;
 }
