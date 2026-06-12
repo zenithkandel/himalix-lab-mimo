@@ -1,62 +1,103 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
-import { AuthProvider } from './context/AuthContext';
-import { ThemeProvider } from './context/ThemeContext';
-import { CartProvider } from './context/CartContext';
 
-import Navbar from './components/Navbar';
-import Landing from './pages/Landing';
-import Admin from './pages/Admin';
+/* Context providers */
+import { ThemeProvider }  from './context/ThemeContext';
+import { AuthProvider }   from './context/AuthContext';
+import { CartProvider }   from './context/CartContext';
 
-import StoreNavbar from './components/store/Navbar';
+/* Guards */
 import PrivateRoute from './components/store/PrivateRoute';
-import AdminRoute from './components/store/AdminRoute';
-import Storefront from './pages/store/Storefront';
+import AdminRoute   from './components/store/AdminRoute';
+
+/* Components */
+import LoadingScreen from './components/LoadingScreen';
+
+/* Pages — Portfolio */
+import Landing      from './pages/Landing';
+import PortfolioAdmin from './pages/Admin';
+
+/* Pages — Auth */
+import Signin from './pages/auth/Signin';
+import Signup from './pages/auth/Signup';
+
+/* Pages — Store */
+import Storefront    from './pages/store/Storefront';
 import ProductDetail from './pages/store/ProductDetail';
-import Cart from './pages/store/Cart';
-import Profile from './pages/store/Profile';
-import StoreAdmin from './pages/store/Admin';
-import StoreLogin from './pages/store/Login';
-import StoreRegister from './pages/store/Register';
-import StoreTerms from './pages/store/Terms';
-import StoreNotFound from './pages/store/NotFound';
+import Cart          from './pages/store/Cart';
+import Profile       from './pages/store/Profile';
+import StoreAdmin    from './pages/store/Admin';
+import Terms         from './pages/store/Terms';
+import NotFound      from './pages/store/NotFound';
 
-import './App.css';
+export default function App() {
+  const [appReady, setAppReady] = useState(false);
 
-function App() {
   return (
     <ThemeProvider>
-      <AuthProvider>
-        <CartProvider>
-          <Router>
-            <Routes>
-              {/* Labs Routes */}
-              <Route path="/" element={<><Navbar /><Landing /></>} />
-              <Route path="/admin/*" element={<Admin />} />
+      <Router>
+        <AuthProvider>
+          <CartProvider>
+            {!appReady && <LoadingScreen onDone={() => setAppReady(true)} />}
 
-              {/* Store Routes */}
-              <Route path="/store/*" element={
-                <div className="store-app">
-                  <StoreNavbar />
-                  <Routes>
-                    <Route index element={<Storefront />} />
-                    <Route path="login" element={<StoreLogin />} />
-                    <Route path="register" element={<StoreRegister />} />
-                    <Route path="terms" element={<StoreTerms />} />
-                    <Route path="product/:id" element={<ProductDetail />} />
-                    <Route path="cart" element={<PrivateRoute><Cart /></PrivateRoute>} />
-                    <Route path="profile" element={<PrivateRoute><Profile /></PrivateRoute>} />
-                    <Route path="admin" element={<AdminRoute><StoreAdmin /></AdminRoute>} />
-                    <Route path="*" element={<StoreNotFound />} />
-                  </Routes>
-                </div>
-              } />
-            </Routes>
-          </Router>
-        </CartProvider>
-      </AuthProvider>
+            <div style={{ visibility: appReady ? 'visible' : 'hidden' }}>
+              <Routes>
+                {/* ── Portfolio ── */}
+                <Route path="/"      element={<Landing />} />
+
+                {/* ── Auth (universal) ── */}
+                <Route path="/signin" element={<Signin />} />
+                <Route path="/signup" element={<Signup />} />
+
+                {/* ── Portfolio Admin ── */}
+                <Route
+                  path="/admin/*"
+                  element={
+                    <AdminRoute>
+                      <PortfolioAdmin />
+                    </AdminRoute>
+                  }
+                />
+
+                {/* ── Store ── */}
+                <Route path="/store"              element={<Storefront />} />
+                <Route path="/store/product/:id"  element={<ProductDetail />} />
+                <Route path="/store/terms"        element={<Terms />} />
+
+                <Route
+                  path="/store/cart"
+                  element={
+                    <PrivateRoute>
+                      <Cart />
+                    </PrivateRoute>
+                  }
+                />
+
+                <Route
+                  path="/store/profile"
+                  element={
+                    <PrivateRoute>
+                      <Profile />
+                    </PrivateRoute>
+                  }
+                />
+
+                <Route
+                  path="/store/admin/*"
+                  element={
+                    <AdminRoute>
+                      <StoreAdmin />
+                    </AdminRoute>
+                  }
+                />
+
+                {/* ── 404 ── */}
+                <Route path="*" element={<NotFound />} />
+              </Routes>
+            </div>
+          </CartProvider>
+        </AuthProvider>
+      </Router>
     </ThemeProvider>
   );
 }
-
-export default App;
