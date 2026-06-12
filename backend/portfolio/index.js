@@ -6,7 +6,7 @@ const router = express.Router();
 // GET / - Fetch all content for landing page
 router.get('/', async (req, res) => {
   try {
-    const [contentRows] = await pool.query('SELECT * FROM landing_content');
+    const [contentRows] = await pool.query('SELECT * FROM himalix_portfolio.landing_content');
     const content = {};
     contentRows.forEach(row => {
       if (!content[row.section]) {
@@ -20,7 +20,7 @@ router.get('/', async (req, res) => {
     });
 
     const [services] = await pool.query(
-      'SELECT * FROM services WHERE is_active = TRUE ORDER BY display_order ASC'
+      'SELECT * FROM himalix_portfolio.services WHERE is_active = TRUE ORDER BY display_order ASC'
     );
     const parsedServices = services.map(s => ({
       ...s,
@@ -28,7 +28,7 @@ router.get('/', async (req, res) => {
     }));
 
     const [team] = await pool.query(
-      'SELECT * FROM team_members WHERE is_active = TRUE ORDER BY display_order ASC'
+      'SELECT * FROM himalix_portfolio.team_members WHERE is_active = TRUE ORDER BY display_order ASC'
     );
     const parsedTeam = team.map(t => ({
       ...t,
@@ -36,10 +36,10 @@ router.get('/', async (req, res) => {
     }));
 
     const [testimonials] = await pool.query(
-      'SELECT * FROM testimonials WHERE is_active = TRUE ORDER BY display_order ASC'
+      'SELECT * FROM himalix_portfolio.testimonials WHERE is_active = TRUE ORDER BY display_order ASC'
     );
 
-    const [settingsRows] = await pool.query('SELECT * FROM labs_site_settings');
+    const [settingsRows] = await pool.query('SELECT * FROM himalix_portfolio.labs_site_settings');
     const settings = {};
     settingsRows.forEach(row => {
       settings[row.setting_key] = row.setting_value;
@@ -56,7 +56,7 @@ router.get('/', async (req, res) => {
 router.get('/section/:section', async (req, res) => {
   try {
     const [rows] = await pool.query(
-      'SELECT * FROM landing_content WHERE section = ?',
+      'SELECT * FROM himalix_portfolio.landing_content WHERE section = ?',
       [req.params.section]
     );
 
@@ -86,7 +86,7 @@ router.post('/contact', async (req, res) => {
     }
 
     await pool.query(
-      'INSERT INTO contact_messages (name, email, subject, message) VALUES (?, ?, ?, ?)',
+      'INSERT INTO himalix_portfolio.contact_messages (name, email, subject, message) VALUES (?, ?, ?, ?)',
       [name, email, subject || '', message]
     );
 

@@ -40,7 +40,7 @@ const upload = multer({
 // GET /content
 router.get('/content', async (req, res) => {
   try {
-    const [rows] = await pool.query('SELECT * FROM landing_content ORDER BY id ASC');
+    const [rows] = await pool.query('SELECT * FROM himalix_portfolio.landing_content ORDER BY id ASC');
     res.json(rows);
   } catch (error) {
     console.error('Get content error:', error);
@@ -57,7 +57,7 @@ router.put('/content/:id', async (req, res) => {
     }
 
     const [result] = await pool.query(
-      'UPDATE landing_content SET content_value = ? WHERE id = ?',
+      'UPDATE himalix_portfolio.landing_content SET content_value = ? WHERE id = ?',
       [JSON.stringify(content_value), req.params.id]
     );
 
@@ -65,7 +65,7 @@ router.put('/content/:id', async (req, res) => {
       return res.status(404).json({ error: 'Content not found' });
     }
 
-    const [rows] = await pool.query('SELECT * FROM landing_content WHERE id = ?', [req.params.id]);
+    const [rows] = await pool.query('SELECT * FROM himalix_portfolio.landing_content WHERE id = ?', [req.params.id]);
     res.json(rows[0]);
   } catch (error) {
     console.error('Update content error:', error);
@@ -83,7 +83,7 @@ router.put('/content/bulk', async (req, res) => {
 
     for (const update of updates) {
       await pool.query(
-        'UPDATE landing_content SET content_value = ? WHERE id = ?',
+        'UPDATE himalix_portfolio.landing_content SET content_value = ? WHERE id = ?',
         [JSON.stringify(update.content_value), update.id]
       );
     }
@@ -100,7 +100,7 @@ router.put('/content/bulk', async (req, res) => {
 // GET /services
 router.get('/services', async (req, res) => {
   try {
-    const [rows] = await pool.query('SELECT * FROM services ORDER BY display_order ASC');
+    const [rows] = await pool.query('SELECT * FROM himalix_portfolio.services ORDER BY display_order ASC');
     res.json(rows);
   } catch (error) {
     console.error('Get services error:', error);
@@ -118,12 +118,12 @@ router.post('/services', async (req, res) => {
     }
 
     const [result] = await pool.query(
-      `INSERT INTO services (title, subtitle, description, icon_class, features, link_url, display_order, is_active)
+      `INSERT INTO himalix_portfolio.services (title, subtitle, description, icon_class, features, link_url, display_order, is_active)
        VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
       [title, subtitle || '', description || '', icon_class || '', JSON.stringify(features || []), link_url || '#', display_order || 0, is_active !== false]
     );
 
-    const [rows] = await pool.query('SELECT * FROM services WHERE id = ?', [result.insertId]);
+    const [rows] = await pool.query('SELECT * FROM himalix_portfolio.services WHERE id = ?', [result.insertId]);
     res.status(201).json(rows[0]);
   } catch (error) {
     console.error('Create service error:', error);
@@ -137,7 +137,7 @@ router.put('/services/:id', async (req, res) => {
     const { title, subtitle, description, icon_class, features, link_url, display_order, is_active } = req.body;
 
     const [result] = await pool.query(
-      `UPDATE services SET title = ?, subtitle = ?, description = ?, icon_class = ?, features = ?, link_url = ?, display_order = ?, is_active = ?
+      `UPDATE himalix_portfolio.services SET title = ?, subtitle = ?, description = ?, icon_class = ?, features = ?, link_url = ?, display_order = ?, is_active = ?
        WHERE id = ?`,
       [title, subtitle || '', description || '', icon_class || '', JSON.stringify(features || []), link_url || '#', display_order || 0, is_active !== false, req.params.id]
     );
@@ -146,7 +146,7 @@ router.put('/services/:id', async (req, res) => {
       return res.status(404).json({ error: 'Service not found' });
     }
 
-    const [rows] = await pool.query('SELECT * FROM services WHERE id = ?', [req.params.id]);
+    const [rows] = await pool.query('SELECT * FROM himalix_portfolio.services WHERE id = ?', [req.params.id]);
     res.json(rows[0]);
   } catch (error) {
     console.error('Update service error:', error);
@@ -157,7 +157,7 @@ router.put('/services/:id', async (req, res) => {
 // DELETE /services/:id
 router.delete('/services/:id', async (req, res) => {
   try {
-    const [result] = await pool.query('DELETE FROM services WHERE id = ?', [req.params.id]);
+    const [result] = await pool.query('DELETE FROM himalix_portfolio.services WHERE id = ?', [req.params.id]);
     if (result.affectedRows === 0) {
       return res.status(404).json({ error: 'Service not found' });
     }
@@ -173,7 +173,7 @@ router.delete('/services/:id', async (req, res) => {
 // GET /team
 router.get('/team', async (req, res) => {
   try {
-    const [rows] = await pool.query('SELECT * FROM team_members ORDER BY display_order ASC');
+    const [rows] = await pool.query('SELECT * FROM himalix_portfolio.team_members ORDER BY display_order ASC');
     res.json(rows);
   } catch (error) {
     console.error('Get team error:', error);
@@ -191,12 +191,12 @@ router.post('/team', async (req, res) => {
     }
 
     const [result] = await pool.query(
-      `INSERT INTO team_members (name, role, bio, image_url, social_links, display_order, is_active)
+      `INSERT INTO himalix_portfolio.team_members (name, role, bio, image_url, social_links, display_order, is_active)
        VALUES (?, ?, ?, ?, ?, ?, ?)`,
       [name, role, bio || '', image_url || '', JSON.stringify(social_links || {}), display_order || 0, is_active !== false]
     );
 
-    const [rows] = await pool.query('SELECT * FROM team_members WHERE id = ?', [result.insertId]);
+    const [rows] = await pool.query('SELECT * FROM himalix_portfolio.team_members WHERE id = ?', [result.insertId]);
     res.status(201).json(rows[0]);
   } catch (error) {
     console.error('Create team member error:', error);
@@ -210,7 +210,7 @@ router.put('/team/:id', async (req, res) => {
     const { name, role, bio, image_url, social_links, display_order, is_active } = req.body;
 
     const [result] = await pool.query(
-      `UPDATE team_members SET name = ?, role = ?, bio = ?, image_url = ?, social_links = ?, display_order = ?, is_active = ?
+      `UPDATE himalix_portfolio.team_members SET name = ?, role = ?, bio = ?, image_url = ?, social_links = ?, display_order = ?, is_active = ?
        WHERE id = ?`,
       [name, role, bio || '', image_url || '', JSON.stringify(social_links || {}), display_order || 0, is_active !== false, req.params.id]
     );
@@ -219,7 +219,7 @@ router.put('/team/:id', async (req, res) => {
       return res.status(404).json({ error: 'Team member not found' });
     }
 
-    const [rows] = await pool.query('SELECT * FROM team_members WHERE id = ?', [req.params.id]);
+    const [rows] = await pool.query('SELECT * FROM himalix_portfolio.team_members WHERE id = ?', [req.params.id]);
     res.json(rows[0]);
   } catch (error) {
     console.error('Update team member error:', error);
@@ -230,7 +230,7 @@ router.put('/team/:id', async (req, res) => {
 // DELETE /team/:id
 router.delete('/team/:id', async (req, res) => {
   try {
-    const [result] = await pool.query('DELETE FROM team_members WHERE id = ?', [req.params.id]);
+    const [result] = await pool.query('DELETE FROM himalix_portfolio.team_members WHERE id = ?', [req.params.id]);
     if (result.affectedRows === 0) {
       return res.status(404).json({ error: 'Team member not found' });
     }
@@ -246,7 +246,7 @@ router.delete('/team/:id', async (req, res) => {
 // GET /testimonials
 router.get('/testimonials', async (req, res) => {
   try {
-    const [rows] = await pool.query('SELECT * FROM testimonials ORDER BY display_order ASC');
+    const [rows] = await pool.query('SELECT * FROM himalix_portfolio.testimonials ORDER BY display_order ASC');
     res.json(rows);
   } catch (error) {
     console.error('Get testimonials error:', error);
@@ -264,12 +264,12 @@ router.post('/testimonials', async (req, res) => {
     }
 
     const [result] = await pool.query(
-      `INSERT INTO testimonials (client_name, client_title, company, content, rating, image_url, is_active, display_order)
+      `INSERT INTO himalix_portfolio.testimonials (client_name, client_title, company, content, rating, image_url, is_active, display_order)
        VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
       [client_name, client_title || '', company || '', content, rating || 5, image_url || '', is_active !== false, display_order || 0]
     );
 
-    const [rows] = await pool.query('SELECT * FROM testimonials WHERE id = ?', [result.insertId]);
+    const [rows] = await pool.query('SELECT * FROM himalix_portfolio.testimonials WHERE id = ?', [result.insertId]);
     res.status(201).json(rows[0]);
   } catch (error) {
     console.error('Create testimonial error:', error);
@@ -283,7 +283,7 @@ router.put('/testimonials/:id', async (req, res) => {
     const { client_name, client_title, company, content, rating, image_url, is_active, display_order } = req.body;
 
     const [result] = await pool.query(
-      `UPDATE testimonials SET client_name = ?, client_title = ?, company = ?, content = ?, rating = ?, image_url = ?, is_active = ?, display_order = ?
+      `UPDATE himalix_portfolio.testimonials SET client_name = ?, client_title = ?, company = ?, content = ?, rating = ?, image_url = ?, is_active = ?, display_order = ?
        WHERE id = ?`,
       [client_name, client_title || '', company || '', content, rating || 5, image_url || '', is_active !== false, display_order || 0, req.params.id]
     );
@@ -292,7 +292,7 @@ router.put('/testimonials/:id', async (req, res) => {
       return res.status(404).json({ error: 'Testimonial not found' });
     }
 
-    const [rows] = await pool.query('SELECT * FROM testimonials WHERE id = ?', [req.params.id]);
+    const [rows] = await pool.query('SELECT * FROM himalix_portfolio.testimonials WHERE id = ?', [req.params.id]);
     res.json(rows[0]);
   } catch (error) {
     console.error('Update testimonial error:', error);
@@ -303,7 +303,7 @@ router.put('/testimonials/:id', async (req, res) => {
 // DELETE /testimonials/:id
 router.delete('/testimonials/:id', async (req, res) => {
   try {
-    const [result] = await pool.query('DELETE FROM testimonials WHERE id = ?', [req.params.id]);
+    const [result] = await pool.query('DELETE FROM himalix_portfolio.testimonials WHERE id = ?', [req.params.id]);
     if (result.affectedRows === 0) {
       return res.status(404).json({ error: 'Testimonial not found' });
     }
@@ -319,7 +319,7 @@ router.delete('/testimonials/:id', async (req, res) => {
 // GET /settings
 router.get('/settings', async (req, res) => {
   try {
-    const [rows] = await pool.query('SELECT * FROM labs_site_settings');
+    const [rows] = await pool.query('SELECT * FROM himalix_portfolio.labs_site_settings');
     res.json(rows);
   } catch (error) {
     console.error('Get settings error:', error);
@@ -336,7 +336,7 @@ router.put('/settings/:key', async (req, res) => {
     }
 
     const [result] = await pool.query(
-      'UPDATE labs_site_settings SET setting_value = ? WHERE setting_key = ?',
+      'UPDATE himalix_portfolio.labs_site_settings SET setting_value = ? WHERE setting_key = ?',
       [setting_value, req.params.key]
     );
 
@@ -344,7 +344,7 @@ router.put('/settings/:key', async (req, res) => {
       return res.status(404).json({ error: 'Setting not found' });
     }
 
-    const [rows] = await pool.query('SELECT * FROM labs_site_settings WHERE setting_key = ?', [req.params.key]);
+    const [rows] = await pool.query('SELECT * FROM himalix_portfolio.labs_site_settings WHERE setting_key = ?', [req.params.key]);
     res.json(rows[0]);
   } catch (error) {
     console.error('Update setting error:', error);
@@ -357,7 +357,7 @@ router.put('/settings/:key', async (req, res) => {
 // GET /messages
 router.get('/messages', async (req, res) => {
   try {
-    const [rows] = await pool.query('SELECT * FROM contact_messages ORDER BY created_at DESC');
+    const [rows] = await pool.query('SELECT * FROM himalix_portfolio.contact_messages ORDER BY created_at DESC');
     res.json(rows);
   } catch (error) {
     console.error('Get messages error:', error);
@@ -369,7 +369,7 @@ router.get('/messages', async (req, res) => {
 router.put('/messages/:id/read', async (req, res) => {
   try {
     const [result] = await pool.query(
-      'UPDATE contact_messages SET is_read = TRUE WHERE id = ?',
+      'UPDATE himalix_portfolio.contact_messages SET is_read = TRUE WHERE id = ?',
       [req.params.id]
     );
 
@@ -387,7 +387,7 @@ router.put('/messages/:id/read', async (req, res) => {
 // DELETE /messages/:id
 router.delete('/messages/:id', async (req, res) => {
   try {
-    const [result] = await pool.query('DELETE FROM contact_messages WHERE id = ?', [req.params.id]);
+    const [result] = await pool.query('DELETE FROM himalix_portfolio.contact_messages WHERE id = ?', [req.params.id]);
     if (result.affectedRows === 0) {
       return res.status(404).json({ error: 'Message not found' });
     }
@@ -418,11 +418,11 @@ router.post('/upload', upload.single('image'), (req, res) => {
 // GET /stats
 router.get('/stats', async (req, res) => {
   try {
-    const [services] = await pool.query('SELECT COUNT(*) as count FROM services');
-    const [team] = await pool.query('SELECT COUNT(*) as count FROM team_members');
-    const [testimonials] = await pool.query('SELECT COUNT(*) as count FROM testimonials');
-    const [messages] = await pool.query('SELECT COUNT(*) as count FROM contact_messages');
-    const [unread] = await pool.query('SELECT COUNT(*) as count FROM contact_messages WHERE is_read = FALSE');
+    const [services] = await pool.query('SELECT COUNT(*) as count FROM himalix_portfolio.services');
+    const [team] = await pool.query('SELECT COUNT(*) as count FROM himalix_portfolio.team_members');
+    const [testimonials] = await pool.query('SELECT COUNT(*) as count FROM himalix_portfolio.testimonials');
+    const [messages] = await pool.query('SELECT COUNT(*) as count FROM himalix_portfolio.contact_messages');
+    const [unread] = await pool.query('SELECT COUNT(*) as count FROM himalix_portfolio.contact_messages WHERE is_read = FALSE');
 
     res.json({
       total_services: services[0].count,

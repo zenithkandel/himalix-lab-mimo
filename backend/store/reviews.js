@@ -10,12 +10,12 @@ router.get('/:product_id', async (req, res) => {
     const [rows] = await pool.query(
       `SELECT r.id, r.rating, r.comment, r.created_at, u.email, u.avatar_url
        FROM reviews r
-       JOIN users u ON r.user_id = u.id
+       JOIN himalix_auth.users u ON r.user_id = u.id
        WHERE r.product_id = ?
        ORDER BY r.created_at DESC`,
       [productId]
     );
-    res.json(rows);
+    res.json({ reviews: rows });
   } catch (err) {
     console.error('Fetch reviews error:', err);
     res.status(500).json({ message: 'Server error fetching reviews' });
@@ -48,7 +48,7 @@ router.post('/:product_id', authMiddleware, async (req, res) => {
     const [insertedReview] = await pool.query(
       `SELECT r.id, r.rating, r.comment, r.created_at, u.email, u.avatar_url
        FROM reviews r
-       JOIN users u ON r.user_id = u.id
+       JOIN himalix_auth.users u ON r.user_id = u.id
        WHERE r.id = ?`,
       [result.insertId]
     );

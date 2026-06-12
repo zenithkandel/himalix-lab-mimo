@@ -70,7 +70,7 @@ router.get('/:id', optionalAuth, async (req, res) => {
     }
     const product = rows[0];
 
-    res.json(product);
+    res.json({ product, ...product });
   } catch (error) {
     console.error('Get product error:', error);
     res.status(500).json({ message: 'Internal server error' });

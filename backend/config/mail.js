@@ -3,7 +3,7 @@ const { pool } = require('./db');
 
 async function getMailTransporter() {
   const [rows] = await pool.query(
-    "SELECT key_name, key_value FROM settings WHERE key_name IN ('smtp_host', 'smtp_port', 'smtp_user', 'smtp_pass', 'smtp_secure')"
+    "SELECT key_name, key_value FROM himalix_store.settings WHERE key_name IN ('smtp_host', 'smtp_port', 'smtp_user', 'smtp_pass', 'smtp_secure')"
   );
 
   const config = {};
@@ -50,7 +50,7 @@ async function sendNotificationEmail(eventType, subject, htmlBody) {
     }
 
     const [receivers] = await pool.query(
-      `SELECT email_address FROM email_notification_receivers WHERE ${field} = 1`
+      `SELECT email_address FROM himalix_store.email_notification_receivers WHERE ${field} = 1`
     );
 
     if (receivers.length === 0) {
@@ -60,7 +60,7 @@ async function sendNotificationEmail(eventType, subject, htmlBody) {
 
     const recipientList = receivers.map(r => r.email_address).join(', ');
 
-    const [senderRows] = await pool.query("SELECT key_value FROM settings WHERE key_name = 'smtp_user'");
+    const [senderRows] = await pool.query("SELECT key_value FROM himalix_store.settings WHERE key_name = 'smtp_user'");
     const fromAddress = (senderRows.length > 0 && senderRows[0].key_value) || 'noreply@himalix.store';
 
     const mailOptions = {

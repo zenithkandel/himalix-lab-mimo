@@ -24,7 +24,7 @@ async function generateUniqueReferralCode() {
     for (let i = 0; i < 6; i++) {
       code += chars.charAt(Math.floor(Math.random() * chars.length));
     }
-    const [existing] = await pool.query('SELECT id FROM users WHERE referral_code = ?', [code]);
+    const [existing] = await pool.query('SELECT id FROM himalix_auth.users WHERE referral_code = ?', [code]);
     if (existing.length === 0) {
       isUnique = true;
     }
@@ -46,14 +46,14 @@ router.post('/register', authLimiter, async (req, res) => {
       return res.status(400).json({ message: 'Password must be at least 6 characters' });
     }
 
-    const [existing] = await connection.query('SELECT id FROM users WHERE email = ?', [email]);
+    const [existing] = await connection.query('SELECT id FROM himalix_auth.users WHERE email = ?', [email]);
     if (existing.length > 0) {
       return res.status(409).json({ message: 'Email already registered' });
     }
 
     let referredById = null;
     if (referredByCode) {
-      const [refUsers] = await connection.query('SELECT id FROM users WHERE referral_code = ?', [referredByCode]);
+      const [refUsers] = await connection.query('SELECT id FROM himalix_auth.users WHERE referral_code = ?', [referredByCode]);
       if (refUsers.length > 0) {
         referredById = refUsers[0].id;
       }
@@ -72,7 +72,7 @@ router.post('/register', authLimiter, async (req, res) => {
     const initialBalance = referredById ? bonusAmount : 0.00;
 
     const [result] = await connection.query(
-      'INSERT INTO users (email, password_hash, role, referral_code, referred_by, wallet_balance) VALUES (?, ?, ?, ?, ?, ?)',
+      'INSERT INTO himalix_auth.users (email, password_hash, role, referral_code, referred_by, wallet_balance) VALUES (?, ?, ?, ?, ?, ?)',
       [email, hashedPassword, role || 'user', myReferralCode, referredById, initialBalance]
     );
 
@@ -87,7 +87,7 @@ router.post('/register', authLimiter, async (req, res) => {
 
       // Add credit to the referrer
       await connection.query(
-        'UPDATE users SET wallet_balance = wallet_balance + ? WHERE id = ?',
+        'UPDATE himalix_auth.users SET wallet_balance = wallet_balance + ? WHERE id = ?',
         [bonusAmount, referredById]
       );
 
@@ -137,7 +137,7 @@ router.post('/login', authLimiter, async (req, res) => {
       return res.status(400).json({ message: 'Email and password are required' });
     }
 
-    const [rows] = await pool.query('SELECT * FROM users WHERE email = ?', [email]);
+    const [rows] = await pool.query('SELECT * FROM himalix_auth.users WHERE email = ?', [email]);
     if (rows.length === 0) {
       return res.status(401).json({ message: 'Invalid credentials' });
     }
@@ -237,30 +237,30 @@ router.post('/google', authLimiter, async (req, res) => {
     }
 
     let user;
-    const [byGoogleId] = await pool.query('SELECT * FROM users WHERE google_id = ?', [googleId]);
+    const [byGoogleId] = await pool.query('SELECT * FROM himalix_auth.users WHERE google_id = ?', [googleId]);
     if (byGoogleId.length > 0) {
       user = byGoogleId[0];
       if (!user.referral_code) {
         user.referral_code = await generateUniqueReferralCode();
-        await pool.query('UPDATE users SET referral_code = ? WHERE id = ?', [user.referral_code, user.id]);
+        await pool.query('UPDATE himalix_auth.users SET referral_code = ? WHERE id = ?', [user.referral_code, user.id]);
       }
-      await pool.query('UPDATE users SET avatar_url = ? WHERE id = ?', [avatarUrl || null, user.id]);
+      await pool.query('UPDATE himalix_auth.users SET avatar_url = ? WHERE id = ?', [avatarUrl || null, user.id]);
       user.avatar_url = avatarUrl;
     } else {
-      const [byEmail] = await pool.query('SELECT * FROM users WHERE email = ?', [email]);
+      const [byEmail] = await pool.query('SELECT * FROM himalix_auth.users WHERE email = ?', [email]);
       if (byEmail.length > 0) {
         user = byEmail[0];
         if (!user.referral_code) {
           user.referral_code = await generateUniqueReferralCode();
         }
-        await pool.query('UPDATE users SET google_id = ?, avatar_url = ?, referral_code = ? WHERE id = ?', [googleId, avatarUrl || null, user.referral_code, user.id]);
+        await pool.query('UPDATE himalix_auth.users SET google_id = ?, avatar_url = ?, referral_code = ? WHERE id = ?', [googleId, avatarUrl || null, user.referral_code, user.id]);
         user.google_id = googleId;
         user.avatar_url = avatarUrl;
         console.log(`Linked existing email account ${email} to Google ID ${googleId}`);
       } else {
         const myReferralCode = await generateUniqueReferralCode();
         const [insertResult] = await pool.query(
-          'INSERT INTO users (email, google_id, avatar_url, role, referral_code) VALUES (?, ?, ?, ?, ?)',
+          'INSERT INTO himalix_auth.users (email, google_id, avatar_url, role, referral_code) VALUES (?, ?, ?, ?, ?)',
           [email, googleId, avatarUrl || null, 'user', myReferralCode]
         );
         user = {
@@ -284,7 +284,7 @@ router.post('/google', authLimiter, async (req, res) => {
     }
 
     // Refresh user details to obtain correct wallet_balance
-    const [freshUsers] = await pool.query('SELECT * FROM users WHERE id = ?', [user.id]);
+    const [freshUsers] = await pool.query('SELECT * FROM himalix_auth.users WHERE id = ?', [user.id]);
     if (freshUsers.length > 0) {
       user = freshUsers[0];
     }
@@ -308,7 +308,7 @@ router.post('/google', authLimiter, async (req, res) => {
 // GET /me — Get current user (from labs, kept for backward compatibility)
 router.get('/me', authMiddleware, async (req, res) => {
   try {
-    const [users] = await pool.query('SELECT id, email, role, avatar_url, wallet_balance, referral_code FROM users WHERE id = ?', [req.user.id]);
+    const [users] = await pool.query('SELECT id, email, role, avatar_url, wallet_balance, referral_code FROM himalix_auth.users WHERE id = ?', [req.user.id]);
     if (users.length === 0) {
       return res.status(404).json({ message: 'User not found' });
     }

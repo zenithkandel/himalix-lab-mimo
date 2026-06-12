@@ -19,17 +19,17 @@ async function initializeDatabase() {
 
     // 1. Ensure users.password_hash is nullable (for Google-only users)
     try {
-      await connection.query('ALTER TABLE users MODIFY COLUMN password_hash VARCHAR(255) NULL');
+      await connection.query('ALTER TABLE himalix_auth.users MODIFY COLUMN password_hash VARCHAR(255) NULL');
     } catch (err) {
       // Column may already be nullable — ignore
     }
 
     // 2. Add google_id column if not exists
     try {
-      const [columns] = await connection.query("SHOW COLUMNS FROM users LIKE 'google_id'");
+      const [columns] = await connection.query("SHOW COLUMNS FROM himalix_auth.users LIKE 'google_id'");
       if (columns.length === 0) {
         await connection.query(`
-          ALTER TABLE users 
+          ALTER TABLE himalix_auth.users 
           ADD COLUMN google_id VARCHAR(255) NULL AFTER password_hash,
           ADD UNIQUE KEY uq_users_google_id (google_id)
         `);
@@ -41,10 +41,10 @@ async function initializeDatabase() {
 
     // 3. Add avatar_url column if not exists
     try {
-      const [columns] = await connection.query("SHOW COLUMNS FROM users LIKE 'avatar_url'");
+      const [columns] = await connection.query("SHOW COLUMNS FROM himalix_auth.users LIKE 'avatar_url'");
       if (columns.length === 0) {
         await connection.query(`
-          ALTER TABLE users 
+          ALTER TABLE himalix_auth.users 
           ADD COLUMN avatar_url VARCHAR(500) NULL AFTER google_id
         `);
         console.log('avatar_url column added to users table');
