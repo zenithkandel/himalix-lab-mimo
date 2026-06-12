@@ -211,7 +211,7 @@ export default function ProductDetail() {
 
                 <div className="product-detail__actions">
                   <button
-                    className="btn btn-primary btn-lg"
+                    className="btn product-detail__cta-massive"
                     onClick={handleAddToCart}
                     style={{ flex: 1 }}
                   >

@@ -241,13 +241,31 @@ export default function Cart() {
                   {addrField('addr-city', 'City / Municipality', 'city', 'e.g. Kathmandu')}
                   {addrField('addr-district', 'District', 'district', 'e.g. Kathmandu')}
                 </div>
-                <div className="checkout-address__row">
-                  {addrField('addr-lat', 'Latitude (optional)', 'lat', '27.7029', 'number')}
-                  {addrField('addr-lng', 'Longitude (optional)', 'lng', '85.3072', 'number')}
+                <div className="checkout-address__row" style={{ alignItems: 'flex-end' }}>
+                  {addrField('addr-lat', 'Latitude', 'lat', '27.7029', 'number')}
+                  {addrField('addr-lng', 'Longitude', 'lng', '85.3072', 'number')}
+                  <div className="form-group" style={{ flex: '0 0 auto' }}>
+                    <button 
+                      type="button" 
+                      className="btn btn-outline"
+                      onClick={() => {
+                        if (navigator.geolocation) {
+                          navigator.geolocation.getCurrentPosition(
+                            (pos) => setAddress(p => ({ ...p, lat: pos.coords.latitude.toFixed(6), lng: pos.coords.longitude.toFixed(6) })),
+                            (err) => alert('Could not fetch location: ' + err.message)
+                          );
+                        } else {
+                          alert('Geolocation is not supported by your browser.');
+                        }
+                      }}
+                    >
+                      <i className="fa-light fa-sharp fa-location-crosshairs" /> Auto-Locate
+                    </button>
+                  </div>
                 </div>
                 <p style={{ fontSize: 'var(--text-xs)', color: 'var(--text-3)' }}>
                   <i className="fa-light fa-sharp fa-circle-info" style={{ color: 'var(--accent)' }} />
-                  {' '}Providing coordinates enables accurate shipping cost calculation.
+                  {' '}Providing precise coordinates enables accurate shipping cost calculation.
                 </p>
               </div>
             </div>

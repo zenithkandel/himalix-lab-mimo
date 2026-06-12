@@ -527,6 +527,44 @@ table.admin-table tbody tr:hover td {
   background: var(--bg-1);
 }
 
+/* ── DRAG AND DROP ZONE ── */
+.drag-drop-zone {
+  position: relative;
+  border: 2px dashed var(--border-strong);
+  background: var(--bg-2);
+  padding: var(--space-8);
+  text-align: center;
+  transition: all var(--transition-fast);
+  cursor: pointer;
+}
+
+.drag-drop-zone:hover {
+  border-color: var(--accent);
+  background: var(--bg-3);
+}
+
+.drag-drop-zone input[type="file"] {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  opacity: 0;
+  cursor: pointer;
+  z-index: 10;
+}
+
+.drag-drop-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-3);
+  color: var(--text-2);
+}
+
+.drag-drop-content i {
+  color: var(--accent);
+}
+
 /* ── CMS SECTIONS (Portfolio admin) ── */
 .cms-section-list {
   display: flex;
