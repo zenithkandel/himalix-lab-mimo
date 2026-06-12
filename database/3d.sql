@@ -1,0 +1,12 @@
+-- ============================================================
+-- Himalix 3D Printing Schema (Placeholder)
+-- ============================================================
+
+-- CREATE TABLE IF NOT EXISTS printing_orders (
+--     id INT AUTO_INCREMENT PRIMARY KEY,
+--     user_id INT,
+--     file_url VARCHAR(500),
+--     material VARCHAR(100),
+--     status VARCHAR(50),
+--     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+-- );

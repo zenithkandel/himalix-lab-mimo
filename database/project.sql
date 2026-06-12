@@ -1,0 +1,13 @@
+-- ============================================================
+-- Himalix Projects Schema (Placeholder)
+-- ============================================================
+
+-- CREATE TABLE IF NOT EXISTS custom_projects (
+--     id INT AUTO_INCREMENT PRIMARY KEY,
+--     user_id INT,
+--     title VARCHAR(255),
+--     description TEXT,
+--     budget DECIMAL(10,2),
+--     status VARCHAR(50),
+--     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+-- );

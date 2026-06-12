@@ -1,0 +1,14 @@
+-- ============================================================
+-- Himalix Web Agency Schema (Placeholder)
+-- ============================================================
+
+-- CREATE TABLE IF NOT EXISTS web_inquiries (
+--     id INT AUTO_INCREMENT PRIMARY KEY,
+--     name VARCHAR(255),
+--     email VARCHAR(255),
+--     project_type VARCHAR(100),
+--     budget_range VARCHAR(50),
+--     requirements TEXT,
+--     status VARCHAR(50),
+--     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+-- );
