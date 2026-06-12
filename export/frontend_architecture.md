@@ -1,6 +1,6 @@
 # 💻 React Frontend Architecture & Design System
 
-This document details the client-side architecture of the Himalix Labs web platform, covering React state managers, contexts, component models, and styling tokens.
+This document details the client-side architecture of the Himalix Labs web platform, covering React state managers, contexts, component models, file-based CSS breakdown, and strict UX/UI guidelines.
 
 ---
 
@@ -50,7 +50,7 @@ Access is restricted using simple route guards located in `frontend/src/componen
 * **`PrivateRoute.js`:**
   - Checks if a valid `token` exists in the `AuthContext`.
   - If authenticated, renders the child component.
-  - If unauthenticated, redirects to `/store/login`.
+  - If unauthenticated, redirects to `/signin`.
 * **`AdminRoute.js`:**
   - Verifies `token` exists AND `user.role === 'admin'`.
   - If valid, grants entry.
@@ -58,93 +58,70 @@ Access is restricted using simple route guards located in `frontend/src/componen
 
 ---
 
-## 📐 Design Tokens & Custom CSS (`App.css`)
+## 🎨 Premium "Non-AI" UI Design Principles
 
-All styling is managed through a customized vanilla CSS system with a focus on dark mode and high-contrast styling.
+To maintain a bespoke, premium, and human-crafted visual style, the implementing agent must strictly follow these aesthetic parameters:
 
-### 🎨 Key CSS Color System (Variables):
+### 🚫 Design Restrictions (Anti-AI Templates)
+1. **NO Neon Blue/Purple/Green Gradients:** Avoid standard AI-generated code template styles (such as indigo-to-purple sweeps or neon green highlights).
+2. **NO Rounded Borders:** Enforce a strict zero-radius rule. Every container, input, button, and image must have sharp, clinical corners.
+3. **NO Decorative Excess:** Banish unnecessary shadows, complex background patterns, and floating cards. Use structure, spacing, and typographic hierarchy to define layouts.
 
-```css
-:root {
-  /* Common Palette */
-  --accent: #d4a017;            /* Primary Gold / Amber */
-  --accent-rgb: 212, 160, 23;
-  --accent-light: #f3c64f;
-  
-  /* Font Family Stacks */
-  --font-sans: 'Inter', system-ui, -apple-system, sans-serif;
-  --font-mono: 'JetBrains Mono', monospace;
-  --font-serif: 'Playfair Display', Georgia, serif;
-}
+### 🎨 Color Palette & Typography
+* **Flat Muted Tones:**
+  - **Dark Mode (Default):** Pitch black (`#0a0a0a`) background, deep charcoal (`#121212`, `#181818`) panels, off-white text, and razor-thin borders (`#262626`).
+  - **Light Mode:** Crisp paper white (`#ffffff`), soft grey (`#f8f9fa`) panels, charcoal text, and clean grey borders (`#e9ecef`).
+  - **Refined Gold Accent:** Refined amber/gold (`#d4a017` / `#b8960c`) used strictly for functional highlights (action buttons, badges, current navigation steps).
+* **Typography:**
+  - **UI/Body:** Clean Swiss-style sans-serif (`Inter`).
+  - **Prices, SKUs, and Tech Specs:** Fixed-width developer font (`JetBrains Mono`).
+  - **Headers/Display:** Editorial serif (`Playfair Display`).
 
-/* Light Theme Variables */
-[data-theme="light"] {
-  --bg-primary: #f8f9fa;
-  --bg-secondary: #ffffff;
-  --bg-card: #ffffff;
-  --text-primary: #121212;
-  --text-secondary: #495057;
-  --text-muted: #868e96;
-  --border: #e9ecef;
-  --shadow: 0 4px 20px rgba(0,0,0,0.05);
-}
+---
 
-/* Dark Theme Variables (Default) */
-[data-theme="dark"] {
-  --bg-primary: #0a0a0a;
-  --bg-secondary: #121212;
-  --bg-card: #181818;
-  --text-primary: #f8f9fa;
-  --text-secondary: #ced4da;
-  --text-muted: #6c757d;
-  --border: #262626;
-  --shadow: 0 8px 30px rgba(0,0,0,0.5);
-}
+## 🗂️ Stylesheet Architecture (CSS File Breakdown)
+
+Do **NOT** write all CSS rules in a single large `App.css` file. Separate them into modular stylesheets located in `frontend/src/styles/`:
+
+1. **`theme.css`:**
+   - Houses CSS custom variables, theme mappings (`[data-theme="light"]` vs `[data-theme="dark"]`), and typography imports.
+2. **`reset.css`:**
+   - Normalizes browser styles, sets global box-sizing rules, and enforces `border-radius: 0 !important;` globally.
+3. **`navigation.css`:**
+   - Layout rules for the portfolio navigation bar and e-commerce store navigation bar.
+4. **`landing.css`:**
+   - Styling for the portfolio homepage (Hero grid, Services, About, Team, and Testimonials panels).
+5. **`store.css`:**
+   - Styles for storefront product grids, technical spec sheets, cart tables, and user checkout containers.
+6. **`admin.css`:**
+   - Styling for the nested admin portal shell, sidebars, metrics cards, transaction logs, and data tables.
+
+---
+
+## 🏷️ Premium FontAwesome Integration & Icon Style
+
+The application uses a custom premium FontAwesome kit loaded in the document head:
+```html
+<script src="https://zenithkandel.com.np/fontawesome/zenith-icons.js"></script>
 ```
 
-### 📐 Structural Layout Rules:
-* **Zero border-radius:** Enforced globally for all elements (buttons, inputs, cards, tables, popups) with `border-radius: 0 !important;`.
-* **Micro-Animations:** Clean transition parameters on interactive properties:
-  `transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);`
+### ⚠️ Strict Icon Conventions:
+* All icons **MUST** use the custom **Light Sharp** font classes:
+  - Format: `fa-light fa-sharp fa-[icon-name]`
+  - *Example:* Use `<i className="fa-light fa-sharp fa-microchip" />` or `<i className="fa-light fa-sharp fa-cube" />`.
+  - **Do NOT** use standard free styles like `fa-solid` or `fa-regular` directly on rendering layouts.
 
 ---
 
-## ✨ Interactive Motion & Components
+## 🧠 UX Psychology & User Engagement Mechanics
 
-Interactive visual elements are built using custom wrapper components and `framer-motion`:
+The interface must be designed to minimize user friction while introducing high-engagement feedback loops:
 
-1. **`ScrollReveal.js`:**
-   - Detects when elements enter the viewport.
-   - Triggers vertical slide-in and fade animations.
-2. **`AnimatedCounter.js`:**
-   - Increments stat count numbers dynamically when scrolled into view.
-3. **`SmoothScroll.js`:**
-   - Custom scrolling physics overlay providing inertia scroll mechanics.
-4. **`InteractiveCanvas.js`:**
-   - Renders a background particle grid behind the hero card.
-5. **`LoadingScreen.js`:**
-   - Pre-loader console log intro animation.
-6. **`ImageUploadZone.js`:**
-   - Drag-and-drop file upload interface that calls the backend upload endpoint.
-
----
-
-## 📄 Key Pages Overview
-
-### 🏡 Portfolio module:
-* **`Landing.js`:**
-  - Hero banner, dynamic services grid, mission cards, co-founders profiles card list, testimonials carousel, and direct contact portal.
-* **`Admin.js` (Portfolio Manager):**
-  - CMS admin panel. Provides tabs to edit landing texts, manage services, team profiles, reviews, and read contact logs.
-
-### 🛍️ Store storefront module:
-* **`Storefront.js`:**
-  - Item list displaying item cards, category filters, text search, and sorting menus.
-* **`ProductDetail.js`:**
-  - Renders image galleries, technical specs tables, inventory stock indicators, and customer reviews.
-* **`Cart.js`:**
-  - Lists order item tables, supports cart editing, calculates taxes, maps delivery locations, and processes payments.
-* **`Profile.js`:**
-  - Tracks user metadata, logs virtual wallet transactions, applies referral codes, claims social credits, and lists past order sheets.
-* **`Admin.js` (Store Manager):**
-  - E-commerce manager dashboard. Includes stats cards, analytics charts, product tables, user profile editors, settings panels, and email receivers lists.
+1. **Snappy Micro-Interactions:**
+   - Hover states should feel responsive: lines expanding, buttons changing fill instantly (without sluggish transition curves), and interactive canvas lines tracking mouse movements.
+2. **Wallet Balance Visibility:**
+   - Render the virtual wallet balance (`रु X.XX`) prominently in the navigation headers, user profile cards, and checkout boxes. This encourages users to spend their store credit.
+3. **Instant Dopamine Rewards:**
+   - When a user follows social media or binds a referral code, trigger a success alert and instantly increment the balance counter (`+रु 5.00`) without requiring a page refresh.
+4. **Zero-Friction Checkout:**
+   - A single-page checkout form that automatically pre-fills user coordinates, estimates shipping fees on the fly based on latitude/longitude inputs, and processes transactions in a single click.

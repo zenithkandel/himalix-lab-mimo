@@ -1,14 +1,14 @@
 # Himalix Labs & Himalix Store — Unified Platform
 
-Welcome to the comprehensive technical blueprints for **Himalix Labs**, a Nepal-based online technology solutions company. This documentation provides a meticulous overview of the entire codebase, database design, API endpoints, frontend architecture, and refactoring plans. 
+Welcome to the comprehensive technical blueprints for **Himalix Labs**, a Nepal-based online technology solutions company. This documentation provides a meticulous overview of the entire database, API gateway, React frontend module structure, and styling architecture.
 
-These specifications are written in precise, granular detail to enable any AI agent or engineer to reconstruct the entire platform, its features, and services without introducing regressions or breaking existing behaviors.
+These specifications are written in precise detail to enable any AI agent or engineer to construct the entire platform, its features, and services **from scratch in a clean, empty workspace** without breaking any core mechanics.
 
 ---
 
 ## 📖 Project Overview
 
-**Himalix Labs** is a Nepal-based online solution provider that delivers cost-effective services. The company's leadership consists of **Sakshyam Upadhyaya** (Founder & CEO), **Zenith Kandel** (Co-Founder), and **Sakshyam Bastakoti** (Co-Founder). 
+**Himalix Labs** is a Nepal-based online solution provider that delivers cost-effective services. The company's leadership consists of **Sakshyam Upadhyaya** (Founder & CEO), **Zenith Kandel** (Co-Founder), and **Sakshyam Bastakoti** (Co-Founder).
 
 The platform addresses two key scarcity gaps in the Nepalese market:
 1. **Scarcity of robotics and hardware components** (processors, sensors, modules, ICs, development boards, etc.).
@@ -28,49 +28,65 @@ The platform is designed as a lightweight, robust full-stack JavaScript applicat
 
 | Layer | Technology | Key Details |
 |---|---|---|
-| **Frontend Core** | React 18 | Single Page Application (SPA) using Create React App configuration. |
+| **Frontend Core** | React 18 | Single Page Application (SPA) using Create React App or Vite configuration. |
 | **Routing** | React Router v6 | Client-side routing with private/admin route protection. |
-| **Styling** | Vanilla CSS | Completely customized styling located in `App.css` (zero border-radius globally enforced, modular CSS classes, and dark/light themes). |
+| **Styling** | Modular Vanilla CSS | Completely customized styling broken down into separate files (zero border-radius globally enforced, minimal premium design elements, and dark/light themes). |
 | **Backend API** | Node.js + Express 4 | RESTful API backend handling business logic directly in routes (controllers/models structure omitted for ease of modular deployment). |
 | **Database** | MySQL 8.0+ / MariaDB | Relational schema with transactional integrity (InnoDB engine) and foreign key relationships. |
 | **Database Client** | `mysql2/promise` | Connection pooling with async/await support. |
-| **Authentication** | JSON Web Tokens (JWT) + Google OAuth | Cryptographically signed tokens (`jsonwebtoken`) and Google auth verification library (`google-auth-library`). |
+| **Authentication** | JWT + Google OAuth | Cryptographically signed tokens (`jsonwebtoken`) and Google auth verification library (`google-auth-library`). |
 | **Notifications** | SMTP + Nodemailer | Automated emails triggered on user signup, order placements, and low inventory stock levels. |
 | **File Uploads** | Multer | Multipart form-data parser handling localized file storage in `/uploads`. |
 | **Security** | Helmet + CORS | Content Security Policy protection, cross-origin resource sharing, and Express rate-limit configurations. |
 
 ---
 
+## 🎨 Design Theme: "Minimal Premium Non-AI"
+
+The UI/UX must avoid generic AI-generated code template styles (such as neon blue/purple gradients or rounded floating cards) in favor of a clean, premium, and human-crafted visual style:
+
+1. **Sharp Edges:** Global zero border-radius is strictly enforced (`border-radius: 0 !important`). Every element (buttons, forms, images, cards) must have crisp, sharp corners.
+2. **No Blue/Purple Gradients:** Use a solid, flat, and muted color palette. Dark mode defaults to deep charcoal and pitch black. Light mode uses soft paper whites and cool greys. Gold/amber (`#d4a017`) is used sparingly for accents.
+3. **Typographic Grid:** Align layouts on a geometric, print-like grid.
+4. **Premium Icons:** Loads FontAwesome Premium via:
+   `<script src="https://zenithkandel.com.np/fontawesome/zenith-icons.js"></script>`
+   All icons **MUST** use the custom Light Sharp style: `fa-light fa-sharp fa-[icon-name]`.
+5. **Psychologically Engaging UX:** Emphasizes wallet balance indicators, instant credit updates, and single-page checkouts to reduce friction.
+
+---
+
 ## 📁 File Structure Refactoring
 
-The current codebase is in a partially jumbled merged state. The target folder structure below organizes components into clean, separated sub-modules for each service, making it highly modular and extensible.
+The folder structure below organizes components into clean, separated sub-modules for each service, making it highly modular and extensible.
 
 ```text
 himalix-labs/
 ├── auth/
 │   └── [universal auth files, Google OAuth, token validation helpers]
 ├── frontend/
-│   ├── portfolio/
-│   │   └── [landing page views, components, hooks, assets]
-│   ├── store/
-│   │   └── [ecommerce catalog, details, cart, profile views]
-│   ├── 3d/
-│   │   └── [3D print file upload, pricing preview, STL renderer]
-│   ├── web/
-│   │   └── [web development specs form, portfolio showcase]
-│   └── project/
-│       └── [premade projects catalog, customized custom order sheets]
+│   ├── src/
+│   │   ├── styles/               <-- Modular CSS files split
+│   │   │   ├── theme.css         <-- Theme tokens & light/dark modes
+│   │   │   ├── reset.css         <-- Reset defaults & sharp corners override
+│   │   │   ├── navigation.css    <-- Portfolio & Store navbars
+│   │   │   ├── landing.css       <-- General landing content styles
+│   │   │   ├── store.css         <-- E-commerce templates
+│   │   │   └── admin.css         <-- Nested Admin layouts
+│   │   └── pages/
+│   │       ├── auth/             <-- Universal signup / signin pages
+│   │       ├── portfolio/
+│   │       ├── store/
+│   │       ├── 3d/
+│   │       ├── web/
+│   │       └── project/
 ├── backend/
+│   ├── config/
+│   ├── uploads/
 │   ├── portfolio/
-│   │   └── [general info CMS, testimonials, contact message routes]
 │   ├── store/
-│   │   └── [products catalog, shopping cart, order checkout, wallet ledgers]
 │   ├── 3d/
-│   │   └── [3D pricing engine, file storage, printing order logs]
 │   ├── web/
-│   │   └── [web agency client order details, quotes, timeline hooks]
 │   └── project/
-│       └── [project ordering endpoints, custom specs submissions]
 ├── database/
 │   ├── portfolio.sql
 │   ├── store.sql
@@ -79,59 +95,35 @@ himalix-labs/
 │   └── project.sql
 └── admin/
     ├── main/
-    │   ├── frontend/  <-- Admin portal shell & layout switcher
-    │   └── backend/   <-- Global admin statistics, user management
     ├── portfolio/
-    │   ├── frontend/
-    │   └── backend/
     ├── store/
-    │   ├── frontend/
-    │   └── backend/
     ├── 3d/
-    │   ├── frontend/
-    │   └── backend/
     ├── web/
-    │   ├── frontend/
-    │   └── backend/
     └── project/
-        ├── frontend/
-        └── backend/
 ```
 
 ---
 
 ## 🔒 Universal Authentication & Session Consistency
 
-The authentication module is designed to be shared uniformly across all sub-modules (portfolio, store, 3D, web, and projects).
+The authentication module is shared uniformly across all sub-modules:
 
-### Core Requirements:
 1. **Unified Sign-in & Sign-up:**
    - Universal signup is hosted at `/signup`.
    - Universal signin is hosted at `/signin`.
 2. **Session Persistence:**
-   - Authenticated JWT credentials are saved in localStorage (under key `token` and `user`) or secure HttpOnly cookies.
-   - Session context remains consistent: once logged in, switching to `/store`, `/3d`, or `/admin` recognizes the active user context without re-authentication.
-3. **Dual Login Provider:**
-   - **Local Accounts:** Secure email and password verification (salted and hashed via `bcryptjs`).
-   - **Google Sign-in:** Verified server-side via Google's OAuth2 API, mapping Google profile details (avatar, email, unique Google ID) into the single unified `users` database table.
+   - JWT tokens are saved in `localStorage` or cookies, remaining consistent across the entire origin. Once logged in, switching modules detects the active session without re-authentication.
+3. **Providers:**
+   - **Local Accounts:** Secure email/password login (hashed via `bcryptjs`).
+   - **Google Sign-in:** Verified server-side via Google's OAuth2 API, mapping credentials into the single `users` database table.
 
 ---
 
 ## 👑 The Unified Admin Panel (`/admin`)
 
-The administration interface is unified into a single control center with delegated sub-module views.
-
-### Structural Flow:
-1. **Primary Shell (`/admin`):**
-   - Renders a master navigation sidebar or bar allowing choice between all domains: `Portfolio CMS`, `Himalix Store`, `Himalix 3D`, `Himalix Web`, and `Himalix Projects`.
-   - Restricts access via role-checking route guards: only accounts with `role = 'admin'` in the unified `users` table can enter.
-2. **Sub-Module Switcher:**
-   - Selecting a domain dynamically swaps out the secondary navigation dashboard shell and routes:
-     - `/admin/portfolio`: Edit landing hero section, services list, testimonials, team list, and read contact messages.
-     - `/admin/store`: Perform full Product CRUD, audit active shopping carts, review order sheets and dispatch updates, manually deposit wallet credits, and modify shop variables.
-     - `/admin/3d`: View custom 3D printing orders, download STL model files, compute quotes, and update printer task lines.
-     - `/admin/web`: Review customer site specifications, send price estimations, and update project milestone progress.
-     - `/admin/project`: Oversee premade project stock levels and process custom engineering applications.
+The administration interface is unified into a single control center:
+1. **Primary Shell (`/admin`):** Renders a master navigation sidebar allowing administrators to select between `General CMS`, `E-Commerce Store`, `3D Printing`, `Web Projects`, and `Robotics Projects`.
+2. **Sub-Module Switcher:** Selecting a domain dynamically loads the matching dashboard sub-route (e.g. `/admin/portfolio`, `/admin/store`, `/admin/3d`, etc.), updating the main viewport layout.
 
 ---
 
