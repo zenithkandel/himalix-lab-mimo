@@ -73,7 +73,7 @@ export default function Landing() {
             Kathmandu, Nepal
           </div>
           <h1 id="hero-title" className="hero__title">
-            {hero.title_before || 'Nepal's Premier'}{' '}
+            {hero.title_before || "Nepal's Premier"}{' '}
             <em>{hero.title_em || 'Technology'}</em>
             <br />{hero.title_after || 'Solutions Provider'}
           </h1>
@@ -154,8 +154,8 @@ export default function Landing() {
                 <div className="section__eyebrow">
                   <i className="fa-light fa-sharp fa-building" /> About Himalix Labs
                 </div>
-                <h2 id="about-title" className="section__title">{about.title || 'Built for Nepal\'s tech future.'}</h2>
-                <p className="about__desc">{about.description || 'Himalix Labs is a Kathmandu-based technology company delivering quality electronics, 3D printing services, web solutions, and custom software projects.'}</p>
+                <h2 id="about-title" className="section__title">{about.title || "Built for Nepal's tech future."}</h2>
+                <p className="about__desc">{about.description || "Himalix Labs is a Kathmandu-based technology company delivering quality electronics, 3D printing services, web solutions, and custom software projects."}</p>
                 <div className="about__pillars">
                   {(about.pillars || defaultPillars).map((p, i) => (
                     <div key={i} className="about__pillar">
