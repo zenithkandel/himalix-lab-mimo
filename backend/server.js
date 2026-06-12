@@ -24,6 +24,11 @@ app.use('/api/auth', require('./auth'));
 app.use('/api/content', require('./portfolio'));
 app.use('/api/admin', require('./admin/portfolio'));
 
+// Service Routes
+app.use('/api/3d', require('./3d'));
+app.use('/api/web', require('./web'));
+app.use('/api/project', require('./project'));
+
 // Store Routes
 app.use('/api/store/products', require('./store/products'));
 app.use('/api/store/cart', require('./store/cart'));

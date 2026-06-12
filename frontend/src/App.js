@@ -21,6 +21,11 @@ import PortfolioAdmin from './admin/portfolio/Admin';
 import Signin from './auth/Signin';
 import Signup from './auth/Signup';
 
+/* Pages — 3D / Web / Project (Placeholders) */
+import ThreeDService from './3d/Index';
+import WebService    from './web/Index';
+import ProjectService from './project/Index';
+
 /* Pages — Store */
 import Storefront    from './store/Storefront';
 import ProductDetail from './store/ProductDetail';
