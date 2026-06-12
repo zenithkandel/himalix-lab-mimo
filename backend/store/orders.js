@@ -2,7 +2,7 @@ const express = require('express');
 const router = express.Router();
 const { pool } = require('../config/db');
 const { authMiddleware } = require('../middleware/auth');
-const { sendNotificationEmail } = require('../../config/mail');
+const { sendNotificationEmail } = require('../config/mail');
 
 router.use(authMiddleware);
 
