@@ -191,6 +191,10 @@
   z-index: 70;
 }
 
+.admin-topbar__hamburger {
+  display: none;
+}
+
 .admin-topbar__breadcrumb {
   display: flex;
   align-items: center;
@@ -696,6 +700,11 @@ table.admin-table tbody tr:hover td {
     transform: translateX(-100%);
     transition: transform var(--transition-base);
     z-index: 200;
+  }
+
+  .admin-topbar__hamburger {
+    display: inline-flex !important;
+    margin-right: var(--space-3);
   }
 
   .admin-sidebar--mobile-open {

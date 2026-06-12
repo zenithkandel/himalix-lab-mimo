@@ -4,6 +4,9 @@ import { useNavigate } from 'react-router-dom';
 import Dashboard from './components/Dashboard';
 import OrderManager from './components/OrderManager';
 import ProductEditor from './components/ProductEditor';
+import UserManager from './components/UserManager';
+import ReviewManager from './components/ReviewManager';
+import SettingsManager from './components/SettingsManager';
 
 const VIEWS = [
   { id: 'dashboard', icon: 'gauge',         label: 'Dashboard' },
@@ -65,14 +68,14 @@ export default function StoreAdmin() {
       try {
         const res  = await authFetch('/api/store/admin/users');
         const data = await res.json();
-        setUsers(data.users || []);
+        setUsers(Array.isArray(data) ? data : (data.users || []));
       } catch {}
     }
     if (view === 'reviews') {
       try {
         const res  = await authFetch('/api/store/admin/reviews');
         const data = await res.json();
-        setReviews(data.reviews || []);
+        setReviews(Array.isArray(data) ? data : (data.reviews || []));
       } catch {}
     }
   }, [view, authFetch]);
@@ -155,7 +158,7 @@ export default function StoreAdmin() {
       {/* Main Content Area */}
       <main className="admin-main">
         <header className="admin-topbar">
-          <button className="btn btn-ghost" onClick={() => setMobileOpen(!mobileOpen)} style={{ display: 'none' }}>
+          <button className="btn btn-ghost admin-topbar__hamburger" onClick={() => setMobileOpen(!mobileOpen)}>
             <i className="fa-light fa-sharp fa-bars" />
           </button>
           <div className="admin-topbar__breadcrumb">
@@ -223,9 +226,25 @@ export default function StoreAdmin() {
             </div>
           )}
 
-          {view === 'users' && <div>Users management coming soon...</div>}
-          {view === 'reviews' && <div>Reviews management coming soon...</div>}
-          {view === 'settings' && <div>Settings coming soon...</div>}
+          {view === 'users' && (
+            <UserManager 
+              users={users} 
+              authFetch={authFetch} 
+              onLoad={load} 
+            />
+          )}
+          {view === 'reviews' && (
+            <ReviewManager 
+              reviews={reviews} 
+              authFetch={authFetch} 
+              onLoad={load} 
+            />
+          )}
+          {view === 'settings' && (
+            <SettingsManager 
+              authFetch={authFetch} 
+            />
+          )}
         </div>
       </main>
 
