@@ -20,17 +20,17 @@ app.use(express.json({ limit: '50mb' }));
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
 // Routes
-app.use('/api/auth', require('./routes/auth'));
-app.use('/api/content', require('./routes/content'));
-app.use('/api/admin', require('./routes/admin'));
+app.use('/api/auth', require('./auth'));
+app.use('/api/content', require('./portfolio'));
+app.use('/api/admin', require('./admin/portfolio'));
 
 // Store Routes
-app.use('/api/store/products', require('./routes/store/products'));
-app.use('/api/store/cart', require('./routes/store/cart'));
-app.use('/api/store/orders', require('./routes/store/orders'));
-app.use('/api/store/wallet', require('./routes/store/wallet'));
-app.use('/api/store/reviews', require('./routes/store/reviews'));
-app.use('/api/store/admin', require('./routes/store/admin'));
+app.use('/api/store/products', require('./store/products'));
+app.use('/api/store/cart', require('./store/cart'));
+app.use('/api/store/orders', require('./store/orders'));
+app.use('/api/store/wallet', require('./store/wallet'));
+app.use('/api/store/reviews', require('./store/reviews'));
+app.use('/api/store/admin', require('./admin/store'));
 
 // Global error handler
 app.use((err, req, res, next) => {
