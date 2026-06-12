@@ -131,8 +131,10 @@ export default function Storefront() {
       {/* Content */}
       <div className="store-layout">
         {loading && (
-          <div className="loading-page">
-            <div className="spinner" role="status" aria-label="Loading products" />
+          <div className="product-grid" aria-label="Loading products">
+            {Array.from({ length: 8 }).map((_, i) => (
+              <div key={i} className="skeleton-card" />
+            ))}
           </div>
         )}
 

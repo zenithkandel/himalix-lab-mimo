@@ -175,6 +175,25 @@
   border: 1px solid var(--border);
 }
 
+/* ── SKELETON LOADER ── */
+.skeleton-card {
+  background: var(--bg-2);
+  height: 380px;
+  position: relative;
+  overflow: hidden;
+}
+.skeleton-card::after {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; width: 100%; height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.04), transparent);
+  animation: skeleton-shimmer 1.5s infinite;
+}
+@keyframes skeleton-shimmer {
+  0% { transform: translateX(-100%); }
+  100% { transform: translateX(100%); }
+}
+
 /* ── PRODUCT CARD ── */
 .product-card {
   background: var(--bg-2);
