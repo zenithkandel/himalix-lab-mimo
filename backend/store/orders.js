@@ -22,10 +22,28 @@ function calculateHaversineDistance(lat1, lon1, lat2, lon2) {
 }
 
 // 1. Place an Order (Checkout)
-router.post('/checkout', async (req, res) => {
+const checkoutHandler = async (req, res) => {
   const connection = await pool.getConnection();
   try {
-    const { shippingDetails, paymentMethod = 'cash' } = req.body;
+    let shippingDetails = req.body.shippingDetails;
+    let paymentMethod = req.body.paymentMethod || 'cash';
+
+    if (req.body.address) {
+      const addr = req.body.address;
+      shippingDetails = {
+        fullName: addr.full_name || '',
+        email: addr.email || req.user.email || '',
+        phone: addr.phone || '',
+        province: addr.province || 'Bagmati',
+        district: addr.district || '',
+        city: addr.city || '',
+        receivingLocation: (addr.lat && addr.lng) ? `${addr.lat},${addr.lng}` : ''
+      };
+      if (req.body.use_wallet) {
+        paymentMethod = 'store_credit';
+      }
+    }
+
     if (!shippingDetails || !shippingDetails.fullName || !shippingDetails.email || !shippingDetails.phone || !shippingDetails.province || !shippingDetails.district || !shippingDetails.city || !shippingDetails.receivingLocation) {
       return res.status(400).json({ message: 'Shipping details are incomplete' });
     }
@@ -99,7 +117,7 @@ router.post('/checkout', async (req, res) => {
 
     // Verify wallet balance if paying with store credit
     if (paymentMethod === 'store_credit') {
-      const [userRows] = await connection.query('SELECT wallet_balance FROM users WHERE id = ?', [req.user.id]);
+      const [userRows] = await connection.query('SELECT wallet_balance FROM himalix_auth.users WHERE id = ?', [req.user.id]);
       const walletBalance = userRows.length > 0 ? parseFloat(userRows[0].wallet_balance) : 0.00;
       if (walletBalance < totalAmount) {
         await connection.rollback();
@@ -164,7 +182,7 @@ router.post('/checkout', async (req, res) => {
 
     // Deduct wallet balance if paying with store credit
     if (paymentMethod === 'store_credit') {
-      await connection.query('UPDATE users SET wallet_balance = wallet_balance - ? WHERE id = ?', [totalAmount, req.user.id]);
+      await connection.query('UPDATE himalix_auth.users SET wallet_balance = wallet_balance - ? WHERE id = ?', [totalAmount, req.user.id]);
       
       // Log wallet transaction ledger record (negative value indicates debit)
       await connection.query(
@@ -232,6 +250,8 @@ router.post('/checkout', async (req, res) => {
       message: 'Order created successfully',
       orderId,
       trackingCode,
+      order_code: trackingCode,
+      order: { order_code: trackingCode },
       totalAmount,
       status: initialStatus
     });
@@ -242,10 +262,12 @@ router.post('/checkout', async (req, res) => {
   } finally {
     connection.release();
   }
-});
+};
+router.post('/checkout', checkoutHandler);
+router.post('/', checkoutHandler);
 
 // 2. Get User Order History
-router.get('/history', async (req, res) => {
+const historyHandler = async (req, res) => {
   try {
     // Fetch orders with order items joined
     const [rows] = await pool.query(
@@ -289,6 +311,45 @@ router.get('/history', async (req, res) => {
   } catch (err) {
     console.error(err);
     res.status(500).json({ message: 'Server error' });
+  }
+};
+router.get('/history', historyHandler);
+router.get('/my', historyHandler);
+
+// 3. Distance-based Shipping Cost Calculation
+router.get('/shipping', async (req, res) => {
+  try {
+    const { lat, lng } = req.query;
+    if (!lat || !lng || isNaN(lat) || isNaN(lng)) {
+      return res.status(400).json({ message: 'Latitude and Longitude are required' });
+    }
+
+    const [settingsRows] = await pool.query(
+      "SELECT key_name, key_value FROM settings WHERE key_name IN ('delivery_per_km_rate', 'delivery_min_charge', 'delivery_free_threshold')"
+    );
+    let deliveryPerKmRate = 15.00;
+    let deliveryMinCharge = 50.00;
+    let deliveryFreeThreshold = 2000.00;
+
+    settingsRows.forEach(row => {
+      if (row.key_name === 'delivery_per_km_rate') {
+        deliveryPerKmRate = parseFloat(row.key_value);
+      } else if (row.key_name === 'delivery_min_charge') {
+        deliveryMinCharge = parseFloat(row.key_value);
+      } else if (row.key_name === 'delivery_free_threshold') {
+        deliveryFreeThreshold = parseFloat(row.key_value);
+      }
+    });
+
+    const distance = calculateHaversineDistance(HQ_LAT, HQ_LNG, parseFloat(lat), parseFloat(lng));
+    const shippingFee = Math.max(deliveryMinCharge, distance * deliveryPerKmRate);
+    res.json({
+      distance: parseFloat(distance.toFixed(2)),
+      shipping_cost: parseFloat(shippingFee.toFixed(2))
+    });
+  } catch (err) {
+    console.error('Error in shipping route:', err);
+    res.status(500).json({ message: 'Server error calculating shipping fee' });
   }
 });
 

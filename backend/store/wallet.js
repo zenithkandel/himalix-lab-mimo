@@ -5,10 +5,45 @@ const { authMiddleware } = require('../middleware/auth');
 
 router.use(authMiddleware);
 
-// 1. Get Wallet Balance and Transaction History
+// 1. Get Wallet balance and statistics (for cart/profile)
+router.get('/', async (req, res) => {
+  try {
+    const [userRows] = await pool.query(
+      'SELECT wallet_balance, referral_code FROM himalix_auth.users WHERE id = ?',
+      [req.user.id]
+    );
+    if (userRows.length === 0) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+
+    const [[earnedRow]] = await pool.query(
+      'SELECT COALESCE(SUM(amount), 0) as earned FROM wallet_transactions WHERE user_id = ? AND amount > 0',
+      [req.user.id]
+    );
+
+    const [[refCountRow]] = await pool.query(
+      'SELECT COUNT(*) as count FROM himalix_auth.users WHERE referred_by = ?',
+      [req.user.id]
+    );
+
+    res.json({
+      wallet: {
+        balance: parseFloat(userRows[0].wallet_balance),
+        referral_code: userRows[0].referral_code,
+        referral_count: refCountRow.count,
+        total_earned: parseFloat(earnedRow.earned)
+      }
+    });
+  } catch (err) {
+    console.error('Wallet stats fetch error:', err);
+    res.status(500).json({ message: 'Server error fetching wallet stats' });
+  }
+});
+
+// 2. Get Wallet Balance and Transaction History
 router.get('/history', async (req, res) => {
   try {
-    const [userRows] = await pool.query('SELECT wallet_balance, referral_code, referred_by FROM users WHERE id = ?', [req.user.id]);
+    const [userRows] = await pool.query('SELECT wallet_balance, referral_code, referred_by FROM himalix_auth.users WHERE id = ?', [req.user.id]);
     if (userRows.length === 0) {
       return res.status(404).json({ message: 'User not found' });
     }
@@ -18,11 +53,30 @@ router.get('/history', async (req, res) => {
       [req.user.id]
     );
 
+    const mappedHistory = transactions.map(tx => {
+      const isCredit = Number(tx.amount) > 0;
+      let description = '';
+      if (tx.type === 'deposit') description = `Manual deposit via eSewa (Ref: ${tx.reference_id})`;
+      else if (tx.type === 'purchase') description = `Purchase payment for Order (Ref: ${tx.reference_id})`;
+      else if (tx.type === 'refund') description = `Refund for Order (Ref: ${tx.reference_id})`;
+      else if (tx.type === 'referral') description = `Referral Bonus (Ref: ${tx.reference_id})`;
+      else if (tx.type === 'social') description = `Social Share Bonus (${tx.reference_id})`;
+
+      return {
+        id: tx.id,
+        amount: Math.abs(Number(tx.amount)),
+        type: isCredit ? 'credit' : 'debit',
+        description,
+        created_at: tx.created_at
+      };
+    });
+
     res.json({
       walletBalance: parseFloat(userRows[0].wallet_balance),
       referralCode: userRows[0].referral_code,
       referredBy: userRows[0].referred_by,
-      transactions
+      transactions,
+      history: mappedHistory
     });
   } catch (err) {
     console.error('Wallet fetch error:', err);
@@ -44,7 +98,7 @@ router.post('/referral', async (req, res) => {
     await connection.beginTransaction();
 
     // Verify current user's referral status
-    const [userRows] = await connection.query('SELECT referred_by, referral_code FROM users WHERE id = ?', [newUserId]);
+    const [userRows] = await connection.query('SELECT referred_by, referral_code FROM himalix_auth.users WHERE id = ?', [newUserId]);
     if (userRows.length === 0) {
       await connection.rollback();
       return res.status(404).json({ message: 'User not found' });
@@ -61,7 +115,7 @@ router.post('/referral', async (req, res) => {
     }
 
     // Verify referrer exists
-    const [referrerRows] = await connection.query('SELECT id FROM users WHERE referral_code = ?', [referralCode]);
+    const [referrerRows] = await connection.query('SELECT id FROM himalix_auth.users WHERE referral_code = ?', [referralCode]);
     if (referrerRows.length === 0) {
       await connection.rollback();
       return res.status(404).json({ message: 'Invalid referral code.' });
@@ -75,7 +129,7 @@ router.post('/referral', async (req, res) => {
 
     // Update user: bind referred_by, add balance
     await connection.query(
-      'UPDATE users SET referred_by = ?, wallet_balance = wallet_balance + ? WHERE id = ?',
+      'UPDATE himalix_auth.users SET referred_by = ?, wallet_balance = wallet_balance + ? WHERE id = ?',
       [referrerId, bonusAmount, newUserId]
     );
 
@@ -87,7 +141,7 @@ router.post('/referral', async (req, res) => {
 
     // Add balance to referrer
     await connection.query(
-      'UPDATE users SET wallet_balance = wallet_balance + ? WHERE id = ?',
+      'UPDATE himalix_auth.users SET wallet_balance = wallet_balance + ? WHERE id = ?',
       [bonusAmount, referrerId]
     );
 
@@ -112,15 +166,15 @@ router.post('/referral', async (req, res) => {
   }
 });
 
-// 3. Claim credits for following social media (click-to-claim wrapper)
-router.post('/claim-social', async (req, res) => {
+// 4. Claim credits for following social media (click-to-claim wrapper)
+const claimSocialHandler = async (req, res) => {
   const connection = await pool.getConnection();
   try {
-    const { platform } = req.body; // 'instagram' or 'facebook'
+    const { platform } = req.body; // 'instagram', 'facebook', or 'youtube'
     const userId = req.user.id;
 
-    if (!platform || !['instagram', 'facebook'].includes(platform.toLowerCase())) {
-      return res.status(400).json({ message: 'Valid platform (instagram or facebook) is required' });
+    if (!platform || !['instagram', 'facebook', 'youtube'].includes(platform.toLowerCase())) {
+      return res.status(400).json({ message: 'Valid platform (youtube, instagram or facebook) is required' });
     }
 
     const platformKey = platform.toLowerCase();
@@ -140,13 +194,17 @@ router.post('/claim-social', async (req, res) => {
 
     // Fetch social bonus amount from settings
     const [bonusRows] = await connection.query("SELECT key_value FROM settings WHERE key_name = 'social_bonus_amount'");
-    const bonusAmount = bonusRows.length > 0 ? parseFloat(bonusRows[0].key_value) : 5.00;
+    let bonusAmount = bonusRows.length > 0 ? parseFloat(bonusRows[0].key_value) : 5.00;
+    
+    // Customize reward based on platform dynamically (e.g. youtube 50, instagram 25)
+    if (platformKey === 'youtube') bonusAmount = 50.00;
+    else if (platformKey === 'instagram') bonusAmount = 25.00;
 
     // Log the claim
     await connection.query('INSERT INTO social_claims (user_id, platform) VALUES (?, ?)', [userId, platformKey]);
 
     // Update balance
-    await connection.query('UPDATE users SET wallet_balance = wallet_balance + ? WHERE id = ?', [bonusAmount, userId]);
+    await connection.query('UPDATE himalix_auth.users SET wallet_balance = wallet_balance + ? WHERE id = ?', [bonusAmount, userId]);
 
     // Log ledger record
     await connection.query(
@@ -167,6 +225,9 @@ router.post('/claim-social', async (req, res) => {
   } finally {
     connection.release();
   }
-});
+};
+
+router.post('/claim-social', claimSocialHandler);
+router.post('/social-claim', claimSocialHandler);
 
 module.exports = router;

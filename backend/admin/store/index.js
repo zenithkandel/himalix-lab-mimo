@@ -147,14 +147,14 @@ router.get('/analytics', async (req, res) => {
 
     // User counts by role
     const [userCounts] = await pool.query(
-      'SELECT role, COUNT(*) AS count FROM users GROUP BY role'
+      'SELECT role, COUNT(*) AS count FROM himalix_auth.users GROUP BY role'
     );
 
     // Recent orders (last 10)
     const [recentOrders] = await pool.query(`
       SELECT o.id, o.total_amount, o.status, o.created_at, u.email
       FROM orders o
-      LEFT JOIN users u ON o.user_id = u.id
+      LEFT JOIN himalix_auth.users u ON o.user_id = u.id
       ORDER BY o.created_at DESC
       LIMIT 10
     `);
@@ -308,7 +308,7 @@ router.get('/users', async (req, res) => {
       SELECT u.id, u.email, u.role, u.wallet_balance, u.avatar_url, u.created_at,
              CASE WHEN u.google_id IS NOT NULL THEN 'google' ELSE 'local' END AS auth_provider,
              COUNT(o.id) AS order_count
-      FROM users u
+      FROM himalix_auth.users u
       LEFT JOIN orders o ON u.id = o.user_id
       GROUP BY u.id
       ORDER BY u.created_at DESC
@@ -343,8 +343,8 @@ router.put('/users/:id', async (req, res) => {
     }
 
     values.push(req.params.id);
-    await pool.query(`UPDATE users SET ${updateFields.join(', ')} WHERE id = ?`, values);
-    const [updated] = await pool.query('SELECT id, email, role, avatar_url, created_at FROM users WHERE id = ?', [req.params.id]);
+    await pool.query(`UPDATE himalix_auth.users SET ${updateFields.join(', ')} WHERE id = ?`, values);
+    const [updated] = await pool.query('SELECT id, email, role, avatar_url, created_at FROM himalix_auth.users WHERE id = ?', [req.params.id]);
     res.json(updated[0]);
   } catch (err) {
     console.error(err);
@@ -360,7 +360,7 @@ router.put('/users/:id/password', async (req, res) => {
     }
     const salt = await bcrypt.genSalt(10);
     const hashedPassword = await bcrypt.hash(password, salt);
-    await pool.query('UPDATE users SET password_hash = ? WHERE id = ?', [hashedPassword, req.params.id]);
+    await pool.query('UPDATE himalix_auth.users SET password_hash = ? WHERE id = ?', [hashedPassword, req.params.id]);
     res.json({ message: 'Password updated successfully' });
   } catch (err) {
     console.error(err);
@@ -374,7 +374,7 @@ router.put('/users/:id/role', async (req, res) => {
     if (!['user', 'admin'].includes(role)) {
       return res.status(400).json({ message: 'Invalid role' });
     }
-    await pool.query('UPDATE users SET role = ? WHERE id = ?', [role, req.params.id]);
+    await pool.query('UPDATE himalix_auth.users SET role = ? WHERE id = ?', [role, req.params.id]);
     res.json({ message: 'Role updated successfully' });
   } catch (err) {
     console.error(err);
@@ -427,7 +427,7 @@ router.delete('/users/:id', async (req, res) => {
     if (Number(req.user.id) === Number(req.params.id)) {
       return res.status(400).json({ message: 'You cannot delete your own admin account' });
     }
-    const [result] = await pool.query('DELETE FROM users WHERE id = ?', [req.params.id]);
+    const [result] = await pool.query('DELETE FROM himalix_auth.users WHERE id = ?', [req.params.id]);
     if (result.affectedRows === 0) return res.status(404).json({ message: 'User not found' });
     res.json({ message: 'User deleted successfully' });
   } catch (err) {
@@ -444,7 +444,7 @@ router.get('/carts', async (req, res) => {
     const [cartItems] = await pool.query(`
       SELECT ci.id, ci.user_id, u.email, ci.product_id, p.name as product_name, p.sku, p.price, p.category, ci.quantity
       FROM cart_items ci
-      JOIN users u ON ci.user_id = u.id
+      JOIN himalix_auth.users u ON ci.user_id = u.id
       JOIN products p ON ci.product_id = p.id
       ORDER BY ci.user_id
     `);
@@ -464,7 +464,7 @@ router.get('/orders', async (req, res) => {
       SELECT o.id, o.user_id, u.email, o.total_amount, o.status, o.tracking_code, o.shipping_address, o.payment_method, o.payment_status, o.created_at,
              oi.product_id, oi.quantity, oi.price, p.name as product_name
       FROM orders o
-      LEFT JOIN users u ON o.user_id = u.id
+      LEFT JOIN himalix_auth.users u ON o.user_id = u.id
       LEFT JOIN order_items oi ON o.id = oi.order_id
       LEFT JOIN products p ON oi.product_id = p.id
       ORDER BY o.created_at DESC
@@ -701,14 +701,14 @@ router.post('/users/:id/credit', async (req, res) => {
     await connection.beginTransaction();
 
     // Verify user exists
-    const [users] = await connection.query('SELECT id, wallet_balance FROM users WHERE id = ?', [userId]);
+    const [users] = await connection.query('SELECT id, wallet_balance FROM himalix_auth.users WHERE id = ?', [userId]);
     if (users.length === 0) {
       await connection.rollback();
       return res.status(404).json({ message: 'User not found' });
     }
 
     // Increment wallet balance
-    await connection.query('UPDATE users SET wallet_balance = wallet_balance + ? WHERE id = ?', [parsedAmount, userId]);
+    await connection.query('UPDATE himalix_auth.users SET wallet_balance = wallet_balance + ? WHERE id = ?', [parsedAmount, userId]);
 
     // Insert wallet transaction ledger record
     await connection.query(
@@ -718,7 +718,7 @@ router.post('/users/:id/credit', async (req, res) => {
 
     await connection.commit();
 
-    const [updatedUser] = await connection.query('SELECT id, email, wallet_balance FROM users WHERE id = ?', [userId]);
+    const [updatedUser] = await connection.query('SELECT id, email, wallet_balance FROM himalix_auth.users WHERE id = ?', [userId]);
 
     res.json({
       message: 'Wallet balance updated successfully',
@@ -741,7 +741,7 @@ router.get('/reviews', async (req, res) => {
       SELECT r.id, r.rating, r.comment, r.created_at, r.product_id, p.name AS product_name, p.sku AS product_sku, u.email AS user_email
       FROM reviews r
       JOIN products p ON r.product_id = p.id
-      JOIN users u ON r.user_id = u.id
+      JOIN himalix_auth.users u ON r.user_id = u.id
       ORDER BY r.created_at DESC
     `);
     res.json(rows);
@@ -769,7 +769,7 @@ router.get('/wallet/transactions', async (req, res) => {
     const [rows] = await pool.query(`
       SELECT wt.id, wt.user_id, wt.amount, wt.type, wt.reference_id, wt.created_at, u.email AS user_email
       FROM wallet_transactions wt
-      JOIN users u ON wt.user_id = u.id
+      JOIN himalix_auth.users u ON wt.user_id = u.id
       ORDER BY wt.created_at DESC
     `);
     res.json(rows);
@@ -785,7 +785,7 @@ router.get('/social-claims', async (req, res) => {
     const [rows] = await pool.query(`
       SELECT sc.user_id, sc.platform, sc.claimed_at, u.email AS user_email
       FROM social_claims sc
-      JOIN users u ON sc.user_id = u.id
+      JOIN himalix_auth.users u ON sc.user_id = u.id
       ORDER BY sc.claimed_at DESC
     `);
     res.json(rows);
