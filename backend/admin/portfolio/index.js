@@ -1,8 +1,8 @@
 const express = require('express');
 const multer = require('multer');
 const path = require('path');
-const { pool } = require('../config/db');
-const { authMiddleware, adminMiddleware } = require('../middleware/auth');
+const { pool } = require('../../config/db');
+const { authMiddleware, adminMiddleware } = require('../../middleware/auth');
 
 const router = express.Router();
 
