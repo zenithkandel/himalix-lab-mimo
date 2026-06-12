@@ -1,0 +1,222 @@
+/* ================================================================
+   auth.css — Universal Signin + Signup page styles
+   ================================================================ */
+
+.auth-page {
+  min-height: 100vh;
+  display: flex;
+  align-items: stretch;
+  background: var(--bg-1);
+}
+
+/* Left panel — branding / visual side */
+.auth-panel {
+  display: none;
+  flex: 0 0 42%;
+  background: var(--bg-0);
+  border-right: 1px solid var(--border);
+  padding: var(--space-12) var(--space-10);
+  flex-direction: column;
+  justify-content: space-between;
+  position: relative;
+  overflow: hidden;
+}
+
+@media (min-width: 900px) {
+  .auth-panel { display: flex; }
+}
+
+/* Decorative grid overlay on left panel */
+.auth-panel__grid {
+  position: absolute;
+  inset: 0;
+  background-image:
+    linear-gradient(var(--border) 1px, transparent 1px),
+    linear-gradient(90deg, var(--border) 1px, transparent 1px);
+  background-size: 40px 40px;
+  opacity: 0.5;
+}
+
+.auth-panel__content {
+  position: relative;
+  z-index: 1;
+}
+
+.auth-panel__logo {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  font-size: var(--text-sm);
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--text-0);
+}
+
+.auth-panel__logo img {
+  height: 26px;
+}
+
+.auth-panel__tagline {
+  margin-top: var(--space-12);
+}
+
+.auth-panel__tagline h2 {
+  font-family: var(--font-display);
+  font-size: var(--text-3xl);
+  font-weight: 400;
+  line-height: 1.3;
+  color: var(--text-0);
+  margin-bottom: var(--space-4);
+}
+
+.auth-panel__tagline p {
+  font-size: var(--text-sm);
+  color: var(--text-2);
+  line-height: 1.8;
+}
+
+.auth-panel__footer {
+  position: relative;
+  z-index: 1;
+}
+
+.auth-panel__services {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.auth-panel__service-item {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  font-size: var(--text-sm);
+  color: var(--text-2);
+}
+
+.auth-panel__service-item i {
+  color: var(--accent);
+  width: 16px;
+}
+
+/* Right panel — the form */
+.auth-form-wrap {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--space-8) var(--space-6);
+}
+
+.auth-form-box {
+  width: 100%;
+  max-width: 400px;
+}
+
+.auth-form-box__header {
+  margin-bottom: var(--space-8);
+}
+
+.auth-form-box__eyebrow {
+  font-size: var(--text-xs);
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--accent);
+  margin-bottom: var(--space-2);
+}
+
+.auth-form-box__title {
+  font-size: var(--text-2xl);
+  font-weight: 700;
+  color: var(--text-0);
+  margin-bottom: var(--space-2);
+}
+
+.auth-form-box__subtitle {
+  font-size: var(--text-sm);
+  color: var(--text-2);
+}
+
+/* Form body */
+.auth-form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-5);
+}
+
+/* Google Sign-In button */
+.auth-google-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-3);
+  width: 100%;
+  padding: 11px 20px;
+  background: var(--bg-2);
+  border: 1px solid var(--border-strong);
+  color: var(--text-0);
+  font-size: var(--text-sm);
+  font-weight: 500;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.auth-google-btn:hover:not(:disabled) {
+  background: var(--bg-3);
+  border-color: var(--text-2);
+}
+
+.auth-google-btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.auth-google-btn img {
+  width: 16px;
+  height: 16px;
+}
+
+/* Separator */
+.auth-separator {
+  display: flex;
+  align-items: center;
+  gap: var(--space-4);
+  font-size: var(--text-xs);
+  color: var(--text-3);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+.auth-separator::before,
+.auth-separator::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: var(--border);
+}
+
+/* Bottom link */
+.auth-switch {
+  margin-top: var(--space-6);
+  text-align: center;
+  font-size: var(--text-sm);
+  color: var(--text-2);
+}
+
+.auth-switch a {
+  color: var(--accent);
+  font-weight: 500;
+}
+
+.auth-switch a:hover {
+  color: var(--accent-bright);
+}
+
+/* Referral field note */
+.auth-referral-note {
+  font-size: var(--text-xs);
+  color: var(--text-3);
+  margin-top: -var(--space-3);
+}
