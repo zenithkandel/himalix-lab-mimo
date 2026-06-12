@@ -1,7 +1,7 @@
 import React, {
   createContext, useContext, useState, useEffect, useCallback
 } from 'react';
-import { useAuth } from './AuthContext';
+import { useAuth } from '../auth/AuthContext';
 
 const CartContext = createContext();
 
