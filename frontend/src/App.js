@@ -3,32 +3,32 @@ import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 
 /* Context providers */
 import { ThemeProvider }  from './context/ThemeContext';
-import { AuthProvider }   from './context/AuthContext';
-import { CartProvider }   from './context/CartContext';
+import { AuthProvider }   from './auth/AuthContext';
+import { CartProvider }   from './store/CartContext';
 
 /* Guards */
-import PrivateRoute from './components/store/PrivateRoute';
-import AdminRoute   from './components/store/AdminRoute';
+import PrivateRoute from './store/PrivateRoute';
+import AdminRoute   from './store/AdminRoute';
 
 /* Components */
 import LoadingScreen from './components/LoadingScreen';
 
 /* Pages — Portfolio */
-import Landing      from './pages/Landing';
-import PortfolioAdmin from './pages/Admin';
+import Landing      from './portfolio/Landing';
+import PortfolioAdmin from './admin/portfolio/Admin';
 
 /* Pages — Auth */
-import Signin from './pages/auth/Signin';
-import Signup from './pages/auth/Signup';
+import Signin from './auth/Signin';
+import Signup from './auth/Signup';
 
 /* Pages — Store */
-import Storefront    from './pages/store/Storefront';
-import ProductDetail from './pages/store/ProductDetail';
-import Cart          from './pages/store/Cart';
-import Profile       from './pages/store/Profile';
-import StoreAdmin    from './pages/store/Admin';
-import Terms         from './pages/store/Terms';
-import NotFound      from './pages/store/NotFound';
+import Storefront    from './store/Storefront';
+import ProductDetail from './store/ProductDetail';
+import Cart          from './store/Cart';
+import Profile       from './store/Profile';
+import StoreAdmin    from './admin/store/Admin';
+import Terms         from './store/Terms';
+import NotFound      from './store/NotFound';
 
 export default function App() {
   const [appReady, setAppReady] = useState(false);

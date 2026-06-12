@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import StoreNavbar from '../../components/store/Navbar';
-import { useCart } from '../../context/CartContext';
-import { useAuth } from '../../context/AuthContext';
+import StoreNavbar from './Navbar';
+import { useCart } from './CartContext';
+import { useAuth } from '../auth/AuthContext';
 
 export default function Cart() {
   const { items, itemCount, totalAmount, updateQty, removeItem, clearCart } = useCart();

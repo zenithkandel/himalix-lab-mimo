@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import StoreNavbar from '../../components/store/Navbar';
-import ProductCard from '../../components/store/ProductCard';
+import StoreNavbar from './Navbar';
+import ProductCard from './ProductCard';
 
 const SORT_OPTIONS = [
   { value: 'default',   label: 'Default' },

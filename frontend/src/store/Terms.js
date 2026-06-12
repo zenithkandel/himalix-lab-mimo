@@ -1,6 +1,6 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import StoreNavbar from '../../components/store/Navbar';
+import StoreNavbar from './Navbar';
 
 export default function Terms() {
   return (
