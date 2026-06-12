@@ -54,6 +54,11 @@ export default function App() {
                 <Route path="/signin" element={<Signin />} />
                 <Route path="/signup" element={<Signup />} />
 
+                {/* ── Services (Placeholders) ── */}
+                <Route path="/3d"       element={<ThreeDService />} />
+                <Route path="/web"      element={<WebService />} />
+                <Route path="/project"  element={<ProjectService />} />
+
                 {/* ── Portfolio Admin ── */}
                 <Route
                   path="/admin/*"
