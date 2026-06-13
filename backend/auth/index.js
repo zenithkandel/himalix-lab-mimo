@@ -3,11 +3,44 @@ const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const { OAuth2Client } = require('google-auth-library');
 const rateLimit = require('express-rate-limit');
+const multer = require('multer');
+const path = require('path');
+const fs = require('fs');
 const { pool } = require('../config/db');
 const { sendNotificationEmail } = require('../config/mail');
 const { authMiddleware } = require('../middleware/auth');
 
 const router = express.Router();
+
+const uploadsDir = path.join(__dirname, '../uploads');
+if (!fs.existsSync(uploadsDir)) {
+  fs.mkdirSync(uploadsDir, { recursive: true });
+}
+
+const storage = multer.diskStorage({
+  destination: (req, file, cb) => {
+    cb(null, uploadsDir);
+  },
+  filename: (req, file, cb) => {
+    const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1e9);
+    cb(null, uniqueSuffix + path.extname(file.originalname));
+  },
+});
+
+const upload = multer({ 
+  storage,
+  limits: {
+    fileSize: 5 * 1024 * 1024 // 5MB limit
+  },
+  fileFilter: (req, file, cb) => {
+    const allowedMimeTypes = ['image/jpeg', 'image/png', 'image/webp', 'image/gif'];
+    if (allowedMimeTypes.includes(file.mimetype)) {
+      cb(null, true);
+    } else {
+      cb(new Error('Invalid file type. Only JPEG, PNG, WEBP, and GIF are allowed.'));
+    }
+  }
+});
 
 const authLimiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
@@ -36,7 +69,7 @@ async function generateUniqueReferralCode() {
 router.post('/register', authLimiter, async (req, res) => {
   const connection = await pool.getConnection();
   try {
-    const { email, password, role, referredByCode } = req.body;
+    const { email, password, name, role, referredByCode } = req.body;
 
     if (!email || !password) {
       return res.status(400).json({ message: 'Email and password are required' });
@@ -72,8 +105,8 @@ router.post('/register', authLimiter, async (req, res) => {
     const initialBalance = referredById ? bonusAmount : 0.00;
 
     const [result] = await connection.query(
-      'INSERT INTO himalix_auth.users (email, password_hash, role, referral_code, referred_by, wallet_balance) VALUES (?, ?, ?, ?, ?, ?)',
-      [email, hashedPassword, role || 'user', myReferralCode, referredById, initialBalance]
+      'INSERT INTO himalix_auth.users (email, name, password_hash, role, referral_code, referred_by, wallet_balance) VALUES (?, ?, ?, ?, ?, ?, ?)',
+      [email, name || null, hashedPassword, role || 'user', myReferralCode, referredById, initialBalance]
     );
 
     const newUserId = result.insertId;
@@ -105,6 +138,7 @@ router.post('/register', authLimiter, async (req, res) => {
       `New User Registration: ${email}`,
       `<p>A new user account has been registered on Himalix.</p>
        <p>Email: <strong>${email}</strong></p>
+       <p>Name: <strong>${name || '—'}</strong></p>
        <p>Role: <strong>${role || 'user'}</strong></p>
        <p>Timestamp: <strong>${new Date().toLocaleString()}</strong></p>`
     ).catch(err => console.error('Mail error:', err));
@@ -117,7 +151,7 @@ router.post('/register', authLimiter, async (req, res) => {
 
     res.status(201).json({
       token,
-      user: { id: newUserId, email, role: role || 'user', avatar_url: null, wallet_balance: initialBalance, referral_code: myReferralCode }
+      user: { id: newUserId, email, name: name || null, role: role || 'user', avatar_url: null, wallet_balance: initialBalance, referral_code: myReferralCode, phone: null, address: null }
     });
   } catch (error) {
     await connection.rollback();
@@ -156,7 +190,7 @@ router.post('/login', authLimiter, async (req, res) => {
 
     res.json({
       token,
-      user: { id: user.id, email: user.email, role: user.role, avatar_url: user.avatar_url, wallet_balance: user.wallet_balance, referral_code: user.referral_code }
+      user: { id: user.id, email: user.email, name: user.name, role: user.role, avatar_url: user.avatar_url, wallet_balance: user.wallet_balance, referral_code: user.referral_code, phone: user.phone, address: user.address }
     });
   } catch (error) {
     console.error('Login error:', error);
@@ -231,7 +265,7 @@ router.post('/google', authLimiter, async (req, res) => {
       return res.status(401).json({ message: 'Invalid Google token.' });
     }
 
-    const { email, sub: googleId, picture: avatarUrl } = payload;
+    const { email, sub: googleId, picture: avatarUrl, name } = payload;
     if (!email) {
       return res.status(400).json({ message: 'Email not provided by Google account.' });
     }
@@ -244,8 +278,9 @@ router.post('/google', authLimiter, async (req, res) => {
         user.referral_code = await generateUniqueReferralCode();
         await pool.query('UPDATE himalix_auth.users SET referral_code = ? WHERE id = ?', [user.referral_code, user.id]);
       }
-      await pool.query('UPDATE himalix_auth.users SET avatar_url = ? WHERE id = ?', [avatarUrl || null, user.id]);
+      await pool.query('UPDATE himalix_auth.users SET avatar_url = ?, name = ? WHERE id = ?', [avatarUrl || null, name || user.name || null, user.id]);
       user.avatar_url = avatarUrl;
+      user.name = name || user.name || null;
     } else {
       const [byEmail] = await pool.query('SELECT * FROM himalix_auth.users WHERE email = ?', [email]);
       if (byEmail.length > 0) {
@@ -253,19 +288,21 @@ router.post('/google', authLimiter, async (req, res) => {
         if (!user.referral_code) {
           user.referral_code = await generateUniqueReferralCode();
         }
-        await pool.query('UPDATE himalix_auth.users SET google_id = ?, avatar_url = ?, referral_code = ? WHERE id = ?', [googleId, avatarUrl || null, user.referral_code, user.id]);
+        await pool.query('UPDATE himalix_auth.users SET google_id = ?, avatar_url = ?, referral_code = ?, name = ? WHERE id = ?', [googleId, avatarUrl || null, user.referral_code, name || user.name || null, user.id]);
         user.google_id = googleId;
         user.avatar_url = avatarUrl;
+        user.name = name || user.name || null;
         console.log(`Linked existing email account ${email} to Google ID ${googleId}`);
       } else {
         const myReferralCode = await generateUniqueReferralCode();
         const [insertResult] = await pool.query(
-          'INSERT INTO himalix_auth.users (email, google_id, avatar_url, role, referral_code) VALUES (?, ?, ?, ?, ?)',
-          [email, googleId, avatarUrl || null, 'user', myReferralCode]
+          'INSERT INTO himalix_auth.users (email, name, google_id, avatar_url, role, referral_code) VALUES (?, ?, ?, ?, ?, ?)',
+          [email, name || null, googleId, avatarUrl || null, 'user', myReferralCode]
         );
         user = {
           id: insertResult.insertId,
           email,
+          name,
           google_id: googleId,
           avatar_url: avatarUrl,
           role: 'user',
@@ -278,6 +315,7 @@ router.post('/google', authLimiter, async (req, res) => {
           `New Google User Registration: ${email}`,
           `<p>A new user account has registered using Google Sign-In.</p>
            <p>Email: <strong>${email}</strong></p>
+           <p>Name: <strong>${name || '—'}</strong></p>
            <p>Timestamp: <strong>${new Date().toLocaleString()}</strong></p>`
         ).catch(err => console.error('Mail error:', err));
       }
@@ -297,7 +335,7 @@ router.post('/google', authLimiter, async (req, res) => {
 
     res.json({
       token: jwtToken,
-      user: { id: user.id, email: user.email, role: user.role, avatar_url: user.avatar_url, wallet_balance: user.wallet_balance, referral_code: user.referral_code }
+      user: { id: user.id, email: user.email, name: user.name, role: user.role, avatar_url: user.avatar_url, wallet_balance: user.wallet_balance, referral_code: user.referral_code, phone: user.phone, address: user.address }
     });
   } catch (error) {
     console.error('Google login error:', error);
@@ -308,7 +346,7 @@ router.post('/google', authLimiter, async (req, res) => {
 // GET /me — Get current user (from labs, kept for backward compatibility)
 router.get('/me', authMiddleware, async (req, res) => {
   try {
-    const [users] = await pool.query('SELECT id, email, role, avatar_url, wallet_balance, referral_code FROM himalix_auth.users WHERE id = ?', [req.user.id]);
+    const [users] = await pool.query('SELECT id, email, name, role, avatar_url, phone, address, wallet_balance, referral_code FROM himalix_auth.users WHERE id = ?', [req.user.id]);
     if (users.length === 0) {
       return res.status(404).json({ message: 'User not found' });
     }
@@ -319,4 +357,97 @@ router.get('/me', authMiddleware, async (req, res) => {
   }
 });
 
+// PUT /update — Update profile parameters (name, phone, address)
+router.put('/update', authMiddleware, async (req, res) => {
+  try {
+    const { name, phone, address, avatar_url } = req.body;
+    
+    const updates = [];
+    const params = [];
+    
+    if (name !== undefined) {
+      updates.push('name = ?');
+      params.push(name.trim() || null);
+    }
+    if (phone !== undefined) {
+      updates.push('phone = ?');
+      params.push(phone.trim() || null);
+    }
+    if (address !== undefined) {
+      updates.push('address = ?');
+      params.push(address.trim() || null);
+    }
+    if (avatar_url !== undefined) {
+      updates.push('avatar_url = ?');
+      params.push(avatar_url.trim() || null);
+    }
+    
+    if (updates.length === 0) {
+      return res.status(400).json({ message: 'No fields to update' });
+    }
+    
+    params.push(req.user.id);
+    await pool.query(`UPDATE himalix_auth.users SET ${updates.join(', ')} WHERE id = ?`, params);
+    
+    const [rows] = await pool.query('SELECT id, email, name, role, avatar_url, phone, address, wallet_balance, referral_code FROM himalix_auth.users WHERE id = ?', [req.user.id]);
+    res.json({ message: 'Profile updated successfully', user: rows[0] });
+  } catch (err) {
+    console.error('Update profile error:', err);
+    res.status(500).json({ message: 'Failed to update profile info' });
+  }
+});
+
+// PUT /password — Update password for local users
+router.put('/password', authMiddleware, async (req, res) => {
+  try {
+    const { currentPassword, newPassword } = req.body;
+    if (!currentPassword || !newPassword) {
+      return res.status(400).json({ message: 'Current and new passwords are required' });
+    }
+    if (newPassword.length < 6) {
+      return res.status(400).json({ message: 'New password must be at least 6 characters' });
+    }
+
+    const [rows] = await pool.query('SELECT * FROM himalix_auth.users WHERE id = ?', [req.user.id]);
+    if (rows.length === 0) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+
+    const user = rows[0];
+    if (!user.password_hash) {
+      return res.status(400).json({ message: 'Google OAuth accounts do not have passwords set.' });
+    }
+
+    const isMatch = await bcrypt.compare(currentPassword, user.password_hash);
+    if (!isMatch) {
+      return res.status(400).json({ message: 'Current password is incorrect.' });
+    }
+
+    const salt = await bcrypt.genSalt(10);
+    const newHashed = await bcrypt.hash(newPassword, salt);
+
+    await pool.query('UPDATE himalix_auth.users SET password_hash = ? WHERE id = ?', [newHashed, req.user.id]);
+    res.json({ message: 'Password updated successfully' });
+  } catch (err) {
+    console.error('Password change error:', err);
+    res.status(500).json({ message: 'Failed to update password' });
+  }
+});
+
+// POST /upload-avatar — Upload profile picture
+router.post('/upload-avatar', authMiddleware, upload.single('image'), async (req, res) => {
+  try {
+    if (!req.file) {
+      return res.status(400).json({ message: 'No image file uploaded' });
+    }
+    const avatarUrl = `/uploads/${req.file.filename}`;
+    await pool.query('UPDATE himalix_auth.users SET avatar_url = ? WHERE id = ?', [avatarUrl, req.user.id]);
+    res.json({ message: 'Avatar uploaded successfully', avatarUrl });
+  } catch (err) {
+    console.error('Avatar upload error:', err);
+    res.status(500).json({ message: 'Avatar upload failed' });
+  }
+});
+
 module.exports = router;
+

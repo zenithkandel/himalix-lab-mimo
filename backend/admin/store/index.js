@@ -853,25 +853,4 @@ router.put('/notification-receivers/:id', async (req, res) => {
     
     params.push(req.params.id);
     const [result] = await pool.query(`UPDATE email_notification_receivers SET ${updates.join(', ')} WHERE id = ?`, params);
-    if (result.affectedRows === 0) return res.status(404).json({ message: 'Receiver not found' });
-    
-    res.json({ message: 'Receiver updated successfully' });
-  } catch (err) {
-    console.error('Update notification receiver error:', err);
-    res.status(500).json({ message: 'Server error' });
-  }
-});
 
-// DELETE /api/admin/notification-receivers/:id
-router.delete('/notification-receivers/:id', async (req, res) => {
-  try {
-    const [result] = await pool.query('DELETE FROM email_notification_receivers WHERE id = ?', [req.params.id]);
-    if (result.affectedRows === 0) return res.status(404).json({ message: 'Receiver not found' });
-    res.json({ message: 'Receiver deleted successfully' });
-  } catch (err) {
-    console.error('Delete notification receiver error:', err);
-    res.status(500).json({ message: 'Server error' });
-  }
-});
-
-module.exports = router;
