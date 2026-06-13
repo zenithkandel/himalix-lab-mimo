@@ -50,19 +50,19 @@ export default function StoreFooter() {
             ))}
           </div>
 
-          {/* Emergency Helpline Contacts */}
+          {/* Support Contacts */}
           <div>
-            <div className="footer__col-title" style={{ color: 'var(--danger)' }}>
-              <i className="fa-light fa-sharp fa-circle-exclamation" style={{ marginRight: '6px' }} />
-              Emergency Contacts
+            <div className="footer__col-title" style={{ color: 'var(--accent)' }}>
+              <i className="fa-light fa-sharp fa-headset" style={{ marginRight: '6px' }} />
+              Support Contacts
             </div>
             <div className="footer__link" style={{ cursor: 'default', display: 'flex', flexDirection: 'column', gap: 'var(--space-2)' }}>
               <div>
-                <strong style={{ color: 'var(--text-1)', display: 'block', fontSize: 'var(--text-xxs)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Emergency Helpline Phone:</strong>
+                <strong style={{ color: 'var(--text-1)', display: 'block', fontSize: 'var(--text-xxs)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Support Phone:</strong>
                 <a href={`tel:${helplinePhone}`} style={{ color: 'var(--accent)', fontFamily: 'var(--font-mono)', fontSize: 'var(--text-sm)' }}>{helplinePhone}</a>
               </div>
               <div style={{ marginTop: 'var(--space-2)' }}>
-                <strong style={{ color: 'var(--text-1)', display: 'block', fontSize: 'var(--text-xxs)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Emergency Support Email:</strong>
+                <strong style={{ color: 'var(--text-1)', display: 'block', fontSize: 'var(--text-xxs)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Support Email:</strong>
                 <a href={`mailto:${supportEmail}`} style={{ color: 'var(--accent)', fontSize: 'var(--text-sm)' }}>{supportEmail}</a>
               </div>
             </div>

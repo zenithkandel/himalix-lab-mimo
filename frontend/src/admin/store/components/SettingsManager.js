@@ -544,7 +544,7 @@ export default function SettingsManager({ authFetch }) {
 
                 <div className="flex gap-4">
                   <div className="form-group" style={{ flex: 1 }}>
-                    <label className="form-label">Emergency Helpline Phone</label>
+                    <label className="form-label">Support Helpline Phone</label>
                     <input
                       className="form-input"
                       placeholder="e.g. 9801234567"
@@ -553,7 +553,7 @@ export default function SettingsManager({ authFetch }) {
                     />
                   </div>
                   <div className="form-group" style={{ flex: 1 }}>
-                    <label className="form-label">Emergency Support Email</label>
+                    <label className="form-label">Support Email</label>
                     <input
                       type="email"
                       className="form-input"
