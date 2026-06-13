@@ -18,11 +18,22 @@ export default function CrudSection({ sectionName, label, schema, token, apiUrl,
       const res = await authFetch(`/api/admin/${sectionName}`);
       if (res.ok) {
         const data = await res.json();
-        // ensure features is stringified if array
-        const normalized = data.map(item => ({
-          ...item,
-          features: Array.isArray(item.features) ? item.features.join('\n') : (item.features || '')
-        }));
+        // ensure features is stringified if array or JSON string
+        const normalized = data.map(item => {
+          let features = item.features;
+          if (typeof features === 'string' && features.trim().startsWith('[')) {
+            try {
+              const parsed = JSON.parse(features);
+              if (Array.isArray(parsed)) {
+                features = parsed;
+              }
+            } catch (e) {}
+          }
+          return {
+            ...item,
+            features: Array.isArray(features) ? features.join('\n') : (features || '')
+          };
+        });
         setItems(normalized);
       }
     } catch (e) {
@@ -113,7 +124,16 @@ export default function CrudSection({ sectionName, label, schema, token, apiUrl,
       const savedItem = await res.json();
       
       if (savedItem.features) {
-         savedItem.features = Array.isArray(savedItem.features) ? savedItem.features.join('\n') : savedItem.features;
+        let features = savedItem.features;
+        if (typeof features === 'string' && features.trim().startsWith('[')) {
+          try {
+            const parsed = JSON.parse(features);
+            if (Array.isArray(parsed)) {
+              features = parsed;
+            }
+          } catch (e) {}
+        }
+        savedItem.features = Array.isArray(features) ? features.join('\n') : (features || '');
       }
 
       if (payload.id) {

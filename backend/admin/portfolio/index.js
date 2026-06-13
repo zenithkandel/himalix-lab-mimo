@@ -54,7 +54,7 @@ router.get('/content', async (req, res) => {
       }
       let val = row.content_value;
       if (row.content_type === 'json' && typeof val === 'string') {
-        try { val = JSON.parse(val); } catch (e) {}
+        try { val = JSON.parse(val); } catch (e) { }
       }
       content[row.section][row.content_key] = val;
     });
@@ -80,7 +80,7 @@ router.get('/content', async (req, res) => {
         let links = {};
         try {
           links = typeof t.social_links === 'string' ? JSON.parse(t.social_links) : (t.social_links || {});
-        } catch (e) {}
+        } catch (e) { }
         return {
           id: t.id,
           name: t.name,
@@ -351,7 +351,7 @@ router.get('/team', async (req, res) => {
       let links = {};
       try {
         links = typeof t.social_links === 'string' ? JSON.parse(t.social_links) : (t.social_links || {});
-      } catch (e) {}
+      } catch (e) { }
       return {
         ...t,
         instagram: links.instagram || '',
