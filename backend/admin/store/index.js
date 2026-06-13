@@ -853,4 +853,64 @@ router.put('/notification-receivers/:id', async (req, res) => {
     
     params.push(req.params.id);
     const [result] = await pool.query(`UPDATE email_notification_receivers SET ${updates.join(', ')} WHERE id = ?`, params);
+    if (result.affectedRows === 0) return res.status(404).json({ message: 'Receiver not found' });
+    res.json({ message: 'Receiver updated successfully' });
+  } catch (err) {
+    console.error('Update notification receiver error:', err);
+    res.status(500).json({ message: 'Server error' });
+  }
+});
+
+// DELETE /api/admin/notification-receivers/:id
+router.delete('/notification-receivers/:id', async (req, res) => {
+  try {
+    const [result] = await pool.query('DELETE FROM email_notification_receivers WHERE id = ?', [req.params.id]);
+    if (result.affectedRows === 0) return res.status(404).json({ message: 'Receiver not found' });
+    res.json({ message: 'Receiver deleted successfully' });
+  } catch (err) {
+    console.error('Delete notification receiver error:', err);
+    res.status(500).json({ message: 'Server error' });
+  }
+});
+
+// GET /api/store/admin/logs — Fetch combined transaction logs, social claims, and contact helpline messages
+router.get('/logs', async (req, res) => {
+  try {
+    // 1. Wallet transactions
+    const [walletTx] = await pool.query(`
+      SELECT wt.id, wt.user_id, wt.amount, wt.type, wt.reference_id, wt.created_at, u.email AS user_email
+      FROM wallet_transactions wt
+      LEFT JOIN himalix_auth.users u ON wt.user_id = u.id
+      ORDER BY wt.created_at DESC
+      LIMIT 100
+    `);
+
+    // 2. Social claims
+    const [claims] = await pool.query(`
+      SELECT sc.user_id, sc.platform, sc.claimed_at, u.email AS user_email
+      FROM social_claims sc
+      LEFT JOIN himalix_auth.users u ON sc.user_id = u.id
+      ORDER BY sc.claimed_at DESC
+      LIMIT 100
+    `);
+
+    // 3. Contact messages (from himalix_portfolio database)
+    const [contactMsgs] = await pool.query(`
+      SELECT * FROM himalix_portfolio.contact_messages
+      ORDER BY created_at DESC
+      LIMIT 100
+    `);
+
+    res.json({
+      walletTransactions: walletTx,
+      socialClaims: claims,
+      contactMessages: contactMsgs
+    });
+  } catch (err) {
+    console.error('Fetch logs error:', err);
+    res.status(500).json({ message: 'Server error fetching logs' });
+  }
+});
+
+module.exports = router;
 
