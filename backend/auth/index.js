@@ -170,7 +170,7 @@ router.post('/register', authLimiter, async (req, res) => {
 
     res.status(201).json({
       token,
-      user: { id: newUserId, email, name: name || null, role: role || 'user', avatar_url: null, wallet_balance: initialBalance, referral_code: myReferralCode, phone: null, address: null }
+      user: { id: newUserId, email, name: name || null, role: role || 'user', avatar_url: null, wallet_balance: initialBalance, referral_code: myReferralCode, phone: null, shipping_address: null }
     });
   } catch (error) {
     await connection.rollback();
@@ -209,7 +209,7 @@ router.post('/login', authLimiter, async (req, res) => {
 
     res.json({
       token,
-      user: { id: user.id, email: user.email, name: user.name, role: user.role, avatar_url: user.avatar_url, wallet_balance: user.wallet_balance, referral_code: user.referral_code, phone: user.phone, address: user.address }
+      user: { id: user.id, email: user.email, name: user.name, role: user.role, avatar_url: user.avatar_url, wallet_balance: user.wallet_balance, referral_code: user.referral_code, phone: user.phone, shipping_address: user.shipping_address }
     });
   } catch (error) {
     console.error('Login error:', error);
@@ -373,7 +373,7 @@ router.post('/google', authLimiter, async (req, res) => {
 
     res.json({
       token: jwtToken,
-      user: { id: user.id, email: user.email, name: user.name, role: user.role, avatar_url: user.avatar_url, wallet_balance: user.wallet_balance, referral_code: user.referral_code, phone: user.phone, address: user.address }
+      user: { id: user.id, email: user.email, name: user.name, role: user.role, avatar_url: user.avatar_url, wallet_balance: user.wallet_balance, referral_code: user.referral_code, phone: user.phone, shipping_address: user.shipping_address }
     });
   } catch (error) {
     console.error('Google login error:', error);
@@ -384,7 +384,7 @@ router.post('/google', authLimiter, async (req, res) => {
 // GET /me — Get current user (from labs, kept for backward compatibility)
 router.get('/me', authMiddleware, async (req, res) => {
   try {
-    const [users] = await pool.query('SELECT id, email, name, role, avatar_url, google_id, phone, address, wallet_balance, referral_code FROM himalix_auth.users WHERE id = ?', [req.user.id]);
+    const [users] = await pool.query('SELECT id, email, name, role, avatar_url, google_id, phone, shipping_address, wallet_balance, referral_code FROM himalix_auth.users WHERE id = ?', [req.user.id]);
     if (users.length === 0) {
       return res.status(404).json({ message: 'User not found' });
     }
@@ -395,10 +395,10 @@ router.get('/me', authMiddleware, async (req, res) => {
   }
 });
 
-// PUT /update — Update profile parameters (name, phone, address)
+// PUT /update — Update profile parameters (name, phone, shipping_address)
 router.put('/update', authMiddleware, async (req, res) => {
   try {
-    const { name, phone, address, avatar_url } = req.body;
+    const { name, phone, shipping_address, avatar_url } = req.body;
     
     const updates = [];
     const params = [];
@@ -411,9 +411,9 @@ router.put('/update', authMiddleware, async (req, res) => {
       updates.push('phone = ?');
       params.push(phone.trim() || null);
     }
-    if (address !== undefined) {
-      updates.push('address = ?');
-      params.push(address.trim() || null);
+    if (shipping_address !== undefined) {
+      updates.push('shipping_address = ?');
+      params.push(shipping_address ? JSON.stringify(shipping_address) : null);
     }
     if (avatar_url !== undefined) {
       updates.push('avatar_url = ?');
@@ -427,7 +427,7 @@ router.put('/update', authMiddleware, async (req, res) => {
     params.push(req.user.id);
     await pool.query(`UPDATE himalix_auth.users SET ${updates.join(', ')} WHERE id = ?`, params);
     
-    const [rows] = await pool.query('SELECT id, email, name, role, avatar_url, google_id, phone, address, wallet_balance, referral_code FROM himalix_auth.users WHERE id = ?', [req.user.id]);
+    const [rows] = await pool.query('SELECT id, email, name, role, avatar_url, google_id, phone, shipping_address, wallet_balance, referral_code FROM himalix_auth.users WHERE id = ?', [req.user.id]);
     res.json({ message: 'Profile updated successfully', user: rows[0] });
   } catch (err) {
     console.error('Update profile error:', err);

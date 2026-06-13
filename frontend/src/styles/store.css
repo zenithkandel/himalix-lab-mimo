@@ -516,6 +516,12 @@
   background: rgba(40, 40, 40, 0.6);
 }
 
+[data-theme='light'] .product-card:hover {
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.12);
+  border-color: rgba(0, 0, 0, 0.15);
+  background: var(--bg-3);
+}
+
 .product-card--featured {
   width: 280px;
   flex-shrink: 0;
@@ -586,6 +592,10 @@
   justify-content: center;
   opacity: 0;
   transition: opacity var(--transition-fast);
+}
+
+[data-theme='light'] .product-card__image-overlay {
+  background: rgba(0, 0, 0, 0.08);
 }
 
 .product-card:hover .product-card__image-overlay {

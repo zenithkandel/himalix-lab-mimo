@@ -416,7 +416,7 @@ export default function SettingsManager({ authFetch }) {
           <div style={{ flex: 1 }}>
             <h3 className="section-title mb-4" style={{ fontSize: 'var(--text-sm)' }}>Email Notification Receivers</h3>
 
-            <form onSubmit={handleAddReceiver} className="mb-6 flex flex-col gap-4" style={{ border: '1px solid var(--border)', padding: 'var(--space-4)', background: '#141414' }}>
+            <form onSubmit={handleAddReceiver} className="mb-6 flex flex-col gap-4" style={{ border: '1px solid var(--border)', padding: 'var(--space-4)', background: 'var(--bg-1)' }}>
               <div className="form-group mb-0">
                 <label className="form-label">Email Address</label>
                 <input

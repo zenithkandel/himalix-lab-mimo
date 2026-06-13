@@ -24,14 +24,20 @@ export default function Cart() {
   const [shipping, setShipping] = useState(null);
 
   /* Address form */
-  const [address, setAddress] = useState({
-    full_name: user?.name || '',
-    phone: '',
-    address_line: '',
-    city: '',
-    district: '',
-    lat: '',
-    lng: '',
+  const [address, setAddress] = useState(() => {
+    let sa = {};
+    if (user?.shipping_address) {
+      try { sa = typeof user.shipping_address === 'string' ? JSON.parse(user.shipping_address) : user.shipping_address; } catch(e){}
+    }
+    return {
+      full_name: user?.name || '',
+      phone: user?.phone || '',
+      address_line: sa.addressLine || '',
+      city: sa.city || '',
+      district: sa.district || '',
+      lat: sa.lat || '',
+      lng: sa.lng || '',
+    };
   });
 
   useEffect(() => {

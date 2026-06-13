@@ -22,7 +22,16 @@ export default function Profile() {
   const [socialMsg, setSocialMsg] = useState('');
 
   /* Profile edit state */
-  const [profileForm, setProfileForm] = useState({ name: '', phone: '', address: '' });
+  const [profileForm, setProfileForm] = useState({ 
+    name: '', 
+    phone: '', 
+    addressLine: '',
+    city: '',
+    district: '',
+    province: '',
+    lat: '',
+    lng: ''
+  });
   const [profileSaving, setProfileSaving] = useState(false);
   const [profileMsg, setProfileMsg] = useState('');
   const [avatarUploading, setAvatarUploading] = useState(false);
@@ -35,10 +44,19 @@ export default function Profile() {
   // Update profile edit form fields when user state updates
   useEffect(() => {
     if (user) {
+      let sa = {};
+      if (user.shipping_address) {
+        sa = typeof user.shipping_address === 'string' ? JSON.parse(user.shipping_address) : user.shipping_address;
+      }
       setProfileForm({
         name: user.name || '',
         phone: user.phone || '',
-        address: user.address || '',
+        addressLine: sa.addressLine || '',
+        city: sa.city || '',
+        district: sa.district || '',
+        province: sa.province || '',
+        lat: sa.lat || '',
+        lng: sa.lng || ''
       });
     }
   }, [user]);
@@ -131,9 +149,21 @@ export default function Profile() {
     setProfileSaving(true);
     setProfileMsg('');
     try {
+      const payload = {
+        name: profileForm.name,
+        phone: profileForm.phone,
+        shipping_address: {
+          addressLine: profileForm.addressLine,
+          city: profileForm.city,
+          district: profileForm.district,
+          province: profileForm.province,
+          lat: profileForm.lat,
+          lng: profileForm.lng
+        }
+      };
       const res = await authFetch('/api/auth/update', {
         method: 'PUT',
-        body: JSON.stringify(profileForm),
+        body: JSON.stringify(payload),
       });
       const d = await res.json();
       if (!res.ok) throw new Error(d.message);
@@ -570,18 +600,71 @@ export default function Profile() {
                     />
                   </div>
                   <div className="form-group">
-                    <label htmlFor="profile-address" className="form-label">
-                      <i className="fa-light fa-sharp fa-location-dot" /> Default Address
+                    <label className="form-label">
+                      <i className="fa-light fa-sharp fa-location-dot" /> Default Street Address
                     </label>
-                    <textarea
-                      id="profile-address"
-                      className="form-textarea"
-                      placeholder="Enter your primary delivery address"
-                      value={profileForm.address}
-                      onChange={e => setProfileForm(p => ({ ...p, address: e.target.value }))}
+                    <input
+                      className="form-input"
+                      placeholder="e.g. 123 Tech Park, Block C"
+                      value={profileForm.addressLine}
+                      onChange={e => setProfileForm(p => ({ ...p, addressLine: e.target.value }))}
                       disabled={profileSaving}
-                      style={{ minHeight: 80 }}
                     />
+                  </div>
+                  <div className="profile-edit-form__row">
+                    <div className="form-group">
+                      <label className="form-label">City</label>
+                      <input
+                        className="form-input"
+                        placeholder="e.g. Kathmandu"
+                        value={profileForm.city}
+                        onChange={e => setProfileForm(p => ({ ...p, city: e.target.value }))}
+                        disabled={profileSaving}
+                      />
+                    </div>
+                    <div className="form-group">
+                      <label className="form-label">District</label>
+                      <input
+                        className="form-input"
+                        placeholder="e.g. Kathmandu"
+                        value={profileForm.district}
+                        onChange={e => setProfileForm(p => ({ ...p, district: e.target.value }))}
+                        disabled={profileSaving}
+                      />
+                    </div>
+                  </div>
+                  <div className="profile-edit-form__row">
+                    <div className="form-group">
+                      <label className="form-label">Province</label>
+                      <input
+                        className="form-input"
+                        placeholder="e.g. Bagmati"
+                        value={profileForm.province}
+                        onChange={e => setProfileForm(p => ({ ...p, province: e.target.value }))}
+                        disabled={profileSaving}
+                      />
+                    </div>
+                  </div>
+                  
+                  {/* Fake map pin drop just for coordinates representation */}
+                  <div className="form-group" style={{ marginBottom: 'var(--space-6)' }}>
+                    <label className="form-label"><i className="fa-light fa-sharp fa-map-pin" /> Default Coordinates</label>
+                    <div style={{ padding: 'var(--space-4)', background: 'var(--bg-2)', border: '1px solid var(--border)', display: 'flex', flexDirection: 'column', gap: 'var(--space-3)' }}>
+                      <p style={{ fontSize: 'var(--text-xs)', color: 'var(--text-2)' }}>Map your default delivery pin to speed up checkout.</p>
+                      <div className="profile-edit-form__row">
+                        <input className="form-input" placeholder="Latitude (e.g. 27.7172)" value={profileForm.lat} onChange={e => setProfileForm(p => ({ ...p, lat: e.target.value }))} disabled={profileSaving} />
+                        <input className="form-input" placeholder="Longitude (e.g. 85.3240)" value={profileForm.lng} onChange={e => setProfileForm(p => ({ ...p, lng: e.target.value }))} disabled={profileSaving} />
+                      </div>
+                      <button type="button" className="btn btn-outline btn-sm" onClick={() => {
+                        if (navigator.geolocation) {
+                          navigator.geolocation.getCurrentPosition((pos) => {
+                            setProfileForm(p => ({ ...p, lat: pos.coords.latitude.toFixed(6), lng: pos.coords.longitude.toFixed(6) }));
+                          });
+                        }
+                      }}>
+                        <i className="fa-light fa-sharp fa-location-crosshairs" /> Use Current Location
+                      </button>
+                    </div>
                   </div>
                   <button type="submit" className="btn btn-primary" disabled={profileSaving}>
                     {profileSaving

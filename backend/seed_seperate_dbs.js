@@ -44,7 +44,7 @@ async function seed() {
         google_id VARCHAR(255) DEFAULT NULL,
         avatar_url VARCHAR(500) DEFAULT NULL,
         phone VARCHAR(50) DEFAULT NULL,
-        address TEXT DEFAULT NULL,
+        shipping_address JSON DEFAULT NULL,
         role ENUM('user','admin') NOT NULL DEFAULT 'user',
         wallet_balance DECIMAL(10,2) NOT NULL DEFAULT 0.00,
         referral_code VARCHAR(50) DEFAULT NULL,
@@ -63,10 +63,10 @@ async function seed() {
     const userHashedPwd = await bcrypt.hash('user123', 10);
 
     await connection.query(`
-      INSERT INTO users (email, name, password_hash, role, referral_code, wallet_balance, phone, address) VALUES
-      ('admin@himalixlab.com', 'Labs Admin', ?, 'admin', 'HMX-REF-ADMIN0', 0.00, '9801234567', 'Kathmandu, Nepal'),
-      ('admin@himalix.store', 'Store Admin', ?, 'admin', 'HMX-REF-ADMIN1', 0.00, '9801234568', 'Lalitpur, Nepal'),
-      ('user@himalix.store', 'Test Customer', ?, 'user', 'HMX-REF-USER12', 2500.00, '9801122334', 'Bhaktapur, Nepal')
+      INSERT INTO users (email, name, password_hash, role, referral_code, wallet_balance, phone, shipping_address) VALUES
+      ('admin@himalixlab.com', 'Labs Admin', ?, 'admin', 'HMX-REF-ADMIN0', 0.00, '9801234567', '{"addressLine": "Kathmandu", "city": "Kathmandu", "district": "Kathmandu"}'),
+      ('admin@himalix.store', 'Store Admin', ?, 'admin', 'HMX-REF-ADMIN1', 0.00, '9801234568', '{"addressLine": "Lalitpur", "city": "Lalitpur", "district": "Lalitpur"}'),
+      ('user@himalix.store', 'Test Customer', ?, 'user', 'HMX-REF-USER12', 2500.00, '9801122334', '{"addressLine": "Bhaktapur", "city": "Bhaktapur", "district": "Bhaktapur"}')
       ON DUPLICATE KEY UPDATE email=email
     `, [hashedPwd, hashedPwd, userHashedPwd]);
 
