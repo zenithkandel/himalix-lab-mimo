@@ -5,9 +5,12 @@
 CREATE TABLE IF NOT EXISTS users (
     id              INT           NOT NULL AUTO_INCREMENT,
     email           VARCHAR(255)  NOT NULL,
+    name            VARCHAR(255)  DEFAULT NULL,
     password_hash   VARCHAR(255)  DEFAULT NULL,
     google_id       VARCHAR(255)  DEFAULT NULL,
     avatar_url      VARCHAR(500)  DEFAULT NULL,
+    phone           VARCHAR(50)   DEFAULT NULL,
+    address         TEXT          DEFAULT NULL,
     role            ENUM('user','admin') NOT NULL DEFAULT 'user',
     wallet_balance  DECIMAL(10,2) NOT NULL DEFAULT 0.00,
     referral_code   VARCHAR(50)   DEFAULT NULL,

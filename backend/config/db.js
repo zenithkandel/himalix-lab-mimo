@@ -53,6 +53,48 @@ async function initializeDatabase() {
       // Ignore
     }
 
+    // Add name column if not exists
+    try {
+      const [columns] = await connection.query("SHOW COLUMNS FROM himalix_auth.users LIKE 'name'");
+      if (columns.length === 0) {
+        await connection.query(`
+          ALTER TABLE himalix_auth.users 
+          ADD COLUMN name VARCHAR(255) NULL AFTER email
+        `);
+        console.log('name column added to users table');
+      }
+    } catch (err) {
+      // Ignore
+    }
+
+    // Add phone column if not exists
+    try {
+      const [columns] = await connection.query("SHOW COLUMNS FROM himalix_auth.users LIKE 'phone'");
+      if (columns.length === 0) {
+        await connection.query(`
+          ALTER TABLE himalix_auth.users 
+          ADD COLUMN phone VARCHAR(50) NULL AFTER avatar_url
+        `);
+        console.log('phone column added to users table');
+      }
+    } catch (err) {
+      // Ignore
+    }
+
+    // Add address column if not exists
+    try {
+      const [columns] = await connection.query("SHOW COLUMNS FROM himalix_auth.users LIKE 'address'");
+      if (columns.length === 0) {
+        await connection.query(`
+          ALTER TABLE himalix_auth.users 
+          ADD COLUMN address TEXT NULL AFTER phone
+        `);
+        console.log('address column added to users table');
+      }
+    } catch (err) {
+      // Ignore
+    }
+
     // 4. Create settings table if not exists
     try {
       await connection.query(`

@@ -26,8 +26,10 @@ async function seed() {
     ];
 
     for (const db of dbs) {
+      console.log(`Dropping database "${db}" if exists...`);
+      await connection.query(`DROP DATABASE IF EXISTS ${db}`);
       console.log(`Creating database "${db}"...`);
-      await connection.query(`CREATE DATABASE IF NOT EXISTS ${db} CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci`);
+      await connection.query(`CREATE DATABASE ${db} CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci`);
     }
 
     // ─── 3. SETUP AUTH DATABASE SCHEMA & SEED ───
@@ -37,9 +39,12 @@ async function seed() {
       CREATE TABLE IF NOT EXISTS users (
         id INT NOT NULL AUTO_INCREMENT,
         email VARCHAR(255) NOT NULL,
+        name VARCHAR(255) DEFAULT NULL,
         password_hash VARCHAR(255) DEFAULT NULL,
         google_id VARCHAR(255) DEFAULT NULL,
         avatar_url VARCHAR(500) DEFAULT NULL,
+        phone VARCHAR(50) DEFAULT NULL,
+        address TEXT DEFAULT NULL,
         role ENUM('user','admin') NOT NULL DEFAULT 'user',
         wallet_balance DECIMAL(10,2) NOT NULL DEFAULT 0.00,
         referral_code VARCHAR(50) DEFAULT NULL,
@@ -58,10 +63,10 @@ async function seed() {
     const userHashedPwd = await bcrypt.hash('user123', 10);
 
     await connection.query(`
-      INSERT INTO users (email, password_hash, role, referral_code, wallet_balance) VALUES
-      ('admin@himalixlab.com', ?, 'admin', 'HMX-REF-ADMIN0', 0.00),
-      ('admin@himalix.store', ?, 'admin', 'HMX-REF-ADMIN1', 0.00),
-      ('user@himalix.store', ?, 'user', 'HMX-REF-USER12', 2500.00)
+      INSERT INTO users (email, name, password_hash, role, referral_code, wallet_balance, phone, address) VALUES
+      ('admin@himalixlab.com', 'Labs Admin', ?, 'admin', 'HMX-REF-ADMIN0', 0.00, '9801234567', 'Kathmandu, Nepal'),
+      ('admin@himalix.store', 'Store Admin', ?, 'admin', 'HMX-REF-ADMIN1', 0.00, '9801234568', 'Lalitpur, Nepal'),
+      ('user@himalix.store', 'Test Customer', ?, 'user', 'HMX-REF-USER12', 2500.00, '9801122334', 'Bhaktapur, Nepal')
       ON DUPLICATE KEY UPDATE email=email
     `, [hashedPwd, hashedPwd, userHashedPwd]);
 
