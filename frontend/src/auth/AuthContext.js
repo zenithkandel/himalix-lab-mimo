@@ -71,7 +71,7 @@ export function AuthProvider({ children }) {
   const isAdmin = user?.role === 'admin';
 
   return (
-    <AuthContext.Provider value={{ user, loading, token, login, logout, authFetch, isAdmin, systemConfig, loginWithGoogle }}>
+    <AuthContext.Provider value={{ user, setUser, loading, token, login, logout, authFetch, isAdmin, systemConfig, loginWithGoogle }}>
       {children}
     </AuthContext.Provider>
   );

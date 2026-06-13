@@ -346,7 +346,7 @@ router.post('/google', authLimiter, async (req, res) => {
 // GET /me — Get current user (from labs, kept for backward compatibility)
 router.get('/me', authMiddleware, async (req, res) => {
   try {
-    const [users] = await pool.query('SELECT id, email, name, role, avatar_url, phone, address, wallet_balance, referral_code FROM himalix_auth.users WHERE id = ?', [req.user.id]);
+    const [users] = await pool.query('SELECT id, email, name, role, avatar_url, google_id, phone, address, wallet_balance, referral_code FROM himalix_auth.users WHERE id = ?', [req.user.id]);
     if (users.length === 0) {
       return res.status(404).json({ message: 'User not found' });
     }
@@ -389,7 +389,7 @@ router.put('/update', authMiddleware, async (req, res) => {
     params.push(req.user.id);
     await pool.query(`UPDATE himalix_auth.users SET ${updates.join(', ')} WHERE id = ?`, params);
     
-    const [rows] = await pool.query('SELECT id, email, name, role, avatar_url, phone, address, wallet_balance, referral_code FROM himalix_auth.users WHERE id = ?', [req.user.id]);
+    const [rows] = await pool.query('SELECT id, email, name, role, avatar_url, google_id, phone, address, wallet_balance, referral_code FROM himalix_auth.users WHERE id = ?', [req.user.id]);
     res.json({ message: 'Profile updated successfully', user: rows[0] });
   } catch (err) {
     console.error('Update profile error:', err);

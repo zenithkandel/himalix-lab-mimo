@@ -7,6 +7,7 @@ import ProductEditor from './components/ProductEditor';
 import UserManager from './components/UserManager';
 import ReviewManager from './components/ReviewManager';
 import SettingsManager from './components/SettingsManager';
+import LogsManager from './components/LogsManager';
 
 const VIEWS = [
   { id: 'dashboard', icon: 'gauge',         label: 'Dashboard' },
@@ -15,6 +16,7 @@ const VIEWS = [
   { id: 'users',     icon: 'users',         label: 'Users' },
   { id: 'reviews',   icon: 'star',          label: 'Reviews' },
   { id: 'settings',  icon: 'gear',          label: 'Settings' },
+  { id: 'logs',      icon: 'file-lines',    label: 'Logs' },
 ];
 
 export default function StoreAdmin() {
@@ -243,6 +245,11 @@ export default function StoreAdmin() {
           )}
           {view === 'settings' && (
             <SettingsManager 
+              authFetch={authFetch} 
+            />
+          )}
+          {view === 'logs' && (
+            <LogsManager 
               authFetch={authFetch} 
             />
           )}

@@ -81,9 +81,20 @@ export default function ProductDetail() {
 
   if (!product) return null;
 
-  const images = product.images?.length > 0
-    ? product.images
-    : [{ url: product.image_url || '/placeholder.png' }];
+  let images = [];
+  if (product.image_urls) {
+    try {
+      const parsed = typeof product.image_urls === 'string' ? JSON.parse(product.image_urls) : product.image_urls;
+      if (Array.isArray(parsed) && parsed.length > 0) {
+        images = parsed.map(url => ({ url }));
+      }
+    } catch (e) {
+      console.error("Error parsing product.image_urls", e);
+    }
+  }
+  if (images.length === 0) {
+    images = [{ url: product.image_url || '/placeholder.png' }];
+  }
 
   const isOutOfStock = (product.stock_quantity || 0) <= 0;
   const hasDiscount  = product.original_price && product.original_price > product.price;

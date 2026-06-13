@@ -3,10 +3,8 @@ import StoreNavbar from './Navbar';
 import { useAuth } from '../auth/AuthContext';
 import { useNavigate } from 'react-router-dom';
 
-const TABS = ['orders', 'wallet', 'profile'];
-
 export default function Profile() {
-  const { user, authFetch, logout } = useAuth();
+  const { user, setUser, authFetch, logout } = useAuth();
   const navigate = useNavigate();
   const [tab, setTab] = useState('orders');
 
@@ -19,14 +17,30 @@ export default function Profile() {
   const [wallet, setWallet]   = useState(null);
   const [history, setHistory] = useState([]);
   const [historyLoading, setHistoryLoading] = useState(false);
-  const [socialClaim, setSocialClaim] = useState('');
   const [socialLoading, setSocialLoading] = useState(false);
   const [socialMsg, setSocialMsg] = useState('');
 
-  /* Profile edit */
-  const [profileForm, setProfileForm] = useState({ name: user?.name || '', phone: '', address: '' });
+  /* Profile edit state */
+  const [profileForm, setProfileForm] = useState({ name: '', phone: '', address: '' });
   const [profileSaving, setProfileSaving] = useState(false);
   const [profileMsg, setProfileMsg] = useState('');
+  const [avatarUploading, setAvatarUploading] = useState(false);
+
+  /* Password update state */
+  const [passwordForm, setPasswordForm] = useState({ currentPassword: '', newPassword: '', confirmPassword: '' });
+  const [passwordSaving, setPasswordSaving] = useState(false);
+  const [passwordMsg, setPasswordMsg] = useState({ type: '', text: '' });
+
+  // Update profile edit form fields when user state updates
+  useEffect(() => {
+    if (user) {
+      setProfileForm({
+        name: user.name || '',
+        phone: user.phone || '',
+        address: user.address || '',
+      });
+    }
+  }, [user]);
 
   useEffect(() => {
     if (!user) { navigate('/signin'); return; }
@@ -78,6 +92,7 @@ export default function Profile() {
       const d = await res.json();
       if (!res.ok) throw new Error(d.message);
       setProfileMsg('Profile updated!');
+      setUser(d.user);
     } catch (err) {
       setProfileMsg(err.message || 'Failed to save.');
     } finally {
@@ -85,8 +100,65 @@ export default function Profile() {
     }
   };
 
+  const handleAvatarUpload = async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    const formData = new FormData();
+    formData.append('image', file);
+
+    setAvatarUploading(true);
+    setProfileMsg('');
+    try {
+      const res = await authFetch('/api/auth/upload-avatar', {
+        method: 'POST',
+        body: formData,
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.message || 'Avatar upload failed');
+      setUser(prev => ({ ...prev, avatar_url: data.avatarUrl }));
+      setProfileMsg('Avatar uploaded successfully!');
+    } catch (err) {
+      setProfileMsg(err.message || 'Failed to upload avatar.');
+    } finally {
+      setAvatarUploading(false);
+    }
+  };
+
+  const handlePasswordChange = async (e) => {
+    e.preventDefault();
+    if (passwordForm.newPassword !== passwordForm.confirmPassword) {
+      setPasswordMsg({ type: 'danger', text: 'New passwords do not match' });
+      return;
+    }
+    setPasswordSaving(true);
+    setPasswordMsg({ type: '', text: '' });
+    try {
+      const res = await authFetch('/api/auth/password', {
+        method: 'PUT',
+        body: JSON.stringify({
+          currentPassword: passwordForm.currentPassword,
+          newPassword: passwordForm.newPassword
+        })
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.message || 'Password update failed');
+      setPasswordMsg({ type: 'success', text: 'Password updated successfully!' });
+      setPasswordForm({ currentPassword: '', newPassword: '', confirmPassword: '' });
+    } catch (err) {
+      setPasswordMsg({ type: 'danger', text: err.message });
+    } finally {
+      setPasswordSaving(false);
+    }
+  };
+
   const formatPrice = n => `Rs. ${Number(n || 0).toLocaleString('en-NP')}`;
   const formatDate  = s => new Date(s).toLocaleDateString('en-NP', { year: 'numeric', month: 'short', day: 'numeric' });
+
+  const resolveAvatar = (url) => {
+    if (!url) return null;
+    if (url.startsWith('http://') || url.startsWith('https://') || url.startsWith('data:')) return url;
+    return `http://localhost:5000${url}`;
+  };
 
   const statusBadge = (status) => {
     const map = {
@@ -109,12 +181,17 @@ export default function Profile() {
         <aside className="profile-sidebar">
           <div className="profile-card">
             <div className="profile-card__avatar">
-              {user?.avatar_url
-                ? <img src={user.avatar_url} alt={user.name} />
-                : <i className="fa-light fa-sharp fa-user" />
-              }
+              {user?.avatar_url ? (
+                <img 
+                  src={resolveAvatar(user.avatar_url)} 
+                  alt={user.name || 'User'} 
+                  onError={e => { e.target.src = '/placeholder.png'; }}
+                />
+              ) : (
+                <i className="fa-light fa-sharp fa-user" />
+              )}
             </div>
-            <div className="profile-card__name">{user?.name}</div>
+            <div className="profile-card__name">{user?.name || 'Customer'}</div>
             <div className="profile-card__email">{user?.email}</div>
             <div className={`profile-card__role${user?.role === 'admin' ? ' profile-card__role--admin' : ''}`}>
               {user?.role || 'customer'}
@@ -346,10 +423,44 @@ export default function Profile() {
               </div>
               <div className="profile-section__body">
                 {profileMsg && (
-                  <div className={`alert ${profileMsg.includes('!') ? 'alert-success' : 'alert-danger'}`} style={{ marginBottom: 'var(--space-5)' }}>
+                  <div className={`alert ${profileMsg.toLowerCase().includes('failed') || profileMsg.toLowerCase().includes('error') ? 'alert-danger' : 'alert-success'}`} style={{ marginBottom: 'var(--space-5)' }}>
                     {profileMsg}
                   </div>
                 )}
+
+                {/* Avatar upload */}
+                <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-4)', marginBottom: 'var(--space-6)', borderBottom: '1px solid var(--border)', paddingBottom: 'var(--space-5)' }}>
+                  <div style={{ width: '80px', height: '80px', background: '#141414', border: '1px solid var(--border)', display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden' }}>
+                    {user?.avatar_url ? (
+                      <img 
+                        src={resolveAvatar(user.avatar_url)} 
+                        alt="" 
+                        style={{ width: '100%', height: '100%', objectFit: 'cover' }} 
+                        onError={e => { e.target.src = '/placeholder.png'; }}
+                      />
+                    ) : (
+                      <i className="fa-light fa-sharp fa-user text-3xl" style={{ color: 'var(--text-3)' }} />
+                    )}
+                  </div>
+                  <div>
+                    <label htmlFor="avatar-file" className="btn btn-outline btn-sm" style={{ cursor: 'pointer', display: 'inline-flex', alignItems: 'center', gap: 'var(--space-2)' }}>
+                      <i className="fa-light fa-sharp fa-upload" />
+                      {avatarUploading ? 'Uploading...' : 'Upload Picture'}
+                    </label>
+                    <input 
+                      type="file" 
+                      id="avatar-file" 
+                      accept="image/*" 
+                      style={{ display: 'none' }} 
+                      onChange={handleAvatarUpload}
+                      disabled={avatarUploading}
+                    />
+                    <div style={{ fontSize: 'var(--text-xxs)', color: 'var(--text-3)', marginTop: 'var(--space-1)' }}>
+                      JPEG, PNG or WEBP (Max 5MB)
+                    </div>
+                  </div>
+                </div>
+
                 <form className="profile-edit-form" onSubmit={handleProfileSave}>
                   <div className="profile-edit-form__row">
                     <div className="form-group">
@@ -359,6 +470,7 @@ export default function Profile() {
                       <input
                         id="profile-name"
                         className="form-input"
+                        placeholder="Enter your full name"
                         value={profileForm.name}
                         onChange={e => setProfileForm(p => ({ ...p, name: e.target.value }))}
                         disabled={profileSaving}
@@ -379,6 +491,7 @@ export default function Profile() {
                       id="profile-phone"
                       type="tel"
                       className="form-input"
+                      placeholder="Enter your phone number"
                       value={profileForm.phone}
                       onChange={e => setProfileForm(p => ({ ...p, phone: e.target.value }))}
                       disabled={profileSaving}
@@ -391,6 +504,7 @@ export default function Profile() {
                     <textarea
                       id="profile-address"
                       className="form-textarea"
+                      placeholder="Enter your primary delivery address"
                       value={profileForm.address}
                       onChange={e => setProfileForm(p => ({ ...p, address: e.target.value }))}
                       disabled={profileSaving}
@@ -404,6 +518,68 @@ export default function Profile() {
                     }
                   </button>
                 </form>
+
+                {/* Password reset for local accounts */}
+                {!user?.google_id && (
+                  <div style={{ marginTop: 'var(--space-8)', borderTop: '1px solid var(--border)', paddingTop: 'var(--space-6)' }}>
+                    <div className="profile-section__title" style={{ fontSize: 'var(--text-sm)', marginBottom: 'var(--space-4)' }}>
+                      <i className="fa-light fa-sharp fa-key" /> Change Password
+                    </div>
+
+                    {passwordMsg.text && (
+                      <div className={`alert alert-${passwordMsg.type} mb-4`}>
+                        <i className={`fa-light fa-sharp fa-${passwordMsg.type === 'success' ? 'circle-check' : 'circle-exclamation'}`} /> {passwordMsg.text}
+                      </div>
+                    )}
+
+                    <form onSubmit={handlePasswordChange}>
+                      <div className="form-group">
+                        <label htmlFor="curr-pass" className="form-label">Current Password</label>
+                        <input
+                          type="password"
+                          id="curr-pass"
+                          className="form-input"
+                          placeholder="••••••••"
+                          value={passwordForm.currentPassword}
+                          onChange={e => setPasswordForm(p => ({ ...p, currentPassword: e.target.value }))}
+                          required
+                          disabled={passwordSaving}
+                        />
+                      </div>
+                      <div className="profile-edit-form__row">
+                        <div className="form-group">
+                          <label htmlFor="new-pass" className="form-label">New Password</label>
+                          <input
+                            type="password"
+                            id="new-pass"
+                            className="form-input"
+                            placeholder="Min 6 characters"
+                            value={passwordForm.newPassword}
+                            onChange={e => setPasswordForm(p => ({ ...p, newPassword: e.target.value }))}
+                            required
+                            disabled={passwordSaving}
+                          />
+                        </div>
+                        <div className="form-group">
+                          <label htmlFor="confirm-pass" className="form-label">Confirm New Password</label>
+                          <input
+                            type="password"
+                            id="confirm-pass"
+                            className="form-input"
+                            placeholder="Re-enter new password"
+                            value={passwordForm.confirmPassword}
+                            onChange={e => setPasswordForm(p => ({ ...p, confirmPassword: e.target.value }))}
+                            required
+                            disabled={passwordSaving}
+                          />
+                        </div>
+                      </div>
+                      <button type="submit" className="btn btn-primary" disabled={passwordSaving}>
+                        {passwordSaving ? 'Updating...' : 'Update Password'}
+                      </button>
+                    </form>
+                  </div>
+                )}
               </div>
             </div>
           )}
