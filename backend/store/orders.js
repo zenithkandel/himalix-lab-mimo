@@ -2,7 +2,7 @@ const express = require('express');
 const router = express.Router();
 const { pool } = require('../config/db');
 const { authMiddleware } = require('../middleware/auth');
-const { sendNotificationEmail } = require('../config/mail');
+const { sendNotificationEmail, sendEmail } = require('../config/mail');
 
 router.use(authMiddleware);
 
@@ -254,6 +254,48 @@ const checkoutHandler = async (req, res) => {
        <h6>Shipping Details:</h6>
        <p>Name: ${shippingDetails.fullName}<br/>Phone: ${shippingDetails.phone}<br/>Address: ${shippingDetails.city}, ${shippingDetails.district}, ${shippingDetails.province}</p>`
     ).catch(err => console.error('Order notification email error:', err));
+
+    const itemsHtmlUser = cartItems.map(item => `
+      <li>
+        <span style="font-weight: bold; color: #ffffff;">${item.name}</span> (Qty: ${item.quantity})
+        <div style="float: right; color: #ffffff;">रु ${(item.price * item.quantity).toFixed(2)}</div>
+      </li>
+    `).join('');
+
+    sendEmail({
+      to: req.user.email,
+      subject: `Order Confirmation #${orderId}`,
+      title: 'Order Placed Successfully',
+      htmlBody: `
+        <p>Dear Customer,</p>
+        <p>Thank you for shopping at the Himalix Store! We have received your order and are processing it.</p>
+        <p><strong>Order Summary:</strong></p>
+        <div class="highlight-box">
+          <p>Order ID: <strong>#${orderId}</strong></p>
+          <p>Tracking Code: <code>${trackingCode}</code></p>
+          <p>Expected Delivery ETA: <strong>${etaString}</strong></p>
+        </div>
+        
+        <p><strong>Items Ordered:</strong></p>
+        <ul class="item-list">${itemsHtmlUser}</ul>
+        
+        <div style="margin-top: 20px; font-size: 16px; font-weight: bold; color: #ffffff;">
+          Total Paid/Payable: <span style="float: right; color: #d4a017;">रु ${totalAmount.toFixed(2)}</span>
+        </div>
+        
+        <p style="margin-top: 30px;"><strong>Shipping Details:</strong></p>
+        <div class="highlight-box">
+          <p><strong>Name:</strong> ${shippingDetails.fullName}</p>
+          <p><strong>Phone:</strong> ${shippingDetails.phone}</p>
+          <p><strong>Address:</strong> ${shippingDetails.addressLine || ''}, ${shippingDetails.city}, ${shippingDetails.district}, ${shippingDetails.province}</p>
+        </div>
+        
+        <p>You can track the status of your order anytime in your profile page:</p>
+        <a href="http://localhost:3000/store" class="btn">Track Order</a>
+        <br/><br/>
+        <p>Best regards,<br/>The Himalix Team</p>
+      `
+    }).catch(err => console.error('Order confirmation email error:', err));
 
     // Check for stock thresholds and send low stock emails
     for (const item of cartItems) {

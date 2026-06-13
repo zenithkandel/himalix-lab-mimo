@@ -2,6 +2,8 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { useAuth } from '../../auth/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import { useTheme } from '../../context/ThemeContext';
+import ImageUploadZone from '../../components/ImageUploadZone';
+import MessageManager from './components/MessageManager';
 
 const SECTIONS = [
   { id: 'hero',         icon: 'house',       label: 'Hero Section' },
@@ -11,10 +13,11 @@ const SECTIONS = [
   { id: 'team',         icon: 'users',       label: 'Team Members' },
   { id: 'testimonials', icon: 'star',        label: 'Testimonials' },
   { id: 'contact',      icon: 'envelope',    label: 'Contact Info' },
+  { id: 'messages',     icon: 'inbox',       label: 'Inquiries' },
 ];
 
 export default function PortfolioAdmin() {
-  const { user, authFetch, logout } = useAuth();
+  const { user, authFetch, logout, token } = useAuth();
   const navigate = useNavigate();
   const { theme, toggleTheme } = useTheme();
 
@@ -154,12 +157,15 @@ export default function PortfolioAdmin() {
         <div className="admin-content">
           {loading ? (
             <div className="loading-page"><div className="spinner" /></div>
+          ) : activeSection === 'messages' ? (
+            <MessageManager token={token} authFetch={authFetch} />
           ) : (
             <ContentEditor
               section={activeSection}
               data={content[activeSection]}
               onSave={(data) => handleSave(activeSection, data)}
               saving={saving}
+              token={token}
             />
           )}
         </div>
@@ -177,7 +183,7 @@ export default function PortfolioAdmin() {
 }
 
 /* ── Section-specific editors ── */
-function ContentEditor({ section, data, onSave, saving }) {
+function ContentEditor({ section, data, onSave, saving, token }) {
   const [local, setLocal] = useState(data || {});
 
   useEffect(() => { setLocal(data || {}); }, [section, data]);
@@ -227,6 +233,8 @@ function ContentEditor({ section, data, onSave, saving }) {
         onChange={(items) => setLocal({ items })}
         onSave={() => onSave(local)}
         saving={saving}
+        token={token}
+        apiUrl="/api"
       />
     );
   }
@@ -240,14 +248,16 @@ function ContentEditor({ section, data, onSave, saving }) {
           { key: 'name',       label: 'Name' },
           { key: 'role',       label: 'Role / Title' },
           { key: 'bio',        label: 'Short Bio', multiline: true },
-          { key: 'avatar_url', label: 'Avatar URL' },
-          { key: 'twitter',    label: 'Twitter Link', placeholder: '#' },
+          { key: 'avatar_url', label: 'Avatar Image', type: 'image' },
+          { key: 'instagram',  label: 'Instagram Link', placeholder: '#' },
           { key: 'linkedin',   label: 'LinkedIn Link', placeholder: '#' },
           { key: 'github',     label: 'GitHub Link', placeholder: '#' },
         ]}
         onChange={(members) => setLocal({ members })}
         onSave={() => onSave(local)}
         saving={saving}
+        token={token}
+        apiUrl="/api"
       />
     );
   }
@@ -261,13 +271,15 @@ function ContentEditor({ section, data, onSave, saving }) {
           { key: 'name',      label: 'Client Name' },
           { key: 'title',     label: 'Title / City' },
           { key: 'company',   label: 'Company', placeholder: 'e.g. Nepal Telecom' },
-          { key: 'image_url', label: 'Client Image URL', placeholder: 'e.g. https://...' },
+          { key: 'image_url', label: 'Client Image', type: 'image' },
           { key: 'rating',    label: 'Rating (1–5)', type: 'number' },
           { key: 'text',      label: 'Testimonial Text', multiline: true },
         ]}
         onChange={(items) => setLocal({ items })}
         onSave={() => onSave(local)}
         saving={saving}
+        token={token}
+        apiUrl="/api"
       />
     );
   }
@@ -288,6 +300,8 @@ function ContentEditor({ section, data, onSave, saving }) {
         onChange={(items) => setLocal({ items })}
         onSave={() => onSave(local)}
         saving={saving}
+        token={token}
+        apiUrl="/api"
       />
     );
   }
@@ -319,7 +333,7 @@ function ContentEditor({ section, data, onSave, saving }) {
   );
 }
 
-function ArrayEditor({ label, items, schema, onChange, onSave, saving }) {
+function ArrayEditor({ label, items, schema, onChange, onSave, saving, token, apiUrl }) {
   const [draggedIndex, setDraggedIndex] = useState(null);
   const [dragOverIndex, setDragOverIndex] = useState(null);
 
@@ -395,9 +409,11 @@ function ArrayEditor({ label, items, schema, onChange, onSave, saving }) {
     setDragOverIndex(null);
   };
 
+  const isGridLayout = label !== "Statistics";
+
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-5)' }}>
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+      <div style={{ display: 'flex', alignItems: 'center', justifyBetween: 'space-between' }}>
         <span style={{ fontSize: 'var(--text-sm)', fontWeight: 700, color: 'var(--text-0)' }}>{label}</span>
         <button className="btn btn-outline btn-sm" onClick={addItem}>
           <i className="fa-light fa-sharp fa-plus" /> Add Item
@@ -410,66 +426,87 @@ function ArrayEditor({ label, items, schema, onChange, onSave, saving }) {
         </div>
       )}
 
-      {items.map((item, i) => (
-        <div
-          key={item._dragId || i}
-          className={`cms-section-card${i === draggedIndex ? ' cms-section-card--dragging' : ''}${i === dragOverIndex && i !== draggedIndex ? ' cms-section-card--drag-over' : ''}`}
-          draggable={true}
-          onDragStart={(e) => handleDragStart(e, i)}
-          onDragOver={(e) => handleDragOver(e, i)}
-          onDragEnd={handleDragEnd}
-          onDrop={(e) => handleDrop(e, i)}
-        >
-          <div className="cms-section-card__header">
-            <div className="cms-section-card__title">
-              <i className="fa-light fa-sharp fa-grip-dots" />
-              Item {i + 1}
+      <div className={isGridLayout ? "cms-array-grid" : "cms-array-list"}>
+        {items.map((item, i) => (
+          <div
+            key={item._dragId || i}
+            className={`cms-section-card${i === draggedIndex ? ' cms-section-card--dragging' : ''}${i === dragOverIndex && i !== draggedIndex ? ' cms-section-card--drag-over' : ''}`}
+            draggable={true}
+            onDragStart={(e) => handleDragStart(e, i)}
+            onDragOver={(e) => handleDragOver(e, i)}
+            onDragEnd={handleDragEnd}
+            onDrop={(e) => handleDrop(e, i)}
+            style={{ position: 'relative' }}
+          >
+            <div className="cms-section-card__header">
+              {/* Simulated Window Controls */}
+              <div className="cms-window-controls" style={{ display: 'flex', gap: '6px', marginRight: '10px' }}>
+                <span className="cms-window-dot" style={{ width: 8, height: 8, borderRadius: '50%', background: '#ff5f56', display: 'inline-block' }} />
+                <span className="cms-window-dot" style={{ width: 8, height: 8, borderRadius: '50%', background: '#ffbd2e', display: 'inline-block' }} />
+                <span className="cms-window-dot" style={{ width: 8, height: 8, borderRadius: '50%', background: '#27c93f', display: 'inline-block' }} />
+              </div>
+              <div className="cms-section-card__title" style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-2)' }}>
+                <i className="fa-light fa-sharp fa-grip-dots" style={{ cursor: 'grab' }} />
+                Item {i + 1}
+              </div>
+              <button
+                className="btn btn-ghost btn-sm"
+                onClick={() => removeItem(i)}
+                style={{ color: 'var(--danger)', marginLeft: 'auto' }}
+                aria-label="Remove item"
+              >
+                <i className="fa-light fa-sharp fa-trash" />
+              </button>
             </div>
-            <button
-              className="btn btn-ghost btn-sm"
-              onClick={() => removeItem(i)}
-              style={{ color: 'var(--danger)' }}
-              aria-label="Remove item"
-            >
-              <i className="fa-light fa-sharp fa-trash" />
-            </button>
-          </div>
-          <div className="cms-section-card__body">
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 'var(--space-4)' }}>
-              {schema.map(field => (
-                <div
-                  key={field.key}
-                  className="form-group"
-                  style={{ gridColumn: field.multiline ? 'span 2' : 'auto' }}
-                >
-                  <label className="form-label">
-                    {field.label}
-                    {field.key === 'icon' && item[field.key] && (
-                      <i className={`fa-light fa-sharp fa-${item[field.key]}`} style={{ marginLeft: 'var(--space-2)', fontSize: 'var(--text-base)', color: 'var(--accent)' }} />
+            <div className="cms-section-card__body">
+              <div style={{ display: 'grid', gridTemplateColumns: isGridLayout ? '1fr' : '1fr 1fr', gap: 'var(--space-4)' }}>
+                {schema.map(field => (
+                  <div
+                    key={field.key}
+                    className="form-group"
+                    style={{ gridColumn: field.multiline || field.type === 'image' ? 'span 2' : 'auto' }}
+                  >
+                    {field.type === 'image' ? (
+                      <ImageUploadZone
+                        value={item[field.key] || ''}
+                        onChange={val => updateItem(i, field.key, val)}
+                        token={token}
+                        apiUrl={apiUrl}
+                        label={field.label}
+                      />
+                    ) : (
+                      <>
+                        <label className="form-label">
+                          {field.label}
+                          {field.key === 'icon' && item[field.key] && (
+                            <i className={`fa-light fa-sharp fa-${item[field.key]}`} style={{ marginLeft: 'var(--space-2)', fontSize: 'var(--text-base)', color: 'var(--accent)' }} />
+                          )}
+                        </label>
+                        {field.multiline ? (
+                          <textarea
+                            className="form-textarea"
+                            value={item[field.key] || ''}
+                            onChange={e => updateItem(i, field.key, e.target.value)}
+                            style={{ minHeight: 80 }}
+                          />
+                        ) : (
+                          <input
+                            type={field.type || 'text'}
+                            className="form-input"
+                            placeholder={field.placeholder || ''}
+                            value={item[field.key] || ''}
+                            onChange={e => updateItem(i, field.key, e.target.value)}
+                          />
+                        )}
+                      </>
                     )}
-                  </label>
-                  {field.multiline ? (
-                    <textarea
-                      className="form-textarea"
-                      value={item[field.key] || ''}
-                      onChange={e => updateItem(i, field.key, e.target.value)}
-                      style={{ minHeight: 80 }}
-                    />
-                  ) : (
-                    <input
-                      type={field.type || 'text'}
-                      className="form-input"
-                      placeholder={field.placeholder || ''}
-                      value={item[field.key] || ''}
-                      onChange={e => updateItem(i, field.key, e.target.value)}
-                    />
-                  )}
-                </div>
-              ))}
+                  </div>
+                ))}
+              </div>
             </div>
           </div>
-        </div>
-      ))}
+        ))}
+      </div>
 
       <button className="btn btn-primary" onClick={onSave} disabled={saving}>
         {saving

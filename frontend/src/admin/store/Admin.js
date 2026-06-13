@@ -86,14 +86,18 @@ export default function StoreAdmin() {
 
   useEffect(() => { load(); }, [load]);
 
-  const updateOrderStatus = async (orderId, status) => {
+  const updateOrderDetails = async (orderId, fields) => {
     try {
-      await authFetch(`/api/store/admin/orders/${orderId}/status`, {
+      const res = await authFetch(`/api/store/admin/orders/${orderId}/status`, {
         method: 'PUT',
-        body: JSON.stringify({ status }),
+        body: JSON.stringify(fields),
       });
-      setOrders(prev => prev.map(o => o.id === orderId ? { ...o, status } : o));
-    } catch {}
+      if (res.ok) {
+        setOrders(prev => prev.map(o => o.id === orderId ? { ...o, ...fields } : o));
+      }
+    } catch (e) {
+      console.error('Failed to update order details:', e);
+    }
   };
 
   const saveProduct = async (productData, id) => {
@@ -191,7 +195,7 @@ export default function StoreAdmin() {
             <OrderManager 
               orders={orders} 
               loading={orderLoading} 
-              updateOrderStatus={updateOrderStatus} 
+              updateOrderDetails={updateOrderDetails} 
             />
           )}
 

@@ -461,7 +461,8 @@ router.get('/carts', async (req, res) => {
 router.get('/orders', async (req, res) => {
   try {
     const [rows] = await pool.query(`
-      SELECT o.id, o.user_id, u.email, o.total_amount, o.status, o.tracking_code, o.shipping_address, o.payment_method, o.payment_status, o.created_at,
+      SELECT o.id, o.user_id, u.email, u.name AS user_name, u.phone AS user_phone, u.wallet_balance AS user_wallet_balance,
+             o.total_amount, o.status, o.tracking_code, o.shipping_address, o.payment_method, o.payment_status, o.created_at,
              oi.product_id, oi.quantity, oi.price, p.name as product_name
       FROM orders o
       LEFT JOIN himalix_auth.users u ON o.user_id = u.id
@@ -477,6 +478,9 @@ router.get('/orders', async (req, res) => {
           id: row.id,
           user_id: row.user_id,
           email: row.email || 'Guest / Deleted',
+          user_name: row.user_name || 'Guest / N/A',
+          user_phone: row.user_phone || 'N/A',
+          user_wallet_balance: row.user_wallet_balance !== null ? Number(row.user_wallet_balance) : 0,
           total: row.total_amount,
           status: row.status,
           tracking_code: row.tracking_code,

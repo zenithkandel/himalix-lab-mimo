@@ -81,7 +81,7 @@ router.get('/content', async (req, res) => {
           role: t.role,
           bio: t.bio,
           avatar_url: t.image_url,
-          twitter: links.twitter || '',
+          instagram: links.instagram || '',
           linkedin: links.linkedin || '',
           github: links.github || ''
         };
@@ -153,7 +153,7 @@ router.put('/content/:section', async (req, res) => {
       for (let i = 0; i < members.length; i++) {
         const member = members[i];
         const socialLinks = {
-          twitter: member.twitter || '#',
+          instagram: member.instagram || '#',
           linkedin: member.linkedin || '#',
           github: member.github || '#'
         };
@@ -490,14 +490,12 @@ router.put('/settings/:key', async (req, res) => {
       return res.status(400).json({ error: 'setting_value is required' });
     }
 
-    const [result] = await pool.query(
-      'UPDATE himalix_portfolio.labs_site_settings SET setting_value = ? WHERE setting_key = ?',
-      [setting_value, req.params.key]
+    await pool.query(
+      `INSERT INTO himalix_portfolio.labs_site_settings (setting_key, setting_value, setting_type)
+       VALUES (?, ?, 'text')
+       ON DUPLICATE KEY UPDATE setting_value = ?`,
+      [req.params.key, String(setting_value), String(setting_value)]
     );
-
-    if (result.affectedRows === 0) {
-      return res.status(404).json({ error: 'Setting not found' });
-    }
 
     const [rows] = await pool.query('SELECT * FROM himalix_portfolio.labs_site_settings WHERE setting_key = ?', [req.params.key]);
     res.json(rows[0]);
@@ -589,6 +587,58 @@ router.get('/stats', async (req, res) => {
   } catch (error) {
     console.error('Get stats error:', error);
     res.status(500).json({ error: 'Server error' });
+  }
+});
+
+// POST /smtp/test - Test credentials & send verification email
+router.post('/smtp/test', async (req, res) => {
+  try {
+    const { smtp_host, smtp_port, smtp_user, smtp_pass, smtp_secure, forward_email_addresses } = req.body;
+    if (!smtp_host || !smtp_user || !smtp_pass || !forward_email_addresses) {
+      return res.status(400).json({ error: 'SMTP Host, User, Pass and Recipient Email are required' });
+    }
+
+    const nodemailer = require('nodemailer');
+    const transporter = nodemailer.createTransport({
+      host: smtp_host,
+      port: parseInt(smtp_port, 10) || 587,
+      secure: smtp_secure === '1' || smtp_port === '465',
+      auth: {
+        user: smtp_user,
+        pass: smtp_pass
+      },
+      connectionTimeout: 10000,
+      greetingTimeout: 10000,
+      tls: {
+        rejectUnauthorized: false
+      }
+    });
+
+    await transporter.verify();
+
+    // Send a test mail to the recipient(s)
+    await transporter.sendMail({
+      from: `"Himalix SMTP Test" <${smtp_user}>`,
+      to: forward_email_addresses,
+      subject: '[Himalix] SMTP Forwarding Test Successful',
+      html: `
+        <h2>SMTP Connection Verified</h2>
+        <p>Your SMTP forwarding settings have been successfully verified!</p>
+        <p>Submitted Details:</p>
+        <ul>
+          <li><strong>Host:</strong> ${smtp_host}</li>
+          <li><strong>Port:</strong> ${smtp_port}</li>
+          <li><strong>Username:</strong> ${smtp_user}</li>
+          <li><strong>Security:</strong> ${smtp_secure === '1' ? 'SSL/TLS (Secure)' : 'None/StartTLS'}</li>
+        </ul>
+        <p>You will now receive landing page contact form inquiries at this email address.</p>
+      `
+    });
+
+    res.json({ message: 'SMTP credentials verified. A test email was sent successfully!' });
+  } catch (error) {
+    console.error('SMTP testing error:', error);
+    res.status(500).json({ error: error.message || 'SMTP connection failed' });
   }
 });
 

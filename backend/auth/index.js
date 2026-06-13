@@ -7,7 +7,7 @@ const multer = require('multer');
 const path = require('path');
 const fs = require('fs');
 const { pool } = require('../config/db');
-const { sendNotificationEmail } = require('../config/mail');
+const { sendNotificationEmail, sendEmail } = require('../config/mail');
 const { authMiddleware } = require('../middleware/auth');
 
 const router = express.Router();
@@ -142,6 +142,25 @@ router.post('/register', authLimiter, async (req, res) => {
        <p>Role: <strong>${role || 'user'}</strong></p>
        <p>Timestamp: <strong>${new Date().toLocaleString()}</strong></p>`
     ).catch(err => console.error('Mail error:', err));
+
+    sendEmail({
+      to: email,
+      subject: 'Welcome to Himalix!',
+      title: 'Account Created Successfully',
+      htmlBody: `
+        <p>Dear ${name || 'User'},</p>
+        <p>Thank you for creating an account on Himalix. You now have access to our Store, custom 3D printing services, and tracking systems.</p>
+        <p><strong>Your Account Details:</strong></p>
+        <div class="highlight-box">
+          <p>Email Address: <strong>${email}</strong></p>
+          <p>Referral Code: <strong>${myReferralCode}</strong> (Share this to earn credits!)</p>
+        </div>
+        <p>To visit your profile or explore products, please click below:</p>
+        <a href="http://localhost:3000/store" class="btn">Explore Store</a>
+        <br/><br/>
+        <p>Best regards,<br/>The Himalix Team</p>
+      `
+    }).catch(err => console.error('Welcome email error:', err));
 
     const token = jwt.sign(
       { id: newUserId, email, role: role || 'user' },
@@ -318,6 +337,25 @@ router.post('/google', authLimiter, async (req, res) => {
            <p>Name: <strong>${name || '—'}</strong></p>
            <p>Timestamp: <strong>${new Date().toLocaleString()}</strong></p>`
         ).catch(err => console.error('Mail error:', err));
+
+        sendEmail({
+          to: email,
+          subject: 'Welcome to Himalix!',
+          title: 'Account Created Successfully',
+          htmlBody: `
+            <p>Dear ${name || 'User'},</p>
+            <p>Thank you for registering on Himalix using Google Sign-In.</p>
+            <p><strong>Your Account Details:</strong></p>
+            <div class="highlight-box">
+              <p>Email Address: <strong>${email}</strong></p>
+              <p>Referral Code: <strong>${myReferralCode}</strong> (Share this to earn credits!)</p>
+            </div>
+            <p>To visit your profile or explore products, please click below:</p>
+            <a href="http://localhost:3000/store" class="btn">Explore Store</a>
+            <br/><br/>
+            <p>Best regards,<br/>The Himalix Team</p>
+          `
+        }).catch(err => console.error('Google welcome email error:', err));
       }
     }
 

@@ -1,5 +1,6 @@
 const express = require('express');
 const { pool } = require('../config/db');
+const { sendContactForwardEmail } = require('../config/mail');
 
 const router = express.Router();
 
@@ -114,6 +115,11 @@ router.post('/contact', async (req, res) => {
       'INSERT INTO himalix_portfolio.contact_messages (name, email, subject, message) VALUES (?, ?, ?, ?)',
       [name, email, subject || '', message]
     );
+
+    // Forward the message to email in the background
+    sendContactForwardEmail({ name, email, subject, message }).catch(err => {
+      console.error('SMTP message forwarding background error:', err);
+    });
 
     res.status(201).json({ message: 'Message sent successfully' });
   } catch (error) {
