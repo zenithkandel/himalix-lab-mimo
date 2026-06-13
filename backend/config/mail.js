@@ -411,6 +411,15 @@ async function sendContactForwardEmail({ name, email, subject, message }) {
       return;
     }
 
+    // Fetch emergency contact details for the footer
+    const [emergencyRows] = await pool.query(
+      "SELECT key_name, key_value FROM himalix_store.settings WHERE key_name IN ('emergency_contact_phone', 'emergency_contact_email')"
+    );
+    const emergencySettings = {};
+    emergencyRows.forEach(r => { emergencySettings[r.key_name] = r.key_value; });
+    const footerPhone = emergencySettings.emergency_contact_phone || '+977-9800000000';
+    const footerEmail = emergencySettings.emergency_contact_email || 'support@himalix.store';
+
     const transporter = nodemailer.createTransport({
       host,
       port,
@@ -419,22 +428,152 @@ async function sendContactForwardEmail({ name, email, subject, message }) {
       tls: { rejectUnauthorized: false }
     });
 
+    const fullHtml = `
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      background-color: #000000;
+      color: #ffffff;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    }
+    .email-container {
+      max-width: 600px;
+      margin: 20px auto;
+      background-color: #0d0d0d;
+      border: 1px solid #262626;
+      padding: 40px;
+    }
+    .email-header {
+      border-bottom: 1px solid #262626;
+      padding-bottom: 20px;
+      margin-bottom: 30px;
+      text-align: center;
+    }
+    .logo {
+      font-size: 24px;
+      font-weight: 700;
+      letter-spacing: 2px;
+      color: #ffffff;
+      text-transform: uppercase;
+      text-decoration: none;
+    }
+    .logo-accent {
+      color: #d4a017;
+    }
+    .email-title {
+      font-size: 20px;
+      font-weight: 400;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      margin-top: 0;
+      margin-bottom: 20px;
+      color: #ffffff;
+      border-bottom: 1px solid #1f1f1f;
+      padding-bottom: 10px;
+    }
+    .email-body {
+      font-size: 15px;
+      line-height: 1.6;
+      color: #cccccc;
+    }
+    .email-body p {
+      margin-top: 0;
+      margin-bottom: 15px;
+    }
+    .email-body strong {
+      color: #ffffff;
+    }
+    .inquiry-details {
+      width: 100%;
+      border-collapse: collapse;
+      margin-bottom: 25px;
+    }
+    .inquiry-details td {
+      padding: 12px 10px;
+      border-bottom: 1px solid #1f1f1f;
+      font-size: 14px;
+    }
+    .inquiry-details td.label {
+      width: 30%;
+      color: #888888;
+      font-weight: 600;
+    }
+    .inquiry-details td.value {
+      color: #ffffff;
+    }
+    .message-box {
+      background-color: #141414;
+      border-left: 3px solid #d4a017;
+      padding: 20px;
+      font-size: 14px;
+      line-height: 1.6;
+      color: #dddddd;
+      white-space: pre-line;
+      margin-top: 15px;
+      margin-bottom: 25px;
+    }
+    .email-footer {
+      border-top: 1px solid #262626;
+      padding-top: 20px;
+      margin-top: 40px;
+      text-align: center;
+      font-size: 12px;
+      color: #666666;
+      line-height: 1.5;
+    }
+    .email-footer a {
+      color: #888888;
+      text-decoration: none;
+    }
+  </style>
+</head>
+<body>
+  <div class="email-container">
+    <div class="email-header">
+      <div class="logo">HX <span class="logo-accent">HIMALIX</span></div>
+    </div>
+    <div class="email-body">
+      <h1 class="email-title">New Contact Inquiry</h1>
+      <p>A new message has been submitted via the Himalix landing page contact form. The details are as follows:</p>
+      
+      <table class="inquiry-details">
+        <tr>
+          <td class="label">Name</td>
+          <td class="value">${name}</td>
+        </tr>
+        <tr>
+          <td class="label">Email</td>
+          <td class="value"><a href="mailto:${email}" style="color: #d4a017; text-decoration: none;">${email}</a></td>
+        </tr>
+        <tr>
+          <td class="label">Subject</td>
+          <td class="value">${subject || 'No Subject'}</td>
+        </tr>
+      </table>
+
+      <strong>Inquiry Message:</strong>
+      <div class="message-box">${message}</div>
+    </div>
+    <div class="email-footer">
+      This is an automated system notification forwarded from your contact page.<br/>
+      &copy; 2026 Himalix Labs & Store. All rights reserved.<br/>
+      Helpline: <a href="tel:${footerPhone}">${footerPhone}</a> | Email: <a href="mailto:${footerEmail}">${footerEmail}</a>
+    </div>
+  </div>
+</body>
+</html>
+    `;
+
     const mailOptions = {
       from: `"Himalix Contact Form" <${user}>`,
       to: receivers,
       subject: `[Himalix Inquiry] ${subject || 'New Contact Form Submission'}`,
-      html: `
-        <h2>New Contact Form Inquiry</h2>
-        <p><strong>Name:</strong> ${name}</p>
-        <p><strong>Email:</strong> ${email}</p>
-        <p><strong>Subject:</strong> ${subject || 'No Subject'}</p>
-        <p><strong>Message:</strong></p>
-        <blockquote style="border-left: 3px solid #ccc; padding-left: 10px; margin-left: 0; color: #555;">
-          ${message.replace(/\n/g, '<br/>')}
-        </blockquote>
-        <hr/>
-        <p style="font-size: 12px; color: #888;">This message was submitted via the landing page contact form and forwarded automatically.</p>
-      `
+      html: fullHtml
     };
 
     const info = await transporter.sendMail(mailOptions);
