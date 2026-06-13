@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 
 export default function UserManager({ users, authFetch, onLoad }) {
   const [search, setSearch] = useState('');
@@ -11,6 +11,17 @@ export default function UserManager({ users, authFetch, onLoad }) {
   
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      if (e.key === 'Escape') {
+        setBalanceModal(null);
+        setPasswordModal(null);
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, []);
 
   const filtered = users.filter(u => 
     u.email.toLowerCase().includes(search.toLowerCase()) ||

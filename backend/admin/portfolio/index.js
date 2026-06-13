@@ -41,15 +41,52 @@ const upload = multer({
 router.get('/content', async (req, res) => {
   try {
     const [rows] = await pool.query('SELECT * FROM himalix_portfolio.landing_content ORDER BY id ASC');
-    res.json(rows);
+    const content = {};
+    rows.forEach(row => {
+      if (!content[row.section]) {
+        content[row.section] = {};
+      }
+      let val = row.content_value;
+      if (row.content_type === 'json' && typeof val === 'string') {
+        try { val = JSON.parse(val); } catch (e) {}
+      }
+      content[row.section][row.content_key] = val;
+    });
+    res.json({ content });
   } catch (error) {
     console.error('Get content error:', error);
     res.status(500).json({ error: 'Server error' });
   }
 });
 
-// PUT /content/:id
-router.put('/content/:id', async (req, res) => {
+// PUT /content/:section
+router.put('/content/:section', async (req, res) => {
+  try {
+    const { section } = req.params;
+    const data = req.body;
+
+    for (const [key, val] of Object.entries(data)) {
+      const isJson = typeof val === 'object';
+      const contentVal = isJson ? JSON.stringify(val) : String(val);
+      const contentType = isJson ? 'json' : 'text';
+
+      await pool.query(
+        `INSERT INTO himalix_portfolio.landing_content (section, content_key, content_value, content_type)
+         VALUES (?, ?, ?, ?)
+         ON DUPLICATE KEY UPDATE content_value = ?, content_type = ?`,
+        [section, key, contentVal, contentType, contentVal, contentType]
+      );
+    }
+
+    res.json({ message: `Section ${section} updated successfully` });
+  } catch (error) {
+    console.error('Update section error:', error);
+    res.status(500).json({ error: 'Server error' });
+  }
+});
+
+// PUT /content/:id (legacy/individual)
+router.put('/content/id/:id', async (req, res) => {
   try {
     const { content_value } = req.body;
     if (!content_value) {

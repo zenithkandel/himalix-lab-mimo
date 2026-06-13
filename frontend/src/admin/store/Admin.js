@@ -197,7 +197,12 @@ export default function StoreAdmin() {
                     <div className="product-card" key={p.id}>
                       <div className="product-card__img-wrap">
                         {p.image_url ? (
-                          <img src={`http://localhost:5000${p.image_url}`} alt={p.name} className="product-card__img" />
+                          <img 
+                            src={`http://localhost:5000${p.image_url}`} 
+                            alt={p.name} 
+                            className="product-card__img" 
+                            onError={e => { e.target.src = '/placeholder.png'; }} 
+                          />
                         ) : (
                           <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--text-3)' }}>
                             <i className="fa-light fa-sharp fa-image text-3xl" />

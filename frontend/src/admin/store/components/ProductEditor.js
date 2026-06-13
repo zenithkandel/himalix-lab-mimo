@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 
 export default function ProductEditor({ 
   product, 
@@ -43,6 +43,60 @@ export default function ProductEditor({
   const [imageUrls, setImageUrls] = useState(parseImageUrls(product?.image_urls || (product?.image_url ? [product.image_url] : [])));
   const [mainImageUrl, setMainImageUrl] = useState(product?.image_url || '');
   const [uploading, setUploading] = useState(false);
+
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      if (e.key === 'Escape') onClose();
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [onClose]);
+
+  const handlePaste = async (e) => {
+    const items = e.clipboardData?.items;
+    if (!items) return;
+    const files = [];
+    for (const item of items) {
+      if (item.kind === 'file' && item.type.startsWith('image/')) {
+        const file = item.getAsFile();
+        if (file) files.push(file);
+      }
+    }
+    if (files.length === 0) return;
+    
+    setUploading(true);
+    const fd = new FormData();
+    files.forEach(f => fd.append('images', f));
+
+    try {
+      const res = await authFetch('/api/store/admin/upload-multiple', {
+        method: 'POST',
+        body: fd,
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.message || 'Upload failed');
+      
+      const newUrls = data.imageUrls || [];
+      const updatedList = [...imageUrls, ...newUrls];
+      setImageUrls(updatedList);
+      
+      if (!mainImageUrl && updatedList.length > 0) {
+        setMainImageUrl(updatedList[0]);
+      }
+    } catch (err) {
+      alert(err.message);
+    } finally {
+      setUploading(false);
+    }
+  };
+
+  useEffect(() => {
+    const handleGlobalPaste = (e) => {
+      handlePaste(e);
+    };
+    window.addEventListener('paste', handleGlobalPaste);
+    return () => window.removeEventListener('paste', handleGlobalPaste);
+  }, [imageUrls, mainImageUrl]);
 
   const handleAddSpecRow = () => {
     setSpecs([...specs, { key: '', value: '' }]);
@@ -328,6 +382,7 @@ export default function ProductEditor({
                           src={`http://localhost:5000${url}`} 
                           alt="" 
                           style={{ width: '100%', height: '100%', objectFit: 'cover' }} 
+                          onError={e => { e.target.src = '/placeholder.png'; }}
                         />
                         {isMain && (
                           <span style={{ 
