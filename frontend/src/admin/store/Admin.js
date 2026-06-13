@@ -4,6 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import Dashboard from './components/Dashboard';
 import OrderManager from './components/OrderManager';
 import ProductEditor from './components/ProductEditor';
+import ProductCatalog from './components/ProductCatalog';
 import UserManager from './components/UserManager';
 import ReviewManager from './components/ReviewManager';
 import SettingsManager from './components/SettingsManager';
@@ -201,43 +202,12 @@ export default function StoreAdmin() {
 
           {view === 'products' && (
             <div className="admin-products">
-              <div className="flex justify-between items-center mb-6">
-                <h2 className="page-title">Product Catalog</h2>
-                <button className="btn btn-primary" onClick={() => setProdModal('new')}>
-                  <i className="fa-light fa-sharp fa-plus" /> Add Product
-                </button>
-              </div>
-
-              {prodLoading ? <div className="spinner" /> : (
-                <div className="product-grid" style={{ gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))' }}>
-                  {products.map(p => (
-                    <div className="product-card" key={p.id}>
-                      <div className="product-card__img-wrap">
-                        {p.image_url ? (
-                          <img 
-                            src={`http://localhost:5000${p.image_url}`} 
-                            alt={p.name} 
-                            className="product-card__img" 
-                            onError={e => { e.target.src = '/placeholder.png'; }} 
-                          />
-                        ) : (
-                          <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--text-3)' }}>
-                            <i className="fa-light fa-sharp fa-image text-3xl" />
-                          </div>
-                        )}
-                      </div>
-                      <div className="product-card__body">
-                        <div className="product-card__name" style={{ fontSize: '14px' }}>{p.name}</div>
-                        <div className="product-card__price">Rs. {p.price}</div>
-                        <div className="flex gap-2 mt-2">
-                          <button className="btn btn-ghost btn-sm" onClick={() => setProdModal(p)}>Edit</button>
-                          <button className="btn btn-danger btn-sm" onClick={() => deleteProduct(p.id)}>Del</button>
-                        </div>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              )}
+              <ProductCatalog 
+                products={products}
+                loading={prodLoading}
+                onEdit={setProdModal}
+                onDelete={deleteProduct}
+              />
 
               {prodModal && (
                 <ProductEditor 
