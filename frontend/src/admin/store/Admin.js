@@ -59,7 +59,7 @@ export default function StoreAdmin() {
     if (view === 'products') {
       setProdLoading(true);
       try {
-        const res  = await authFetch('/api/store/products');
+        const res  = await authFetch('/api/store/admin/products');
         const data = await res.json();
         setProducts(data.products || []);
       } catch {} finally { setProdLoading(false); }
@@ -92,14 +92,14 @@ export default function StoreAdmin() {
     } catch {}
   };
 
-  const saveProduct = async (formData, id) => {
+  const saveProduct = async (productData, id) => {
     setProdSaving(true);
     try {
       const isNew = !id;
-      const url   = isNew ? '/api/store/products' : `/api/store/products/${id}`;
+      const url   = isNew ? '/api/store/admin/products' : `/api/store/admin/products/${id}`;
       const res   = await authFetch(url, {
         method: isNew ? 'POST' : 'PUT',
-        body: formData,
+        body: JSON.stringify(productData),
       });
       if (!res.ok) throw new Error('Failed to save');
       setProdModal(null);
@@ -110,7 +110,7 @@ export default function StoreAdmin() {
   const deleteProduct = async (id) => {
     if (!window.confirm('Delete this product?')) return;
     try {
-      await authFetch(`/api/store/products/${id}`, { method: 'DELETE' });
+      await authFetch(`/api/store/admin/products/${id}`, { method: 'DELETE' });
       setProducts(prev => prev.filter(p => p.id !== id));
     } catch {}
   };
@@ -221,6 +221,7 @@ export default function StoreAdmin() {
                   saving={prodSaving}
                   onSave={saveProduct}
                   onClose={() => setProdModal(null)}
+                  authFetch={authFetch}
                 />
               )}
             </div>

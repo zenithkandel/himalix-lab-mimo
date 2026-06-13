@@ -1,27 +1,25 @@
 /* ================================================================
    theme.css — Design tokens, color modes, typography scale
-   Himalix Labs — Minimal Premium Design System
+   Himalix Labs — Bugatti-Inspired Austere Luxury Design System
    ================================================================ */
-
-/* ── Google Fonts are loaded via index.html ── */
 
 /* ── CSS Custom Properties ── */
 :root {
   /* Font families */
-  --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-  --font-mono: 'JetBrains Mono', 'Fira Code', 'Cascadia Code', monospace;
-  --font-display: 'Playfair Display', Georgia, 'Times New Roman', serif;
+  --font-sans: 'EB Garamond', Garamond, 'Times New Roman', serif;
+  --font-mono: 'JetBrains Mono', monospace;
+  --font-display: 'Saira Condensed', sans-serif;
 
   /* Type scale */
-  --text-xs: 0.72rem;
-  --text-sm: 0.85rem;
-  --text-base: 1rem;
-  --text-lg: 1.125rem;
-  --text-xl: 1.25rem;
-  --text-2xl: 1.5rem;
-  --text-3xl: 2rem;
-  --text-4xl: 2.75rem;
-  --text-5xl: 3.75rem;
+  --text-xs: 11px;
+  --text-sm: 13px;
+  --text-base: 16px;
+  --text-lg: 18px;
+  --text-xl: 20px;
+  --text-2xl: 24px;
+  --text-3xl: 32px;
+  --text-4xl: 48px;
+  --text-5xl: 64px;
 
   /* Spacing scale */
   --space-1: 4px;
@@ -36,80 +34,60 @@
   --space-16: 64px;
   --space-20: 80px;
   --space-24: 96px;
+  --space-section: 120px;
 
   /* Layout */
-  --max-width: 1200px;
-  --max-width-lg: 1400px;
+  --max-width: 1280px;
+  --max-width-lg: 1440px;
   --sidebar-width: 240px;
 
-  /* NO border radius — ever */
+  /* Strict zero-border radius, except buttons */
   --radius: 0px;
+  --radius-button: 9999px;
 
   /* Transitions */
   --transition-fast: 150ms ease;
   --transition-base: 250ms ease;
   --transition-slow: 400ms ease;
 
-  /* Accent gold */
-  --accent: #d4a017;
-  --accent-dim: #a07810;
-  --accent-bright: #e8b82a;
+  /* Monochrome primary accents */
+  --accent: #ffffff;
+  --accent-dim: #cccccc;
+  --accent-bright: #ffffff;
 
-  /* Status colors — muted, flat, no neon */
-  --success: #45a049;
+  /* Semantic Bugatti colors */
+  --success: #5fa657;
   --danger: #d9534f;
-  --warning: #f0ad4e;
-  --info: #5bc0de;
+  --warning: #d4a017;
+  --info: #c3d9f3; /* desaturated ice-blue link */
   
-  /* Focus Rings for accessibility without blur */
+  /* Focus Rings for accessibility */
   --focus-ring: 0 0 0 2px var(--bg-0), 0 0 0 4px var(--accent);
 }
 
-/* ── Dark Mode (Default) ── */
+/* ── Monochrome Dark Mode (Default and locked) ── */
 [data-theme='dark'],
+[data-theme='light'],
 :root {
-  --bg-0: #0a0a0a;
-  --bg-1: #121212;
-  --bg-2: #1a1a1a;
-  --bg-3: #222222;
-  --bg-4: #2a2a2a;
+  --bg-0: #000000;         /* pure black canvas */
+  --bg-1: #0d0d0d;         /* surface soft */
+  --bg-2: #141414;         /* surface card */
+  --bg-3: #1f1f1f;         /* surface elevated */
+  --bg-4: #262626;         /* hairline / borders */
 
   --border: #262626;
-  --border-strong: #333333;
-  --border-accent: #d4a01740;
+  --border-strong: #3a3a3a;
+  --border-accent: #ffffff40;
 
-  --text-0: #fafafa;
-  --text-1: #d4d4d4;
-  --text-2: #a3a3a3;
-  --text-3: #737373;
+  --text-0: #ffffff;
+  --text-1: #cccccc;
+  --text-2: #999999;
+  --text-3: #666666;
 
   --shadow-sm: none;
   --shadow-md: none;
-  --shadow-lg: 0 8px 30px rgba(0,0,0,0.8);
+  --shadow-lg: none;
 
-  --overlay: rgba(10,10,10,0.85);
+  --overlay: rgba(0,0,0,0.9);
 }
 
-/* ── Light Mode ── */
-[data-theme='light'] {
-  --bg-0: #f5f5f5;
-  --bg-1: #fafafa;
-  --bg-2: #ffffff;
-  --bg-3: #f0f0f0;
-  --bg-4: #e8e8e8;
-
-  --border: #e0e0e0;
-  --border-strong: #c8c8c8;
-  --border-accent: #d4a01720;
-
-  --text-0: #111111;
-  --text-1: #555555;
-  --text-2: #888888;
-  --text-3: #bbbbbb;
-
-  --shadow-sm: 0 1px 3px rgba(0,0,0,0.08);
-  --shadow-md: 0 4px 16px rgba(0,0,0,0.1);
-  --shadow-lg: 0 12px 40px rgba(0,0,0,0.15);
-
-  --overlay: rgba(0,0,0,0.4);
-}

@@ -118,37 +118,39 @@ export default function ReviewManager({ reviews, authFetch, onLoad }) {
 
       {/* Delete Review Confirmation Modal */}
       {deleteModal && (
-        <div className="admin-modal">
-          <div className="admin-modal__content" style={{ maxWidth: 450 }}>
-            <div className="admin-modal__header">
-              <h2 className="page-title" style={{ color: 'var(--danger)' }}>Confirm Deletion</h2>
-              <button className="btn btn-ghost" onClick={() => setDeleteModal(null)}>
-                <i className="fa-light fa-sharp fa-xmark" />
-              </button>
-            </div>
-            <div className="admin-modal__body">
-              <p className="mb-4">
-                Are you sure you want to permanently delete this product review? This action cannot be undone.
-              </p>
-              <div 
-                style={{ 
-                  background: 'rgba(255,255,255,0.05)', 
-                  borderLeft: '3px solid var(--accent)', 
-                  padding: 'var(--space-3)', 
-                  marginBottom: 'var(--space-4)',
-                  fontSize: 'var(--text-sm)'
-                }}
-              >
-                <strong>Customer:</strong> {deleteModal.user_email}<br/>
-                <strong>Product:</strong> {deleteModal.product_name}<br/>
-                <strong>Rating:</strong> {deleteModal.rating} / 5<br/>
-                <strong>Comment:</strong> "{deleteModal.comment || 'N/A'}"
-              </div>
-              <div className="admin-modal__footer flex justify-between mt-6">
-                <button type="button" className="btn btn-outline" onClick={() => setDeleteModal(null)}>Cancel</button>
-                <button type="button" className="btn btn-danger" onClick={handleDeleteReview} disabled={loading}>
-                  {loading ? 'Deleting...' : 'Delete Permanently'}
+        <div className="admin-modal-overlay" onClick={(e) => { if (e.target === e.currentTarget) setDeleteModal(null); }}>
+          <div className="admin-modal">
+            <div className="admin-modal__content" style={{ maxWidth: 450 }}>
+              <div className="admin-modal__header">
+                <h2 className="page-title" style={{ color: 'var(--danger)' }}>Confirm Deletion</h2>
+                <button type="button" className="btn btn-ghost" onClick={() => setDeleteModal(null)}>
+                  <i className="fa-light fa-sharp fa-xmark" />
                 </button>
+              </div>
+              <div className="admin-modal__body">
+                <p className="mb-4">
+                  Are you sure you want to permanently delete this product review? This action cannot be undone.
+                </p>
+                <div 
+                  style={{ 
+                    background: 'rgba(255,255,255,0.05)', 
+                    borderLeft: '3px solid var(--accent)', 
+                    padding: 'var(--space-3)', 
+                    marginBottom: 'var(--space-4)',
+                    fontSize: 'var(--text-sm)'
+                  }}
+                >
+                  <strong>Customer:</strong> {deleteModal.user_email}<br/>
+                  <strong>Product:</strong> {deleteModal.product_name}<br/>
+                  <strong>Rating:</strong> {deleteModal.rating} / 5<br/>
+                  <strong>Comment:</strong> "{deleteModal.comment || 'N/A'}"
+                </div>
+                <div className="admin-modal__footer flex justify-between mt-6">
+                  <button type="button" className="btn btn-outline" onClick={() => setDeleteModal(null)}>Cancel</button>
+                  <button type="button" className="btn btn-danger" onClick={handleDeleteReview} disabled={loading}>
+                    {loading ? 'Deleting...' : 'Delete Permanently'}
+                  </button>
+                </div>
               </div>
             </div>
           </div>

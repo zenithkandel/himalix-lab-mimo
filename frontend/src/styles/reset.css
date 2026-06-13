@@ -7,8 +7,8 @@
   margin: 0;
   padding: 0;
 
-  /* ── ZERO BORDER RADIUS — NON-NEGOTIABLE ── */
-  border-radius: 0 !important;
+  /* ── STRICT ZERO RADIUS BY DEFAULT ── */
+  border-radius: 0;
 }
 
 html {
@@ -20,8 +20,8 @@ html {
 body {
   font-family: var(--font-sans);
   font-size: var(--text-base);
-  color: var(--text-0);
-  background-color: var(--bg-1);
+  color: var(--text-1);
+  background-color: var(--bg-0);
   line-height: 1.6;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
@@ -31,9 +31,11 @@ body {
 
 /* Typography resets */
 h1, h2, h3, h4, h5, h6 {
-  font-family: var(--font-sans);
-  font-weight: 600;
-  line-height: 1.25;
+  font-family: var(--font-display);
+  font-weight: 400;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  line-height: 1.2;
   color: var(--text-0);
 }
 
@@ -57,7 +59,7 @@ img, video {
 }
 
 button {
-  font-family: var(--font-sans);
+  font-family: var(--font-mono);
   cursor: pointer;
   border: none;
   background: none;
@@ -80,7 +82,7 @@ ul, ol {
   height: 6px;
 }
 ::-webkit-scrollbar-track {
-  background: var(--bg-1);
+  background: var(--bg-0);
 }
 ::-webkit-scrollbar-thumb {
   background: var(--border-strong);
@@ -147,17 +149,18 @@ ul, ol {
   gap: var(--space-1);
   padding: 3px 10px;
   font-size: var(--text-xs);
-  font-weight: 600;
-  letter-spacing: 0.04em;
+  font-weight: 400;
+  font-family: var(--font-mono);
+  letter-spacing: 1.5px;
   text-transform: uppercase;
   border: 1px solid transparent;
 }
 
-.badge-success { background: #4ade8015; color: var(--success); border-color: #4ade8030; }
-.badge-danger  { background: #f8717115; color: var(--danger);  border-color: #f8717130; }
-.badge-warning { background: #fbbf2415; color: var(--warning); border-color: #fbbf2430; }
-.badge-gold    { background: #d4a01715; color: var(--accent);  border-color: #d4a01730; }
-.badge-neutral { background: var(--bg-3); color: var(--text-1); border-color: var(--border); }
+.badge-success { background: rgba(95, 166, 87, 0.1); color: var(--success); border-color: rgba(95, 166, 87, 0.2); }
+.badge-danger  { background: rgba(217, 83, 79, 0.1); color: var(--danger);  border-color: rgba(217, 83, 79, 0.2); }
+.badge-warning { background: rgba(212, 160, 23, 0.1); color: var(--warning); border-color: rgba(212, 160, 23, 0.2); }
+.badge-gold    { background: rgba(255, 255, 255, 0.1); color: var(--text-0);  border-color: rgba(255, 255, 255, 0.2); }
+.badge-neutral { background: var(--bg-2); color: var(--text-1); border-color: var(--border); }
 
 /* ── Global button system ── */
 .btn {
@@ -165,15 +168,17 @@ ul, ol {
   align-items: center;
   justify-content: center;
   gap: var(--space-2);
-  padding: 10px 20px;
+  padding: 10px 24px;
   font-size: var(--text-sm);
-  font-weight: 500;
-  letter-spacing: 0.04em;
+  font-weight: 400;
+  font-family: var(--font-mono);
+  letter-spacing: 2px;
   text-transform: uppercase;
   cursor: pointer;
   transition: background-color var(--transition-fast), color var(--transition-fast), border-color var(--transition-fast);
   border: 1px solid transparent;
   white-space: nowrap;
+  border-radius: var(--radius-button) !important;
 }
 
 .btn:focus-visible {
@@ -187,32 +192,33 @@ ul, ol {
 }
 
 .btn-primary {
-  background: var(--accent);
-  color: #000;
-  border-color: var(--accent);
+  background: transparent;
+  color: var(--text-0);
+  border-color: var(--text-0);
 }
 .btn-primary:hover:not(:disabled) {
-  background: var(--accent-bright);
-  border-color: var(--accent-bright);
+  background: var(--text-0);
+  color: var(--bg-0);
 }
 
 .btn-outline {
   background: transparent;
-  color: var(--text-0);
+  color: var(--text-1);
   border-color: var(--border-strong);
 }
 .btn-outline:hover:not(:disabled) {
-  background: var(--bg-3);
-  border-color: var(--text-2);
+  background: var(--bg-2);
+  color: var(--text-0);
+  border-color: var(--text-0);
 }
 
 .btn-ghost {
   background: transparent;
-  color: var(--text-1);
+  color: var(--text-2);
   border-color: transparent;
 }
 .btn-ghost:hover:not(:disabled) {
-  background: var(--bg-3);
+  background: var(--bg-2);
   color: var(--text-0);
 }
 
@@ -222,7 +228,7 @@ ul, ol {
   border-color: var(--danger);
 }
 .btn-danger:hover:not(:disabled) {
-  background: #f8717115;
+  background: rgba(217, 83, 79, 0.15);
 }
 
 .btn-sm {

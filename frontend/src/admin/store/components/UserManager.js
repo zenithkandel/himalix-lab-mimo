@@ -218,101 +218,105 @@ export default function UserManager({ users, authFetch, onLoad }) {
 
       {/* Adjust Wallet Balance Modal */}
       {balanceModal && (
-        <div className="admin-modal">
-          <div className="admin-modal__content" style={{ maxWidth: 450 }}>
-            <div className="admin-modal__header">
-              <h2 className="page-title">Adjust Wallet Balance</h2>
-              <button className="btn btn-ghost" onClick={() => setBalanceModal(null)}>
-                <i className="fa-light fa-sharp fa-xmark" />
-              </button>
-            </div>
-            <form onSubmit={handleAdjustBalance} className="admin-modal__body">
-              {error && <div className="alert alert-danger mb-4">{error}</div>}
-              
-              <div style={{ marginBottom: 'var(--space-3)' }}>
-                <strong>User Email:</strong> {balanceModal.email}<br/>
-                <strong>Current Balance:</strong> Rs. {Number(balanceModal.wallet_balance).toFixed(2)}
-              </div>
-
-              <div className="form-group">
-                <label className="form-label">Adjustment Type</label>
-                <select className="form-select" value={balanceType} onChange={e => setBalanceType(e.target.value)}>
-                  <option value="deposit">Deposit (Credit Account)</option>
-                  <option value="refund">Refund (Credit Account)</option>
-                  <option value="purchase">Debit Adjustment (Charge Account)</option>
-                </select>
-              </div>
-
-              <div className="form-group">
-                <label className="form-label">Amount (Rs.)</label>
-                <input 
-                  type="number" 
-                  step="0.01" 
-                  className="form-input" 
-                  required 
-                  placeholder="e.g. 1000.00" 
-                  value={balanceAmount} 
-                  onChange={e => setBalanceAmount(e.target.value)} 
-                />
-              </div>
-
-              <div className="form-group">
-                <label className="form-label">Reference / Reason</label>
-                <input 
-                  className="form-input" 
-                  placeholder="e.g. eSewa manual deposit ref #81728" 
-                  value={balanceRef} 
-                  onChange={e => setBalanceRef(e.target.value)} 
-                />
-              </div>
-
-              <div className="admin-modal__footer mt-6 flex justify-between">
-                <button type="button" className="btn btn-outline" onClick={() => setBalanceModal(null)}>Cancel</button>
-                <button type="submit" className="btn btn-primary" disabled={loading}>
-                  {loading ? 'Processing...' : 'Confirm Adjustment'}
+        <div className="admin-modal-overlay" onClick={(e) => { if (e.target === e.currentTarget) setBalanceModal(null); }}>
+          <div className="admin-modal">
+            <div className="admin-modal__content" style={{ maxWidth: 450 }}>
+              <div className="admin-modal__header">
+                <h2 className="page-title">Adjust Wallet Balance</h2>
+                <button type="button" className="btn btn-ghost" onClick={() => setBalanceModal(null)}>
+                  <i className="fa-light fa-sharp fa-xmark" />
                 </button>
               </div>
-            </form>
+              <form onSubmit={handleAdjustBalance} className="admin-modal__body">
+                {error && <div className="alert alert-danger mb-4">{error}</div>}
+                
+                <div style={{ marginBottom: 'var(--space-3)' }}>
+                  <strong>User Email:</strong> {balanceModal.email}<br/>
+                  <strong>Current Balance:</strong> Rs. {Number(balanceModal.wallet_balance).toFixed(2)}
+                </div>
+
+                <div className="form-group">
+                  <label className="form-label">Adjustment Type</label>
+                  <select className="form-select" value={balanceType} onChange={e => setBalanceType(e.target.value)}>
+                    <option value="deposit">Deposit (Credit Account)</option>
+                    <option value="refund">Refund (Credit Account)</option>
+                    <option value="purchase">Debit Adjustment (Charge Account)</option>
+                  </select>
+                </div>
+
+                <div className="form-group">
+                  <label className="form-label">Amount (Rs.)</label>
+                  <input 
+                    type="number" 
+                    step="0.01" 
+                    className="form-input" 
+                    required 
+                    placeholder="e.g. 1000.00" 
+                    value={balanceAmount} 
+                    onChange={e => setBalanceAmount(e.target.value)} 
+                  />
+                </div>
+
+                <div className="form-group">
+                  <label className="form-label">Reference / Reason</label>
+                  <input 
+                    className="form-input" 
+                    placeholder="e.g. eSewa manual deposit ref #81728" 
+                    value={balanceRef} 
+                    onChange={e => setBalanceRef(e.target.value)} 
+                  />
+                </div>
+
+                <div className="admin-modal__footer mt-6 flex justify-between">
+                  <button type="button" className="btn btn-outline" onClick={() => setBalanceModal(null)}>Cancel</button>
+                  <button type="submit" className="btn btn-primary" disabled={loading}>
+                    {loading ? 'Processing...' : 'Confirm Adjustment'}
+                  </button>
+                </div>
+              </form>
+            </div>
           </div>
         </div>
       )}
 
       {/* Reset Password Modal */}
       {passwordModal && (
-        <div className="admin-modal">
-          <div className="admin-modal__content" style={{ maxWidth: 400 }}>
-            <div className="admin-modal__header">
-              <h2 className="page-title">Reset Password</h2>
-              <button className="btn btn-ghost" onClick={() => setPasswordModal(null)}>
-                <i className="fa-light fa-sharp fa-xmark" />
-              </button>
-            </div>
-            <form onSubmit={handleResetPassword} className="admin-modal__body">
-              {error && <div className="alert alert-danger mb-4">{error}</div>}
-              
-              <div style={{ marginBottom: 'var(--space-3)' }}>
-                <strong>User Email:</strong> {passwordModal.email}
-              </div>
-
-              <div className="form-group">
-                <label className="form-label">New Password</label>
-                <input 
-                  type="password" 
-                  className="form-input" 
-                  required 
-                  placeholder="Enter at least 6 characters" 
-                  value={newPassword} 
-                  onChange={e => setNewPassword(e.target.value)} 
-                />
-              </div>
-
-              <div className="admin-modal__footer mt-6 flex justify-between">
-                <button type="button" className="btn btn-outline" onClick={() => setPasswordModal(null)}>Cancel</button>
-                <button type="submit" className="btn btn-primary" disabled={loading}>
-                  {loading ? 'Saving...' : 'Update Password'}
+        <div className="admin-modal-overlay" onClick={(e) => { if (e.target === e.currentTarget) setPasswordModal(null); }}>
+          <div className="admin-modal">
+            <div className="admin-modal__content" style={{ maxWidth: 400 }}>
+              <div className="admin-modal__header">
+                <h2 className="page-title">Reset Password</h2>
+                <button type="button" className="btn btn-ghost" onClick={() => setPasswordModal(null)}>
+                  <i className="fa-light fa-sharp fa-xmark" />
                 </button>
               </div>
-            </form>
+              <form onSubmit={handleResetPassword} className="admin-modal__body">
+                {error && <div className="alert alert-danger mb-4">{error}</div>}
+                
+                <div style={{ marginBottom: 'var(--space-3)' }}>
+                  <strong>User Email:</strong> {passwordModal.email}
+                </div>
+
+                <div className="form-group">
+                  <label className="form-label">New Password</label>
+                  <input 
+                    type="password" 
+                    className="form-input" 
+                    required 
+                    placeholder="Enter at least 6 characters" 
+                    value={newPassword} 
+                    onChange={e => setNewPassword(e.target.value)} 
+                  />
+                </div>
+
+                <div className="admin-modal__footer mt-6 flex justify-between">
+                  <button type="button" className="btn btn-outline" onClick={() => setPasswordModal(null)}>Cancel</button>
+                  <button type="submit" className="btn btn-primary" disabled={loading}>
+                    {loading ? 'Saving...' : 'Update Password'}
+                  </button>
+                </div>
+              </form>
+            </div>
           </div>
         </div>
       )}

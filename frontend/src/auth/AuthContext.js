@@ -55,13 +55,16 @@ export function AuthProvider({ children }) {
 
   /* Helper: authenticated fetch */
   const authFetch = useCallback((url, options = {}) => {
+    const headers = {
+      ...(token ? { Authorization: `Bearer ${token}` } : {}),
+      ...options.headers,
+    };
+    if (!(options.body instanceof FormData)) {
+      headers['Content-Type'] = 'application/json';
+    }
     return fetch(url, {
       ...options,
-      headers: {
-        'Content-Type': 'application/json',
-        ...(token ? { Authorization: `Bearer ${token}` } : {}),
-        ...options.headers,
-      }
+      headers,
     });
   }, [token]);
 
