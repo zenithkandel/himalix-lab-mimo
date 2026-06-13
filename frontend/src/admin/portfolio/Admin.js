@@ -321,6 +321,7 @@ function ContentEditor({ section, data, onSave, saving }) {
 
 function ArrayEditor({ label, items, schema, onChange, onSave, saving }) {
   const [draggedIndex, setDraggedIndex] = useState(null);
+  const [dragOverIndex, setDragOverIndex] = useState(null);
 
   useEffect(() => {
     const missingKeys = items.some(item => !item._dragId);
@@ -365,23 +366,33 @@ function ArrayEditor({ label, items, schema, onChange, onSave, saving }) {
 
   const handleDragOver = (e, index) => {
     e.preventDefault();
-    if (draggedIndex === null || draggedIndex === index) return;
-
-    const next = [...items];
-    const draggedItem = next[draggedIndex];
-    next.splice(draggedIndex, 1);
-    next.splice(index, 0, draggedItem);
-
-    setDraggedIndex(index);
-    onChange(next);
+    if (draggedIndex === null) return;
+    if (dragOverIndex !== index) {
+      setDragOverIndex(index);
+    }
   };
 
   const handleDragEnd = () => {
     setDraggedIndex(null);
+    setDragOverIndex(null);
   };
 
-  const handleDrop = (e) => {
+  const handleDrop = (e, targetIndex) => {
     e.preventDefault();
+    if (draggedIndex === null || draggedIndex === targetIndex) {
+      setDraggedIndex(null);
+      setDragOverIndex(null);
+      return;
+    }
+
+    const next = [...items];
+    const draggedItem = next[draggedIndex];
+    next.splice(draggedIndex, 1);
+    next.splice(targetIndex, 0, draggedItem);
+
+    onChange(next);
+    setDraggedIndex(null);
+    setDragOverIndex(null);
   };
 
   return (
@@ -402,12 +413,12 @@ function ArrayEditor({ label, items, schema, onChange, onSave, saving }) {
       {items.map((item, i) => (
         <div
           key={item._dragId || i}
-          className={`cms-section-card${i === draggedIndex ? ' cms-section-card--dragging' : ''}`}
+          className={`cms-section-card${i === draggedIndex ? ' cms-section-card--dragging' : ''}${i === dragOverIndex && i !== draggedIndex ? ' cms-section-card--drag-over' : ''}`}
           draggable={true}
           onDragStart={(e) => handleDragStart(e, i)}
           onDragOver={(e) => handleDragOver(e, i)}
           onDragEnd={handleDragEnd}
-          onDrop={handleDrop}
+          onDrop={(e) => handleDrop(e, i)}
         >
           <div className="cms-section-card__header">
             <div className="cms-section-card__title">
