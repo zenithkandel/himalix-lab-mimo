@@ -3,6 +3,7 @@ import React, { useState, useRef, useEffect } from 'react';
 const FileUploadZone = ({ value, onChange, token, apiUrl, label = 'Image' }) => {
   const [isDragging, setIsDragging] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
+  const [isHovered, setIsHovered] = useState(false);
   const fileInputRef = useRef(null);
   const zoneRef = useRef(null);
 
@@ -66,7 +67,8 @@ const FileUploadZone = ({ value, onChange, token, apiUrl, label = 'Image' }) => 
 
   useEffect(() => {
     const handlePaste = (e) => {
-      if (document.activeElement === zoneRef.current) {
+      // Allow paste if the zone is directly focused, or if the user is hovering over it
+      if (document.activeElement === zoneRef.current || isHovered) {
         const items = e.clipboardData?.items;
         if (!items) return;
 
@@ -87,7 +89,7 @@ const FileUploadZone = ({ value, onChange, token, apiUrl, label = 'Image' }) => 
     return () => {
       window.removeEventListener('paste', handlePaste);
     };
-  }, [token, apiUrl]);
+  }, [token, apiUrl, isHovered]);
 
   return (
     <div className="admin-form-group" style={{ marginBottom: '1.5rem' }}>
@@ -119,9 +121,11 @@ const FileUploadZone = ({ value, onChange, token, apiUrl, label = 'Image' }) => 
             overflow: 'hidden'
           }}
           onMouseEnter={(e) => {
+             setIsHovered(true);
              if(!isDragging) e.currentTarget.style.borderColor = 'var(--accent)';
           }}
           onMouseLeave={(e) => {
+             setIsHovered(false);
              if(!isDragging) e.currentTarget.style.borderColor = 'var(--border-color)';
           }}
         >

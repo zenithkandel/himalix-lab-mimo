@@ -262,7 +262,11 @@ router.put('/content/bulk', async (req, res) => {
 router.get('/services', async (req, res) => {
   try {
     const [rows] = await pool.query('SELECT * FROM himalix_portfolio.services ORDER BY display_order ASC');
-    res.json(rows);
+    const parsed = rows.map(r => ({
+      ...r,
+      features: typeof r.features === 'string' ? JSON.parse(r.features) : (r.features || [])
+    }));
+    res.json(parsed);
   } catch (error) {
     console.error('Get services error:', error);
     res.status(500).json({ error: 'Server error' });
@@ -285,7 +289,11 @@ router.post('/services', async (req, res) => {
     );
 
     const [rows] = await pool.query('SELECT * FROM himalix_portfolio.services WHERE id = ?', [result.insertId]);
-    res.status(201).json(rows[0]);
+    const responseData = rows[0] ? {
+      ...rows[0],
+      features: typeof rows[0].features === 'string' ? JSON.parse(rows[0].features) : (rows[0].features || [])
+    } : null;
+    res.status(201).json(responseData);
   } catch (error) {
     console.error('Create service error:', error);
     res.status(500).json({ error: 'Server error' });
@@ -308,7 +316,11 @@ router.put('/services/:id', async (req, res) => {
     }
 
     const [rows] = await pool.query('SELECT * FROM himalix_portfolio.services WHERE id = ?', [req.params.id]);
-    res.json(rows[0]);
+    const responseData = rows[0] ? {
+      ...rows[0],
+      features: typeof rows[0].features === 'string' ? JSON.parse(rows[0].features) : (rows[0].features || [])
+    } : null;
+    res.json(responseData);
   } catch (error) {
     console.error('Update service error:', error);
     res.status(500).json({ error: 'Server error' });
