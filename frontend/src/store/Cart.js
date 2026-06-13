@@ -19,9 +19,6 @@ export default function Cart() {
   /* Wallet */
   const [wallet, setWallet]     = useState(null);
   const [walletUse, setWalletUse] = useState(false);
-  const [coupon, setCoupon]     = useState('');
-  const [couponApplied, setCouponApplied] = useState(null);
-  const [couponError, setCouponError] = useState('');
 
   /* Shipping */
   const [shipping, setShipping] = useState(null);
@@ -52,38 +49,20 @@ export default function Cart() {
       .catch(() => {});
   }, [address.lat, address.lng, authFetch]);
 
-  const applyCoupon = async () => {
-    setCouponError('');
-    if (!coupon.trim()) return;
-    try {
-      const res = await authFetch('/api/store/orders/apply-coupon', {
-        method: 'POST',
-        body: JSON.stringify({ code: coupon }),
-      });
-      const d = await res.json();
-      if (!res.ok) throw new Error(d.message || 'Invalid coupon');
-      setCouponApplied(d);
-    } catch (err) {
-      setCouponError(err.message);
-      setCouponApplied(null);
-    }
-  };
-
   const walletBalance   = wallet?.balance || 0;
   const subtotal        = totalAmount;
   const taxRate         = (parseFloat(systemConfig?.salesTaxRate) || 0) / 100;
   const salesTax        = subtotal * taxRate;
   const shippingCost    = shipping?.shipping_cost || 0;
-  const couponDiscount  = couponApplied?.discount_amount || 0;
-  const totalBeforeWallet = subtotal + salesTax + shippingCost - couponDiscount;
+  const totalBeforeWallet = subtotal + salesTax + shippingCost;
   const walletDeduction = walletUse ? Math.min(walletBalance, totalBeforeWallet) : 0;
   const grandTotal      = Math.max(0, totalBeforeWallet - walletDeduction);
 
   const formatPrice = n => `Rs. ${Number(n).toLocaleString('en-NP')}`;
 
   const handleCheckout = async () => {
-    if (!address.full_name || !address.phone || !address.address_line || !address.city || !address.district) {
-      setCheckoutError('Please fill in all address fields.');
+    if (!address.full_name || !address.phone || !address.address_line || !address.city || !address.district || !address.lat || !address.lng) {
+      setCheckoutError('Please fill in all address fields and provide your map location.');
       return;
     }
     setCheckoutLoading(true);
@@ -94,7 +73,6 @@ export default function Cart() {
         body: JSON.stringify({
           address,
           use_wallet: walletUse,
-          coupon_code: couponApplied?.code || undefined,
         }),
       });
       const data = await res.json();
@@ -312,27 +290,6 @@ export default function Cart() {
                 </div>
               )}
             </div>
-
-            <div className="wallet-coupon" style={{ borderTop: '1px solid var(--border)' }}>
-              <div className="wallet-coupon__label">
-                <i className="fa-light fa-sharp fa-tag" /> Coupon Code
-              </div>
-              <div className="wallet-coupon__input-row">
-                <input
-                  className="wallet-coupon__input"
-                  placeholder="Enter coupon"
-                  value={coupon}
-                  onChange={e => { setCoupon(e.target.value); setCouponError(''); }}
-                />
-                <button className="btn btn-outline btn-sm" onClick={applyCoupon}>Apply</button>
-              </div>
-              {couponError && <span style={{ fontSize: 'var(--text-xs)', color: 'var(--danger)' }}>{couponError}</span>}
-              {couponApplied && (
-                <span style={{ fontSize: 'var(--text-xs)', color: 'var(--success)' }}>
-                  <i className="fa-light fa-sharp fa-check" /> {formatPrice(couponApplied.discount_amount)} off applied
-                </span>
-              )}
-            </div>
           </div>
 
           {/* Summary card */}
@@ -353,14 +310,6 @@ export default function Cart() {
                   {shipping ? formatPrice(shippingCost) : '—'}
                 </span>
               </div>
-              {couponApplied && (
-                <div className="order-summary__row">
-                  <span>Coupon Discount</span>
-                  <span className="order-summary__value order-summary__value--discount">
-                    −{formatPrice(couponDiscount)}
-                  </span>
-                </div>
-              )}
               {walletUse && walletDeduction > 0 && (
                 <div className="order-summary__row">
                   <span>Wallet Credit</span>

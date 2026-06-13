@@ -12,11 +12,26 @@ export function CartProvider({ children }) {
 
   const localKey = 'himalix-cart';
 
-  /* Load cart: server if logged in, localStorage if guest */
   const fetchCart = useCallback(async () => {
     if (user) {
       try {
         setLoading(true);
+        // Sync guest cart before fetching server cart
+        const localItems = JSON.parse(localStorage.getItem(localKey) || '[]');
+        if (localItems.length > 0) {
+          for (const item of localItems) {
+            try {
+              await authFetch('/api/store/cart', {
+                method: 'POST',
+                body: JSON.stringify({ product_id: item.product_id, quantity: item.quantity })
+              });
+            } catch (err) {
+              console.error('Failed to sync guest cart item:', err);
+            }
+          }
+          localStorage.removeItem(localKey);
+        }
+
         const res  = await authFetch('/api/store/cart');
         const data = await res.json();
         if (data.success) setItems(data.cart || []);
@@ -31,30 +46,6 @@ export function CartProvider({ children }) {
   }, [user, authFetch]);
 
   useEffect(() => { fetchCart(); }, [fetchCart]);
-
-  /* Merge local guest cart to server on login */
-  useEffect(() => {
-    if (user) {
-      const localItems = JSON.parse(localStorage.getItem(localKey) || '[]');
-      if (localItems.length > 0) {
-        const syncGuestCart = async () => {
-          for (const item of localItems) {
-            try {
-              await authFetch('/api/store/cart', {
-                method: 'POST',
-                body: JSON.stringify({ product_id: item.product_id, quantity: item.quantity })
-              });
-            } catch (err) {
-              console.error('Failed to sync guest cart item:', err);
-            }
-          }
-          localStorage.removeItem(localKey);
-          fetchCart();
-        };
-        syncGuestCart();
-      }
-    }
-  }, [user, authFetch, fetchCart]);
 
   /* Sync guest cart to localStorage */
   useEffect(() => {

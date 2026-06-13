@@ -97,6 +97,16 @@ export default function ProductDetail() {
     images = [{ url: product.image_url || '/placeholder.png' }];
   }
 
+  let specsObj = {};
+  if (product.technical_specs) {
+    try {
+      specsObj = typeof product.technical_specs === 'string' ? JSON.parse(product.technical_specs) : product.technical_specs;
+    } catch(e) {
+      console.error(e);
+    }
+  }
+  product.specs = specsObj;
+
   const isOutOfStock = (product.stock_quantity || 0) <= 0;
   const hasDiscount  = product.original_price && product.original_price > product.price;
   const avgRating    = reviews.length

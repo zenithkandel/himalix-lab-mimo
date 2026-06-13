@@ -399,7 +399,7 @@ router.get('/users/:id/orders', async (req, res) => {
       if (!ordersMap[row.id]) {
         ordersMap[row.id] = {
           id: row.id,
-          total: row.total_amount,
+          total_amount: row.total_amount,
           status: row.status,
           tracking_code: row.tracking_code,
           created_at: row.created_at,
@@ -481,7 +481,7 @@ router.get('/orders', async (req, res) => {
           user_name: row.user_name || 'Guest / N/A',
           user_phone: row.user_phone || 'N/A',
           user_wallet_balance: row.user_wallet_balance !== null ? Number(row.user_wallet_balance) : 0,
-          total: row.total_amount,
+          total_amount: row.total_amount,
           status: row.status,
           tracking_code: row.tracking_code,
           shipping_address: row.shipping_address ? JSON.parse(row.shipping_address) : null,

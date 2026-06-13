@@ -353,7 +353,7 @@ const historyHandler = async (req, res) => {
       if (!ordersMap[row.id]) {
         ordersMap[row.id] = {
           id: row.id,
-          total: row.total_amount,
+          total_amount: row.total_amount,
           status: row.status,
           tracking_code: row.tracking_code,
           shipping_address: row.shipping_address ? JSON.parse(row.shipping_address) : null,

@@ -45,10 +45,11 @@
   --radius: 0px;
   --radius-button: 9999px;
 
-  /* Transitions */
-  --transition-fast: 150ms ease;
-  --transition-base: 250ms ease;
-  --transition-slow: 400ms ease;
+  /* Transitions (Premium Easing) */
+  --transition-fast: 250ms cubic-bezier(0.25, 1, 0.5, 1);
+  --transition-base: 450ms cubic-bezier(0.25, 1, 0.5, 1);
+  --transition-slow: 700ms cubic-bezier(0.25, 1, 0.5, 1);
+  --transition-bounce: 600ms cubic-bezier(0.34, 1.56, 0.64, 1);
 
   /* Monochrome primary accents */
   --accent: #ffffff;
@@ -92,6 +93,10 @@
   --shadow-lg: none;
 
   --overlay: rgba(0,0,0,0.9);
+  
+  --glass-bg: rgba(20, 20, 20, 0.6);
+  --glass-border: rgba(255, 255, 255, 0.08);
+  --glass-blur: blur(24px);
 }
 
 /* ── Monochrome Light Mode ── */
@@ -120,5 +125,9 @@
   --shadow-lg: 0 10px 15px rgba(0,0,0,0.05);
 
   --overlay: rgba(255,255,255,0.95);
+  
+  --glass-bg: rgba(255, 255, 255, 0.7);
+  --glass-border: rgba(0, 0, 0, 0.1);
+  --glass-blur: blur(24px);
 }
 
