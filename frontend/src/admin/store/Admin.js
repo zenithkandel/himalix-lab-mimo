@@ -8,6 +8,7 @@ import UserManager from './components/UserManager';
 import ReviewManager from './components/ReviewManager';
 import SettingsManager from './components/SettingsManager';
 import LogsManager from './components/LogsManager';
+import { useTheme } from '../../context/ThemeContext';
 
 const VIEWS = [
   { id: 'dashboard', icon: 'gauge',         label: 'Dashboard' },
@@ -22,6 +23,7 @@ const VIEWS = [
 export default function StoreAdmin() {
   const { user, authFetch, logout } = useAuth();
   const navigate = useNavigate();
+  const { theme, toggleTheme } = useTheme();
 
   const [view, setView]               = useState('dashboard');
   const [mobileOpen, setMobileOpen]   = useState(false);
@@ -144,6 +146,9 @@ export default function StoreAdmin() {
           <button className="admin-sidebar__item" onClick={() => navigate('/store')}>
             <i className="fa-light fa-sharp fa-store" /> View Store
           </button>
+          <button className="admin-sidebar__item" onClick={() => navigate('/admin')}>
+            <i className="fa-light fa-sharp fa-circle-user" /> Portfolio Admin
+          </button>
         </nav>
 
         <div className="admin-sidebar__footer">
@@ -151,6 +156,14 @@ export default function StoreAdmin() {
             <div className="admin-sidebar__user-name">{user?.email}</div>
             <div className="admin-sidebar__user-role">{user?.role}</div>
           </div>
+          <button 
+            className="admin-sidebar__logout" 
+            onClick={toggleTheme} 
+            title={theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'}
+            style={{ marginRight: 'var(--space-2)' }}
+          >
+            <i className={`fa-light fa-sharp fa-${theme === 'dark' ? 'sun' : 'moon'}`} />
+          </button>
           <button className="admin-sidebar__logout" onClick={logout} title="Log Out">
             <i className="fa-light fa-sharp fa-arrow-right-from-bracket" />
           </button>

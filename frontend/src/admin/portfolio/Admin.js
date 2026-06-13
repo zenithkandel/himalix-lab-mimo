@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useAuth } from '../../auth/AuthContext';
 import { useNavigate } from 'react-router-dom';
+import { useTheme } from '../../context/ThemeContext';
 
 const SECTIONS = [
   { id: 'hero',         icon: 'house',       label: 'Hero Section' },
@@ -15,6 +16,7 @@ const SECTIONS = [
 export default function PortfolioAdmin() {
   const { user, authFetch, logout } = useAuth();
   const navigate = useNavigate();
+  const { theme, toggleTheme } = useTheme();
 
   const [activeSection, setActiveSection] = useState('hero');
   const [content, setContent]             = useState({});
@@ -95,6 +97,15 @@ export default function PortfolioAdmin() {
             <div className="admin-sidebar__user-name">{user?.name}</div>
             <div className="admin-sidebar__user-role">Administrator</div>
           </div>
+          <button 
+            className="admin-sidebar__logout" 
+            onClick={toggleTheme} 
+            title={theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'}
+            style={{ marginRight: 'var(--space-2)' }}
+            aria-label="Toggle theme"
+          >
+            <i className={`fa-light fa-sharp fa-${theme === 'dark' ? 'sun' : 'moon'}`} />
+          </button>
           <button className="admin-sidebar__logout" onClick={() => { logout(); navigate('/signin'); }} aria-label="Sign out">
             <i className="fa-light fa-sharp fa-right-from-bracket" />
           </button>
@@ -330,7 +341,12 @@ function ArrayEditor({ label, items, schema, onChange, onSave, saving }) {
                   className="form-group"
                   style={{ gridColumn: field.multiline ? 'span 2' : 'auto' }}
                 >
-                  <label className="form-label">{field.label}</label>
+                  <label className="form-label">
+                    {field.label}
+                    {field.key === 'icon' && item[field.key] && (
+                      <i className={`fa-light fa-sharp fa-${item[field.key]}`} style={{ marginLeft: 'var(--space-2)', fontSize: 'var(--text-base)', color: 'var(--accent)' }} />
+                    )}
+                  </label>
                   {field.multiline ? (
                     <textarea
                       className="form-textarea"
