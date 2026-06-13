@@ -43,6 +43,43 @@ export default function Profile() {
   }, [user]);
 
   useEffect(() => {
+    if (tab !== 'profile') return;
+    const handlePaste = async (e) => {
+      const items = e.clipboardData?.items;
+      if (!items) return;
+      let file = null;
+      for (const item of items) {
+        if (item.kind === 'file' && item.type.startsWith('image/')) {
+          file = item.getAsFile();
+          break;
+        }
+      }
+      if (!file) return;
+      const formData = new FormData();
+      formData.append('image', file);
+
+      setAvatarUploading(true);
+      setProfileMsg('');
+      try {
+        const res = await authFetch('/api/auth/upload-avatar', {
+          method: 'POST',
+          body: formData,
+        });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.message || 'Avatar upload failed');
+        setUser(prev => ({ ...prev, avatar_url: data.avatarUrl }));
+        setProfileMsg('Avatar uploaded successfully!');
+      } catch (err) {
+        setProfileMsg(err.message || 'Failed to upload avatar.');
+      } finally {
+        setAvatarUploading(false);
+      }
+    };
+    window.addEventListener('paste', handlePaste);
+    return () => window.removeEventListener('paste', handlePaste);
+  }, [tab, authFetch, setUser]);
+
+  useEffect(() => {
     if (!user) { navigate('/signin'); return; }
     authFetch('/api/store/orders/my')
       .then(r => r.json())

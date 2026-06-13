@@ -1,9 +1,17 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 
 export default function ReviewManager({ reviews, authFetch, onLoad }) {
   const [search, setSearch] = useState('');
   const [deleteModal, setDeleteModal] = useState(null); // holds review object
   const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      if (e.key === 'Escape') setDeleteModal(null);
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, []);
 
   const filtered = reviews.filter(r => 
     r.comment?.toLowerCase().includes(search.toLowerCase()) ||
