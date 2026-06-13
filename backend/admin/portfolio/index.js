@@ -505,6 +505,77 @@ router.put('/settings/:key', async (req, res) => {
   }
 });
 
+// ==================== EMAIL FORWARDING RECEIVERS ====================
+
+// GET /forward-receivers
+router.get('/forward-receivers', async (req, res) => {
+  try {
+    const [rows] = await pool.query('SELECT * FROM himalix_portfolio.email_forwarding_receivers ORDER BY id ASC');
+    res.json(rows);
+  } catch (error) {
+    console.error('Get forward receivers error:', error);
+    res.status(500).json({ error: 'Server error' });
+  }
+});
+
+// POST /forward-receivers
+router.post('/forward-receivers', async (req, res) => {
+  try {
+    const { email_address, active } = req.body;
+    if (!email_address) {
+      return res.status(400).json({ error: 'email_address is required' });
+    }
+    const isActive = active === undefined ? 1 : (active ? 1 : 0);
+
+    const [result] = await pool.query(
+      'INSERT INTO himalix_portfolio.email_forwarding_receivers (email_address, active) VALUES (?, ?)',
+      [email_address, isActive]
+    );
+
+    const [rows] = await pool.query('SELECT * FROM himalix_portfolio.email_forwarding_receivers WHERE id = ?', [result.insertId]);
+    res.status(201).json(rows[0]);
+  } catch (error) {
+    console.error('Create forward receiver error:', error);
+    if (error.code === 'ER_DUP_ENTRY') {
+      return res.status(400).json({ error: 'Email address is already registered' });
+    }
+    res.status(500).json({ error: 'Server error' });
+  }
+});
+
+// PUT /forward-receivers/:id
+router.put('/forward-receivers/:id', async (req, res) => {
+  try {
+    const { email_address, active } = req.body;
+    const isActive = active ? 1 : 0;
+
+    await pool.query(
+      'UPDATE himalix_portfolio.email_forwarding_receivers SET email_address = ?, active = ? WHERE id = ?',
+      [email_address, isActive, req.params.id]
+    );
+
+    const [rows] = await pool.query('SELECT * FROM himalix_portfolio.email_forwarding_receivers WHERE id = ?', [req.params.id]);
+    if (rows.length === 0) {
+      return res.status(404).json({ error: 'Receiver not found' });
+    }
+    res.json(rows[0]);
+  } catch (error) {
+    console.error('Update forward receiver error:', error);
+    res.status(500).json({ error: 'Server error' });
+  }
+});
+
+// DELETE /forward-receivers/:id
+router.delete('/forward-receivers/:id', async (req, res) => {
+  try {
+    await pool.query('DELETE FROM himalix_portfolio.email_forwarding_receivers WHERE id = ?', [req.params.id]);
+    res.json({ message: 'Receiver deleted successfully' });
+  } catch (error) {
+    console.error('Delete forward receiver error:', error);
+    res.status(500).json({ error: 'Server error' });
+  }
+});
+
 // ==================== CONTACT MESSAGES ====================
 
 // GET /messages

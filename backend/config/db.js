@@ -108,6 +108,20 @@ async function initializeDatabase() {
       // Ignore
     }
 
+    // Ensure email_forwarding_receivers exists in himalix_portfolio
+    try {
+      await connection.query(`
+        CREATE TABLE IF NOT EXISTS himalix_portfolio.email_forwarding_receivers (
+          id INT AUTO_INCREMENT PRIMARY KEY,
+          email_address VARCHAR(255) NOT NULL UNIQUE,
+          active TINYINT(1) NOT NULL DEFAULT 1
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
+      `);
+      console.log('email_forwarding_receivers table verified/created in himalix_portfolio');
+    } catch (err) {
+      console.error('Error creating email_forwarding_receivers table:', err.message);
+    }
+
     // 5. Seed default store settings (only inserts if keys don't exist)
     try {
       const defaultSettings = [
