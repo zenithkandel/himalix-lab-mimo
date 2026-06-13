@@ -52,6 +52,44 @@ router.get('/content', async (req, res) => {
       }
       content[row.section][row.content_key] = val;
     });
+
+    // Load services
+    const [services] = await pool.query('SELECT * FROM himalix_portfolio.services ORDER BY display_order ASC');
+    content.services = {
+      items: services.map(s => ({
+        id: s.id,
+        icon: s.icon_class,
+        title: s.title,
+        description: s.description,
+        link: s.link_url,
+        cta: s.subtitle
+      }))
+    };
+
+    // Load team members
+    const [team] = await pool.query('SELECT * FROM himalix_portfolio.team_members ORDER BY display_order ASC');
+    content.team = {
+      members: team.map(t => ({
+        id: t.id,
+        name: t.name,
+        role: t.role,
+        bio: t.bio,
+        avatar_url: t.image_url
+      }))
+    };
+
+    // Load testimonials
+    const [testimonials] = await pool.query('SELECT * FROM himalix_portfolio.testimonials ORDER BY display_order ASC');
+    content.testimonials = {
+      items: testimonials.map(t => ({
+        id: t.id,
+        name: t.client_name,
+        title: t.client_title,
+        rating: t.rating,
+        text: t.content
+      }))
+    };
+
     res.json({ content });
   } catch (error) {
     console.error('Get content error:', error);
@@ -61,27 +99,90 @@ router.get('/content', async (req, res) => {
 
 // PUT /content/:section
 router.put('/content/:section', async (req, res) => {
+  const connection = await pool.getConnection();
   try {
     const { section } = req.params;
     const data = req.body;
 
-    for (const [key, val] of Object.entries(data)) {
-      const isJson = typeof val === 'object';
-      const contentVal = isJson ? JSON.stringify(val) : String(val);
-      const contentType = isJson ? 'json' : 'text';
+    await connection.beginTransaction();
 
-      await pool.query(
-        `INSERT INTO himalix_portfolio.landing_content (section, content_key, content_value, content_type)
-         VALUES (?, ?, ?, ?)
-         ON DUPLICATE KEY UPDATE content_value = ?, content_type = ?`,
-        [section, key, contentVal, contentType, contentVal, contentType]
-      );
+    if (section === 'services') {
+      const items = data.items || [];
+      // Delete existing
+      await connection.query('DELETE FROM himalix_portfolio.services');
+      // Insert new
+      for (let i = 0; i < items.length; i++) {
+        const item = items[i];
+        const getFeaturesForTitle = (title) => {
+          if (title.includes('Store')) {
+            return ["Wide product catalog", "Wallet & referral system", "Order tracking", "Express delivery"];
+          }
+          if (title.includes('Print') || title.includes('3D')) {
+            return ["FDM & resin printing", "Custom filament colors", "Design assistance", "Bulk orders"];
+          }
+          if (title.includes('Project')) {
+            return ["School science exhibitions", "Competition projects", "Custom development", "Tech consulting"];
+          }
+          return [];
+        };
+        const features = getFeaturesForTitle(item.title || '');
+
+        await connection.query(
+          `INSERT INTO himalix_portfolio.services (title, subtitle, description, icon_class, features, link_url, display_order)
+           VALUES (?, ?, ?, ?, ?, ?, ?)`,
+          [item.title || '', item.cta || '', item.description || '', item.icon || '', JSON.stringify(features), item.link || '', i + 1]
+        );
+      }
+    } else if (section === 'team') {
+      const members = data.members || [];
+      // Delete existing
+      await connection.query('DELETE FROM himalix_portfolio.team_members');
+      // Insert new
+      for (let i = 0; i < members.length; i++) {
+        const member = members[i];
+        await connection.query(
+          `INSERT INTO himalix_portfolio.team_members (name, role, bio, image_url, social_links, display_order)
+           VALUES (?, ?, ?, ?, ?, ?)`,
+          [member.name || '', member.role || '', member.bio || '', member.avatar_url || '', JSON.stringify({"twitter":"#","linkedin":"#","github":"#"}), i + 1]
+        );
+      }
+    } else if (section === 'testimonials') {
+      const items = data.items || [];
+      // Delete existing
+      await connection.query('DELETE FROM himalix_portfolio.testimonials');
+      // Insert new
+      for (let i = 0; i < items.length; i++) {
+        const item = items[i];
+        await connection.query(
+          `INSERT INTO himalix_portfolio.testimonials (client_name, client_title, content, rating, display_order)
+           VALUES (?, ?, ?, ?, ?)`,
+          [item.name || '', item.title || '', item.text || '', item.rating || 5, i + 1]
+        );
+      }
+    } else {
+      // General section updates inside landing_content table
+      for (const [key, val] of Object.entries(data)) {
+        const isJson = typeof val === 'object';
+        const contentVal = isJson ? JSON.stringify(val) : String(val);
+        const contentType = isJson ? 'json' : 'text';
+
+        await connection.query(
+          `INSERT INTO himalix_portfolio.landing_content (section, content_key, content_value, content_type)
+           VALUES (?, ?, ?, ?)
+           ON DUPLICATE KEY UPDATE content_value = ?, content_type = ?`,
+          [section, key, contentVal, contentType, contentVal, contentType]
+        );
+      }
     }
 
+    await connection.commit();
     res.json({ message: `Section ${section} updated successfully` });
   } catch (error) {
+    await connection.rollback();
     console.error('Update section error:', error);
     res.status(500).json({ error: 'Server error' });
+  } finally {
+    connection.release();
   }
 });
 

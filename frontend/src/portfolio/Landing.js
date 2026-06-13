@@ -51,11 +51,11 @@ export default function Landing() {
 
   useEffect(() => () => clearTimeout(contactTimerRef.current), []);
 
-  const hero      = content?.hero      || defaultHero;
-  const services  = content?.services  || defaultServices;
-  const about     = content?.about     || defaultAbout;
-  const stats     = content?.stats     || defaultStats;
-  const team      = content?.team      || defaultTeam;
+  const hero      = content?.content?.hero      || defaultHero;
+  const services  = content?.services          || defaultServices;
+  const about     = content?.content?.about     || defaultAbout;
+  const stats     = content?.content?.stats?.items || defaultStats;
+  const team      = content?.team              || defaultTeam;
 
   return (
     <div className="landing">
@@ -401,8 +401,9 @@ export default function Landing() {
                 </p>
                 <div className="contact__info-items">
                   {[
-                    { icon: 'location-dot', label: 'Address', value: 'Kathmandu, Nepal' },
-                    { icon: 'envelope',     label: 'Email',   value: 'info@himalixlabs.com' },
+                    { icon: 'location-dot', label: 'Address', value: content?.content?.contact?.address || 'Kathmandu, Nepal' },
+                    { icon: 'envelope',     label: 'Email',   value: content?.content?.contact?.email || 'info@himalixlabs.com' },
+                    { icon: 'phone',        label: 'Phone',   value: content?.content?.contact?.phone || '+977-9800000000' }
                   ].map(item => (
                     <div key={item.label} className="contact__info-item">
                       <i className={`fa-light fa-sharp fa-${item.icon}`} />

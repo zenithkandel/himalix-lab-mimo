@@ -116,7 +116,7 @@ export default function PortfolioAdmin() {
       <main className="admin-main">
         <div className="admin-topbar">
           <div className="admin-topbar__breadcrumb">
-            <button className="btn btn-ghost btn-sm" onClick={() => setMobileOpen(o => !o)} style={{ display: 'none' }} aria-label="Toggle sidebar" id="admin-sidebar-toggle">
+            <button className="btn btn-ghost btn-sm admin-topbar__hamburger" onClick={() => setMobileOpen(o => !o)} aria-label="Toggle sidebar" id="admin-sidebar-toggle">
               <i className="fa-light fa-sharp fa-bars" />
             </button>
             <span>Portfolio CMS</span>
@@ -145,6 +145,14 @@ export default function PortfolioAdmin() {
           )}
         </div>
       </main>
+      {/* Mobile Overlay */}
+      {mobileOpen && (
+        <div 
+          className="admin-modal-overlay" 
+          onClick={() => setMobileOpen(false)} 
+          style={{ zIndex: 190 }} 
+        />
+      )}
     </div>
   );
 }
