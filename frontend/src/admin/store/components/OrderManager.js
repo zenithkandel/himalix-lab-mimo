@@ -42,17 +42,18 @@ export default function OrderManager({ orders, updateOrderStatus, loading }) {
             <tbody>
               {filtered.map(o => (
                 <tr key={o.id}>
-                  <td>#{o.id}</td>
+                  <td data-label="ID">#{o.id}</td>
                   <td 
+                    data-label="Tracking"
                     style={{ fontFamily: 'var(--font-mono)', cursor: 'pointer' }}
                     onClick={() => navigator.clipboard.writeText(o.tracking_code)}
                     title="Click to copy"
                   >
                     {o.tracking_code} <i className="fa-light fa-sharp fa-copy" style={{ opacity: 0.5 }} />
                   </td>
-                  <td>Rs. {Number(o.total_amount).toFixed(2)}</td>
-                  <td><span className={`badge badge-${o.payment_status === 'paid' ? 'success' : 'warning'}`}>{o.payment_method} ({o.payment_status})</span></td>
-                  <td>
+                  <td data-label="Total">Rs. {Number(o.total_amount).toFixed(2)}</td>
+                  <td data-label="Payment"><span className={`badge badge-${o.payment_status === 'paid' ? 'success' : 'warning'}`}>{o.payment_method} ({o.payment_status})</span></td>
+                  <td data-label="Status">
                     <select 
                       className="form-select" 
                       style={{ padding: '4px 8px', width: 'auto' }}
@@ -62,7 +63,7 @@ export default function OrderManager({ orders, updateOrderStatus, loading }) {
                       {ORDER_STATUS.map(s => <option key={s} value={s}>{s.toUpperCase()}</option>)}
                     </select>
                   </td>
-                  <td>
+                  <td data-label="Actions">
                     <button className="btn btn-ghost btn-sm" onClick={() => alert('View details implementation coming soon')}><i className="fa-light fa-sharp fa-eye" /> View</button>
                   </td>
                 </tr>

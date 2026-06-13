@@ -58,9 +58,9 @@ export default function Dashboard({ analytics }) {
               <tbody>
                 {analytics.recentOrders.map(o => (
                   <tr key={o.id}>
-                    <td>#{o.id}</td>
-                    <td>Rs. {Number(o.total_amount).toFixed(2)}</td>
-                    <td><span className={`badge badge--${o.status === 'delivered' ? 'success' : o.status === 'cancelled' ? 'danger' : 'neutral'}`}>{o.status}</span></td>
+                    <td data-label="ID">#{o.id}</td>
+                    <td data-label="Total">Rs. {Number(o.total_amount).toFixed(2)}</td>
+                    <td data-label="Status"><span className={`badge badge--${o.status === 'delivered' ? 'success' : o.status === 'cancelled' ? 'danger' : 'neutral'}`}>{o.status}</span></td>
                   </tr>
                 ))}
               </tbody>

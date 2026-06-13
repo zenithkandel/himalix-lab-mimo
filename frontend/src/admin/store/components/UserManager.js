@@ -151,8 +151,8 @@ export default function UserManager({ users, authFetch, onLoad }) {
           <tbody>
             {filtered.map(u => (
               <tr key={u.id}>
-                <td>#{u.id}</td>
-                <td>
+                <td data-label="ID">#{u.id}</td>
+                <td data-label="Customer Email">
                   <div className="flex items-center gap-2">
                     {u.avatar_url ? (
                       <img src={u.avatar_url} alt="" style={{ width: 24, height: 24, borderRadius: '50%' }} />
@@ -162,18 +162,18 @@ export default function UserManager({ users, authFetch, onLoad }) {
                     <span className="font-semibold">{u.email}</span>
                   </div>
                 </td>
-                <td>
+                <td data-label="Role">
                   <span className={`badge badge--${u.role === 'admin' ? 'warning' : 'info'}`} style={{ textTransform: 'uppercase' }}>
                     {u.role}
                   </span>
                 </td>
-                <td style={{ textTransform: 'capitalize' }}>{u.auth_provider || 'local'}</td>
-                <td className="font-mono" style={{ color: 'var(--accent)' }}>
+                <td data-label="Auth Provider" style={{ textTransform: 'capitalize' }}>{u.auth_provider || 'local'}</td>
+                <td data-label="Wallet Balance" className="font-mono" style={{ color: 'var(--accent)' }}>
                   Rs. {Number(u.wallet_balance).toFixed(2)}
                 </td>
-                <td>{u.order_count || 0}</td>
-                <td>{new Date(u.created_at).toLocaleDateString()}</td>
-                <td>
+                <td data-label="Orders Placed">{u.order_count || 0}</td>
+                <td data-label="Joined Date">{new Date(u.created_at).toLocaleDateString()}</td>
+                <td data-label="Actions">
                   <div className="flex gap-2 justify-end">
                     <button 
                       className="btn btn-outline btn-sm" 

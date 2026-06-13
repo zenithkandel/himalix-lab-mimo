@@ -81,26 +81,26 @@ export default function ReviewManager({ reviews, authFetch, onLoad }) {
           <tbody>
             {filtered.map(r => (
               <tr key={r.id}>
-                <td>#{r.id}</td>
-                <td>
+                <td data-label="ID">#{r.id}</td>
+                <td data-label="Product">
                   <div>
                     <span className="font-semibold" style={{ display: 'block' }}>{r.product_name}</span>
                     <code style={{ fontSize: 'var(--text-xs)', color: 'var(--text-2)' }}>{r.product_sku}</code>
                   </div>
                 </td>
-                <td>{r.user_email}</td>
-                <td>
+                <td data-label="Customer">{r.user_email}</td>
+                <td data-label="Rating">
                   <div className="flex" title={`${r.rating} / 5 stars`}>
                     {renderStars(r.rating)}
                   </div>
                 </td>
-                <td>
+                <td data-label="Comment">
                   <p className="admin-review-comment" style={{ maxWidth: 350, margin: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }} title={r.comment}>
                     {r.comment || <em style={{ color: 'var(--text-3)' }}>No comment left</em>}
                   </p>
                 </td>
-                <td>{new Date(r.created_at).toLocaleDateString()}</td>
-                <td>
+                <td data-label="Review Date">{new Date(r.created_at).toLocaleDateString()}</td>
+                <td data-label="Actions">
                   <div className="flex justify-end">
                     <button 
                       className="btn btn-danger btn-sm" 

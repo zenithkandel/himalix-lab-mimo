@@ -746,8 +746,86 @@ table.admin-table tbody tr:hover td {
   }
 }
 
-@media (max-width: 600px) {
+@media (max-width: 639.98px) {
   .admin-content { padding: var(--space-4); }
   .admin-stats-grid { grid-template-columns: 1fr; }
   .admin-topbar { padding: 0 var(--space-4); }
+
+  /* Tables to cards */
+  .table-responsive {
+    overflow-x: visible !important;
+  }
+  
+  table.admin-table, 
+  table.admin-table thead, 
+  table.admin-table tbody, 
+  table.admin-table th, 
+  table.admin-table td, 
+  table.admin-table tr { 
+    display: block !important; 
+    width: 100% !important;
+    box-sizing: border-box !important;
+  }
+  
+  table.admin-table thead {
+    display: none !important;
+  }
+  
+  table.admin-table tr {
+    border: 1px solid var(--border) !important;
+    margin-bottom: var(--space-4) !important;
+    background: var(--bg-1) !important;
+    padding: var(--space-4) !important;
+  }
+  
+  table.admin-table td {
+    border-bottom: 1px solid var(--border) !important;
+    padding: var(--space-3) 0 !important;
+    display: flex !important;
+    justify-content: space-between !important;
+    align-items: center !important;
+    text-align: right !important;
+  }
+  
+  table.admin-table td:last-child {
+    border-bottom: none !important;
+    justify-content: flex-end !important;
+  }
+  
+  table.admin-table td::before {
+    content: attr(data-label) !important;
+    font-weight: 700 !important;
+    text-transform: uppercase !important;
+    font-size: var(--text-xs) !important;
+    color: var(--text-2) !important;
+    float: left !important;
+    text-align: left !important;
+    margin-right: var(--space-4) !important;
+  }
+
+  /* Dashboard recent orders card margins */
+  .admin-dashboard__recent table.admin-table tr {
+    margin-bottom: var(--space-2) !important;
+  }
+
+  /* Array Editor CMS column items */
+  .cms-section-card__body > div {
+    grid-template-columns: 1fr !important; /* Forces 1 column */
+  }
+
+  /* Modals stacked vertically on mobile */
+  .admin-modal {
+    max-width: 100% !important;
+    width: 100% !important;
+    margin: 0 !important;
+    height: 100% !important;
+    max-height: 100vh !important;
+  }
+  
+  /* Inputs comfortable height and stacking */
+  .form-group {
+    flex-direction: column !important;
+    align-items: stretch !important;
+    gap: var(--space-1) !important;
+  }
 }

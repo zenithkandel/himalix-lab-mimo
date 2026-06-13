@@ -211,34 +211,34 @@ export default function LogsManager({ authFetch }) {
             <tbody>
               {activeTab === 'wallet' && paginatedItems.map((tx) => (
                 <tr key={tx.id}>
-                  <td className="font-mono">#{tx.id}</td>
-                  <td>{tx.user_email || `User #${tx.user_id}`}</td>
-                  <td className="font-mono" style={{ color: tx.amount < 0 ? 'var(--danger)' : 'var(--accent)' }}>
+                  <td data-label="ID" className="font-mono">#{tx.id}</td>
+                  <td data-label="User Email">{tx.user_email || `User #${tx.user_id}`}</td>
+                  <td data-label="Amount" className="font-mono" style={{ color: tx.amount < 0 ? 'var(--danger)' : 'var(--accent)' }}>
                     {tx.amount < 0 ? '-' : '+'}{formatPrice(Math.abs(tx.amount))}
                   </td>
-                  <td>
+                  <td data-label="Type">
                     <span className={`badge badge--${tx.type === 'deposit' ? 'success' : tx.type === 'purchase' ? 'info' : 'warning'}`} style={{ textTransform: 'uppercase' }}>
                       {tx.type}
                     </span>
                   </td>
-                  <td className="font-mono">{tx.reference_id || 'N/A'}</td>
-                  <td>{new Date(tx.created_at).toLocaleString('en-NP')}</td>
+                  <td data-label="Reference ID" className="font-mono">{tx.reference_id || 'N/A'}</td>
+                  <td data-label="Created At">{new Date(tx.created_at).toLocaleString('en-NP')}</td>
                 </tr>
               ))}
               {activeTab === 'claims' && paginatedItems.map((claim, index) => (
                 <tr key={`${claim.user_id}-${claim.platform}-${index}`}>
-                  <td>{claim.user_email || `User #${claim.user_id}`}</td>
-                  <td style={{ textTransform: 'uppercase', letterSpacing: '0.05em' }} className="font-mono">{claim.platform}</td>
-                  <td>{new Date(claim.claimed_at).toLocaleString('en-NP')}</td>
+                  <td data-label="User Email">{claim.user_email || `User #${claim.user_id}`}</td>
+                  <td data-label="Platform" style={{ textTransform: 'uppercase', letterSpacing: '0.05em' }} className="font-mono">{claim.platform}</td>
+                  <td data-label="Claimed At">{new Date(claim.claimed_at).toLocaleString('en-NP')}</td>
                 </tr>
               ))}
               {activeTab === 'contact' && paginatedItems.map((msg) => (
                 <tr key={msg.id}>
-                  <td><strong>{msg.name}</strong></td>
-                  <td className="font-mono">{msg.email}</td>
-                  <td>{msg.subject || 'No Subject'}</td>
-                  <td style={{ maxWidth: '300px', whiteSpace: 'normal', wordBreak: 'break-all' }}>{msg.message}</td>
-                  <td>{new Date(msg.created_at).toLocaleString('en-NP')}</td>
+                  <td data-label="Name"><strong>{msg.name}</strong></td>
+                  <td data-label="Email" className="font-mono">{msg.email}</td>
+                  <td data-label="Subject">{msg.subject || 'No Subject'}</td>
+                  <td data-label="Message" style={{ maxWidth: '300px', whiteSpace: 'normal', wordBreak: 'break-all' }}>{msg.message}</td>
+                  <td data-label="Date">{new Date(msg.created_at).toLocaleString('en-NP')}</td>
                 </tr>
               ))}
             </tbody>
