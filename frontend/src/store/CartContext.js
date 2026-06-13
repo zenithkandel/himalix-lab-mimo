@@ -32,6 +32,30 @@ export function CartProvider({ children }) {
 
   useEffect(() => { fetchCart(); }, [fetchCart]);
 
+  /* Merge local guest cart to server on login */
+  useEffect(() => {
+    if (user) {
+      const localItems = JSON.parse(localStorage.getItem(localKey) || '[]');
+      if (localItems.length > 0) {
+        const syncGuestCart = async () => {
+          for (const item of localItems) {
+            try {
+              await authFetch('/api/store/cart', {
+                method: 'POST',
+                body: JSON.stringify({ product_id: item.product_id, quantity: item.quantity })
+              });
+            } catch (err) {
+              console.error('Failed to sync guest cart item:', err);
+            }
+          }
+          localStorage.removeItem(localKey);
+          fetchCart();
+        };
+        syncGuestCart();
+      }
+    }
+  }, [user, authFetch, fetchCart]);
+
   /* Sync guest cart to localStorage */
   useEffect(() => {
     if (!user) localStorage.setItem(localKey, JSON.stringify(items));

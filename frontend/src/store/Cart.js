@@ -7,7 +7,7 @@ import StoreFooter from './Footer';
 
 export default function Cart() {
   const { items, itemCount, totalAmount, updateQty, removeItem, clearCart } = useCart();
-  const { user, authFetch } = useAuth();
+  const { user, authFetch, systemConfig } = useAuth();
   const navigate = useNavigate();
 
   const [step, setStep]         = useState('cart');   // cart | checkout | success
@@ -70,10 +70,13 @@ export default function Cart() {
 
   const walletBalance   = wallet?.balance || 0;
   const subtotal        = totalAmount;
+  const taxRate         = (parseFloat(systemConfig?.salesTaxRate) || 0) / 100;
+  const salesTax        = subtotal * taxRate;
   const shippingCost    = shipping?.shipping_cost || 0;
   const couponDiscount  = couponApplied?.discount_amount || 0;
-  const walletDeduction = walletUse ? Math.min(walletBalance, subtotal + shippingCost - couponDiscount) : 0;
-  const grandTotal      = Math.max(0, subtotal + shippingCost - couponDiscount - walletDeduction);
+  const totalBeforeWallet = subtotal + salesTax + shippingCost - couponDiscount;
+  const walletDeduction = walletUse ? Math.min(walletBalance, totalBeforeWallet) : 0;
+  const grandTotal      = Math.max(0, totalBeforeWallet - walletDeduction);
 
   const formatPrice = n => `Rs. ${Number(n).toLocaleString('en-NP')}`;
 
@@ -330,6 +333,10 @@ export default function Cart() {
               <div className="order-summary__row">
                 <span>Subtotal ({itemCount} items)</span>
                 <span className="order-summary__value">{formatPrice(subtotal)}</span>
+              </div>
+              <div className="order-summary__row">
+                <span>Sales Tax ({systemConfig?.salesTaxRate || 0}%)</span>
+                <span className="order-summary__value">{formatPrice(salesTax)}</span>
               </div>
               <div className="order-summary__row">
                 <span>Shipping</span>

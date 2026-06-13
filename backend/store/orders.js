@@ -37,6 +37,7 @@ const checkoutHandler = async (req, res) => {
         province: addr.province || 'Bagmati',
         district: addr.district || '',
         city: addr.city || '',
+        addressLine: addr.address_line || '',
         receivingLocation: (addr.lat && addr.lng) ? `${addr.lat},${addr.lng}` : ''
       };
       if (req.body.use_wallet) {
@@ -44,7 +45,7 @@ const checkoutHandler = async (req, res) => {
       }
     }
 
-    if (!shippingDetails || !shippingDetails.fullName || !shippingDetails.email || !shippingDetails.phone || !shippingDetails.province || !shippingDetails.district || !shippingDetails.city || !shippingDetails.receivingLocation) {
+    if (!shippingDetails || !shippingDetails.fullName || !shippingDetails.email || !shippingDetails.phone || !shippingDetails.province || !shippingDetails.district || !shippingDetails.city || !shippingDetails.addressLine) {
       return res.status(400).json({ message: 'Shipping details are incomplete' });
     }
 
@@ -99,21 +100,44 @@ const checkoutHandler = async (req, res) => {
     let shippingFee = 0;
 
     try {
-      const coords = shippingDetails.receivingLocation.split(',').map(c => parseFloat(c.trim()));
-      if (coords.length === 2 && !isNaN(coords[0]) && !isNaN(coords[1])) {
-        distance = calculateHaversineDistance(HQ_LAT, HQ_LNG, coords[0], coords[1]);
-        if (deliveryFreeThreshold > 0 && subtotal >= deliveryFreeThreshold) {
-          shippingFee = 0;
+      if (shippingDetails.receivingLocation) {
+        const coords = shippingDetails.receivingLocation.split(',').map(c => parseFloat(c.trim()));
+        if (coords.length === 2 && !isNaN(coords[0]) && !isNaN(coords[1])) {
+          distance = calculateHaversineDistance(HQ_LAT, HQ_LNG, coords[0], coords[1]);
+          if (deliveryFreeThreshold > 0 && subtotal >= deliveryFreeThreshold) {
+            shippingFee = 0;
+          } else {
+            shippingFee = Math.max(deliveryMinCharge, distance * deliveryPerKmRate);
+          }
         } else {
-          shippingFee = Math.max(deliveryMinCharge, distance * deliveryPerKmRate);
+          shippingFee = deliveryMinCharge;
         }
+      } else {
+        shippingFee = deliveryMinCharge;
       }
     } catch (e) {
       console.error('Error calculating shipping fee:', e);
       shippingFee = deliveryMinCharge;
     }
 
-    const totalAmount = subtotal + tax + shippingFee;
+    // Apply settings-based coupon discount if requested
+    let couponDiscount = 0;
+    if (req.body.coupon_code) {
+      const [rows] = await connection.query(
+        "SELECT key_name, key_value FROM settings WHERE key_name IN ('coupon_code', 'coupon_value')"
+      );
+      let dbCouponCode = 'SAVE100';
+      let dbCouponValue = 100.00;
+      rows.forEach(r => {
+        if (r.key_name === 'coupon_code') dbCouponCode = r.key_value;
+        if (r.key_name === 'coupon_value') dbCouponValue = parseFloat(r.key_value) || 0.00;
+      });
+      if (req.body.coupon_code.toUpperCase() === dbCouponCode.toUpperCase()) {
+        couponDiscount = dbCouponValue;
+      }
+    }
+
+    const totalAmount = Math.max(0, subtotal + tax + shippingFee - couponDiscount);
 
     // Verify wallet balance if paying with store credit
     if (paymentMethod === 'store_credit') {
@@ -350,6 +374,36 @@ router.get('/shipping', async (req, res) => {
   } catch (err) {
     console.error('Error in shipping route:', err);
     res.status(500).json({ message: 'Server error calculating shipping fee' });
+  }
+});
+
+// 4. Validate and Apply Coupon (Settings dynamic lookups)
+router.post('/apply-coupon', async (req, res) => {
+  try {
+    const { code } = req.body;
+    if (!code) return res.status(400).json({ message: 'Coupon code is required' });
+
+    const [rows] = await pool.query(
+      "SELECT key_name, key_value FROM settings WHERE key_name IN ('coupon_code', 'coupon_value')"
+    );
+    let dbCouponCode = 'SAVE100';
+    let dbCouponValue = 100.00;
+    rows.forEach(r => {
+      if (r.key_name === 'coupon_code') dbCouponCode = r.key_value;
+      if (r.key_name === 'coupon_value') dbCouponValue = parseFloat(r.key_value) || 0.00;
+    });
+
+    if (code.toUpperCase() === dbCouponCode.toUpperCase()) {
+      res.json({
+        code: dbCouponCode,
+        discount_amount: dbCouponValue
+      });
+    } else {
+      res.status(400).json({ message: 'Invalid or expired coupon code' });
+    }
+  } catch (err) {
+    console.error('Coupon validation error:', err);
+    res.status(500).json({ message: 'Server error validating coupon code' });
   }
 });
 

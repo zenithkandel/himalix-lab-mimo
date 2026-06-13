@@ -214,9 +214,28 @@ const claimSocialHandler = async (req, res) => {
 
     await connection.commit();
 
+    const [userRows] = await pool.query(
+      'SELECT wallet_balance, referral_code FROM himalix_auth.users WHERE id = ?',
+      [userId]
+    );
+    const [[earnedRow]] = await pool.query(
+      'SELECT COALESCE(SUM(amount), 0) as earned FROM wallet_transactions WHERE user_id = ? AND amount > 0',
+      [userId]
+    );
+    const [[refCountRow]] = await pool.query(
+      'SELECT COUNT(*) as count FROM himalix_auth.users WHERE referred_by = ?',
+      [userId]
+    );
+
     res.json({
       message: `Successfully claimed Rs. ${bonusAmount.toFixed(2)} store credit!`,
-      bonusEarned: bonusAmount
+      bonusEarned: bonusAmount,
+      wallet: {
+        balance: parseFloat(userRows[0].wallet_balance),
+        referral_code: userRows[0].referral_code,
+        referral_count: refCountRow.count,
+        total_earned: parseFloat(earnedRow.earned)
+      }
     });
   } catch (err) {
     await connection.rollback();

@@ -57,7 +57,7 @@ export default function StoreAdmin() {
       try {
         const res  = await authFetch('/api/store/admin/orders');
         const data = await res.json();
-        setOrders(data.orders || []);
+        setOrders(Array.isArray(data) ? data : (data.orders || []));
       } catch {} finally { setOrderLoading(false); }
     }
     if (view === 'products') {

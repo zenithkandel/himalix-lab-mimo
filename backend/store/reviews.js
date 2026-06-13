@@ -8,7 +8,7 @@ router.get('/:product_id', async (req, res) => {
   try {
     const productId = req.params.product_id;
     const [rows] = await pool.query(
-      `SELECT r.id, r.rating, r.comment, r.created_at, u.email, u.avatar_url
+      `SELECT r.id, r.rating, r.comment, r.created_at, u.email, u.avatar_url, u.name AS user_name
        FROM reviews r
        JOIN himalix_auth.users u ON r.user_id = u.id
        WHERE r.product_id = ?
@@ -46,7 +46,7 @@ router.post('/:product_id', authMiddleware, async (req, res) => {
     );
 
     const [insertedReview] = await pool.query(
-      `SELECT r.id, r.rating, r.comment, r.created_at, u.email, u.avatar_url
+      `SELECT r.id, r.rating, r.comment, r.created_at, u.email, u.avatar_url, u.name AS user_name
        FROM reviews r
        JOIN himalix_auth.users u ON r.user_id = u.id
        WHERE r.id = ?`,

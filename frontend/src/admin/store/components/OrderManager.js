@@ -51,7 +51,7 @@ export default function OrderManager({ orders, updateOrderStatus, loading }) {
                   >
                     {o.tracking_code} <i className="fa-light fa-sharp fa-copy" style={{ opacity: 0.5 }} />
                   </td>
-                  <td data-label="Total">Rs. {Number(o.total_amount).toFixed(2)}</td>
+                  <td data-label="Total">Rs. {Number(o.total).toFixed(2)}</td>
                   <td data-label="Payment"><span className={`badge badge-${o.payment_status === 'paid' ? 'success' : 'warning'}`}>{o.payment_method} ({o.payment_status})</span></td>
                   <td data-label="Status">
                     <select 

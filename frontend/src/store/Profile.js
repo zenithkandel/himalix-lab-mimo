@@ -84,7 +84,7 @@ export default function Profile() {
     if (!user) { navigate('/signin'); return; }
     authFetch('/api/store/orders/my')
       .then(r => r.json())
-      .then(d => setOrders(d.orders || []))
+      .then(d => setOrders(Array.isArray(d) ? d : (d.orders || [])))
       .finally(() => setOrdersLoading(false));
     authFetch('/api/store/wallet')
       .then(r => r.json())
@@ -192,6 +192,32 @@ export default function Profile() {
   const formatPrice = n => `Rs. ${Number(n || 0).toLocaleString('en-NP')}`;
   const formatDate  = s => new Date(s).toLocaleDateString('en-NP', { year: 'numeric', month: 'short', day: 'numeric' });
 
+  const renderShippingAddress = (addr) => {
+    if (!addr) return '—';
+    let obj = addr;
+    if (typeof addr === 'string') {
+      try {
+        obj = JSON.parse(addr);
+      } catch (e) {
+        return addr;
+      }
+    }
+    if (typeof obj === 'object' && obj !== null) {
+      const parts = [obj.city, obj.district, obj.province].filter(Boolean);
+      return (
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+          {obj.fullName && <div><strong>Name:</strong> {obj.fullName}</div>}
+          {obj.phone && <div><strong>Phone:</strong> {obj.phone}</div>}
+          {obj.addressLine && <div><strong>Street:</strong> {obj.addressLine}</div>}
+          {parts.length > 0 && <div><strong>Location:</strong> {parts.join(', ')}</div>}
+          {obj.expectedDeliveryETA && <div><strong>ETA:</strong> {obj.expectedDeliveryETA}</div>}
+          {obj.shippingFee !== undefined && <div><strong>Shipping Fee:</strong> Rs. {obj.shippingFee}</div>}
+        </div>
+      );
+    }
+    return String(addr);
+  };
+
   const resolveAvatar = (url) => {
     if (!url) return null;
     if (url.startsWith('http://') || url.startsWith('https://') || url.startsWith('data:')) return url;
@@ -295,12 +321,12 @@ export default function Profile() {
                         onKeyDown={e => e.key === 'Enter' && setSelectedOrder(order)}
                         aria-expanded={selectedOrder?.id === order.id}
                       >
-                        <span className="order-row__id">#{order.order_code || order.id}</span>
+                        <span className="order-row__id">#{order.tracking_code || order.id}</span>
                         <span className="order-row__date">{formatDate(order.created_at)}</span>
                         <span className="order-row__items">
                           {order.items?.map(i => i.product_name).join(', ') || '—'}
                         </span>
-                        <span className="order-row__total">{formatPrice(order.total_amount)}</span>
+                        <span className="order-row__total">{formatPrice(order.total)}</span>
                         <span className="order-row__status">{statusBadge(order.status)}</span>
                       </div>
                     ))}
@@ -313,7 +339,7 @@ export default function Profile() {
                     <div className="order-detail-overlay" onClick={() => setSelectedOrder(null)} aria-hidden="true" />
                     <div className="order-detail-panel" role="dialog" aria-modal="true" aria-label="Order details">
                       <div className="order-detail-panel__header">
-                        <span className="order-detail-panel__title">#{selectedOrder.order_code || selectedOrder.id}</span>
+                        <span className="order-detail-panel__title">#{selectedOrder.tracking_code || selectedOrder.id}</span>
                         <button className="order-detail-panel__close" onClick={() => setSelectedOrder(null)} aria-label="Close">
                           <i className="fa-light fa-sharp fa-xmark" />
                         </button>
@@ -334,14 +360,14 @@ export default function Profile() {
                         </div>
                         <div className="order-summary__row order-summary__row--total">
                           <span>Total</span>
-                          <span className="order-summary__value order-summary__value--gold">{formatPrice(selectedOrder.total_amount)}</span>
+                          <span className="order-summary__value order-summary__value--gold">{formatPrice(selectedOrder.total)}</span>
                         </div>
                         {selectedOrder.shipping_address && (
                           <div>
                             <div className="profile-section__title" style={{ fontSize: 'var(--text-xs)', marginBottom: 'var(--space-2)' }}>Delivery Address</div>
-                            <p style={{ fontSize: 'var(--text-sm)', color: 'var(--text-1)', lineHeight: 1.6 }}>
-                              {selectedOrder.shipping_address}
-                            </p>
+                            <div style={{ fontSize: 'var(--text-sm)', color: 'var(--text-1)', lineHeight: 1.6 }}>
+                              {renderShippingAddress(selectedOrder.shipping_address)}
+                            </div>
                           </div>
                         )}
                       </div>
