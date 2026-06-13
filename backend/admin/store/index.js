@@ -27,7 +27,7 @@ const storage = multer.diskStorage({
   },
 });
 
-const upload = multer({ 
+const upload = multer({
   storage,
   limits: {
     fileSize: 5 * 1024 * 1024 // 5MB limit
@@ -507,10 +507,10 @@ router.get('/orders', async (req, res) => {
 router.put('/orders/:id/status', async (req, res) => {
   try {
     const { status, tracking_code, payment_status } = req.body;
-    
+
     const updates = [];
     const params = [];
-    
+
     if (status !== undefined) {
       updates.push('status = ?');
       params.push(status);
@@ -523,14 +523,14 @@ router.put('/orders/:id/status', async (req, res) => {
       updates.push('payment_status = ?');
       params.push(payment_status);
     }
-    
+
     if (updates.length === 0) {
       return res.status(400).json({ message: 'No fields to update' });
     }
-    
+
     params.push(req.params.id);
     const [result] = await pool.query(`UPDATE orders SET ${updates.join(', ')} WHERE id = ?`, params);
-    
+
     if (result.affectedRows === 0) {
       return res.status(404).json({ message: 'Order not found' });
     }
@@ -871,7 +871,7 @@ router.put('/notification-receivers/:id', async (req, res) => {
     const { notify_on_order_placed, notify_on_low_stock, notify_on_user_registered } = req.body;
     const updates = [];
     const params = [];
-    
+
     if (notify_on_order_placed !== undefined) {
       updates.push('notify_on_order_placed = ?');
       params.push(notify_on_order_placed ? 1 : 0);
@@ -884,11 +884,11 @@ router.put('/notification-receivers/:id', async (req, res) => {
       updates.push('notify_on_user_registered = ?');
       params.push(notify_on_user_registered ? 1 : 0);
     }
-    
+
     if (updates.length === 0) {
       return res.status(400).json({ message: 'Nothing to update' });
     }
-    
+
     params.push(req.params.id);
     const [result] = await pool.query(`UPDATE email_notification_receivers SET ${updates.join(', ')} WHERE id = ?`, params);
     if (result.affectedRows === 0) return res.status(404).json({ message: 'Receiver not found' });
