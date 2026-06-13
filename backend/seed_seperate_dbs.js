@@ -154,22 +154,21 @@ async function seed() {
 
     console.log('Seeding portfolio landing content...');
     const contentRows = [
-      ['hero', 'hero_headline', 'Innovating Nepal\'s Tech Future', 'text'],
-      ['hero', 'hero_subline', 'Empowering Nepalese innovators with cutting-edge electronics, 3D printing, and custom tech solutions', 'text'],
-      ['hero', 'hero_cta_text', 'Explore Our Services', 'text'],
-      ['hero', 'hero_cta_link', '#services', 'text'],
-      ['about', 'about_title', 'About Himalix Labs', 'text'],
-      ['about', 'about_description', 'Himalix Labs is Nepal\'s premier technology solutions organization, dedicated to making advanced electronics and digital fabrication accessible to every Nepalese innovator. Founded with the vision of bridging the technology gap in South Asia, we provide end-to-end tech solutions — from electronic components and 3D printing to custom project development.', 'text'],
-      ['about', 'about_mission', 'To democratize technology access in Nepal and empower the next generation of innovators with tools, knowledge, and support.', 'text'],
-      ['about', 'about_vision', 'Building a thriving tech ecosystem in Nepal where every idea can become reality.', 'text'],
-      ['stats', 'stats_projects', '500+', 'text'],
-      ['stats', 'stats_clients', '200+', 'text'],
-      ['stats', 'stats_products', '1000+', 'text'],
-      ['stats', 'stats_years', '5+', 'text'],
-      ['contact', 'contact_title', 'Get In Touch', 'text'],
-      ['contact', 'contact_email', 'info@himalixlab.com', 'text'],
-      ['contact', 'contact_phone', '+977-9800000000', 'text'],
-      ['contact', 'contact_address', 'Kathmandu, Nepal', 'text'],
+      ['hero', 'title_before', 'Nepal\'s Premier', 'text'],
+      ['hero', 'title_em', 'Technology', 'text'],
+      ['hero', 'title_after', 'Solutions Provider', 'text'],
+      ['hero', 'subtitle', 'From electronics to custom software — one platform, endless possibilities.', 'text'],
+      ['about', 'title', 'Built for Nepal\'s tech future.', 'text'],
+      ['about', 'description', 'Himalix Labs is a Kathmandu-based technology company delivering quality electronics, 3D printing, web solutions, and custom software — all from one place.', 'text'],
+      ['contact', 'email', 'info@himalixlabs.com', 'text'],
+      ['contact', 'phone', '+977-9800000000', 'text'],
+      ['contact', 'address', 'Kathmandu, Nepal', 'text'],
+      ['stats', 'items', JSON.stringify([
+        { icon: 'users', value: 500, suffix: '+', label: 'Happy Customers' },
+        { icon: 'box', value: 1200, suffix: '+', label: 'Orders Delivered' },
+        { icon: 'cube', value: 300, suffix: '+', label: '3D Prints Completed' },
+        { icon: 'star', value: 4, suffix: '.9★', label: 'Average Rating' }
+      ]), 'json'],
       ['footer', 'footer_description', 'Himalix Labs — Nepal\'s premier technology solutions organization.', 'text'],
       ['footer', 'footer_copyright', '© 2026 Himalix Labs. All rights reserved.', 'text']
     ];
