@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 
 const ORDER_STATUS = ['pending', 'confirmed', 'processing', 'shipped', 'delivered', 'cancelled'];
 const PAYMENT_STATUS = ['paid', 'unpaid', 'refunded'];
@@ -7,6 +7,20 @@ export default function OrderManager({ orders, updateOrderDetails, loading }) {
   const [search, setSearch] = useState('');
   const [activeOrder, setActiveOrder] = useState(null);
   const [modalFields, setModalFields] = useState({ status: '', payment_status: '', tracking_code: '' });
+
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      if (e.key === 'Escape') {
+        setActiveOrder(null);
+      }
+    };
+    if (activeOrder) {
+      document.addEventListener('keydown', handleKeyDown);
+    }
+    return () => {
+      document.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [activeOrder]);
 
   if (loading) return <div className="spinner" />;
 
@@ -57,6 +71,67 @@ export default function OrderManager({ orders, updateOrderDetails, loading }) {
       }
     }
     return addr;
+  };
+
+  const getCoordinates = (shipping) => {
+    if (!shipping || !shipping.receivingLocation) return null;
+    const parts = shipping.receivingLocation.split(',');
+    if (parts.length === 2) {
+      const lat = parts[0].trim();
+      const lng = parts[1].trim();
+      if (lat && lng && !isNaN(lat) && !isNaN(lng)) {
+        return { lat, lng };
+      }
+    }
+    return null;
+  };
+
+  const handleCopyOrderDetails = (order) => {
+    if (!order) return;
+    const shipping = getShippingDetails(order);
+    const coords = getCoordinates(shipping);
+    
+    let shippingStr = 'No shipping details';
+    if (shipping) {
+      const coordsStr = coords ? `${coords.lat}, ${coords.lng}` : 'N/A';
+      const mapsUrl = coords ? `https://maps.google.com/?q=${coords.lat},${coords.lng}` : 'N/A';
+      shippingStr = `Recipient: ${shipping.fullName || 'N/A'}
+Phone: ${shipping.phone || 'N/A'}
+Street Line: ${shipping.addressLine || 'N/A'}
+City: ${shipping.city || 'N/A'}
+District: ${shipping.district || 'N/A'}
+Province: ${shipping.province || 'N/A'}
+Coordinates: ${coordsStr}
+Google Maps Location: ${mapsUrl}`;
+    }
+
+    const itemsStr = order.items && order.items.length > 0 
+      ? order.items.map(item => 
+          `- ${item.name || `Product #${item.product_id}`} (Qty: ${item.quantity}, Price: Rs. ${Number(item.price).toFixed(2)}, Total: Rs. ${(Number(item.price) * item.quantity).toFixed(2)})`
+        ).join('\n')
+      : 'No items in order';
+
+    const details = `Order ID: #${order.id}
+Tracking Code: ${order.tracking_code || 'N/A'}
+Date: ${formatDate(order.created_at)}
+Grand Total: Rs. ${Number(order.total).toFixed(2)}
+Payment Method: ${order.payment_method.toUpperCase()}
+Payment Status: ${order.payment_status.toUpperCase()}
+
+Customer Profile:
+Name: ${order.user_name || 'Guest'}
+Email: ${order.email}
+Phone: ${order.user_phone || 'N/A'}
+
+Shipping Details:
+${shippingStr}
+
+Items Ordered:
+${itemsStr}`;
+
+    navigator.clipboard.writeText(details)
+      .then(() => alert('Order details copied to clipboard!'))
+      .catch((err) => alert('Failed to copy details: ' + err));
   };
 
   return (
@@ -202,6 +277,7 @@ export default function OrderManager({ orders, updateOrderDetails, loading }) {
                     {(() => {
                       const shipping = getShippingDetails(activeOrder);
                       if (!shipping) return <div style={{ fontSize: '13px', color: 'var(--text-3)' }}>No shipping details available</div>;
+                      const coords = getCoordinates(shipping);
                       return (
                         <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', fontSize: '13px', background: 'var(--bg-1)', padding: '12px', border: '1px solid var(--border)' }}>
                           <div><strong>Recipient:</strong> {shipping.fullName || 'N/A'}</div>
@@ -210,8 +286,21 @@ export default function OrderManager({ orders, updateOrderDetails, loading }) {
                           <div><strong>City:</strong> {shipping.city || 'N/A'}</div>
                           <div><strong>District:</strong> {shipping.district || 'N/A'}</div>
                           <div><strong>Province:</strong> {shipping.province || 'N/A'}</div>
-                          {shipping.lat && shipping.lng && (
-                            <div><strong>Coords:</strong> Lat: {shipping.lat}, Lng: {shipping.lng}</div>
+                          {coords && (
+                            <>
+                              <div><strong>Coords:</strong> Lat: {coords.lat}, Lng: {coords.lng}</div>
+                              <div>
+                                <strong>Google Maps:</strong>{' '}
+                                <a 
+                                  href={`https://maps.google.com/?q=${coords.lat},${coords.lng}`} 
+                                  target="_blank" 
+                                  rel="noopener noreferrer"
+                                  style={{ color: 'var(--accent)', textDecoration: 'underline', fontWeight: 600 }}
+                                >
+                                  View on Map
+                                </a>
+                              </div>
+                            </>
                           )}
                         </div>
                       );
@@ -249,7 +338,12 @@ export default function OrderManager({ orders, updateOrderDetails, loading }) {
               </div>
 
               <div className="admin-modal__footer mt-6 flex justify-between">
-                <button type="button" className="btn btn-outline" onClick={() => setActiveOrder(null)}>Close</button>
+                <div style={{ display: 'flex', gap: '8px' }}>
+                  <button type="button" className="btn btn-outline" onClick={() => setActiveOrder(null)}>Close</button>
+                  <button type="button" className="btn btn-outline" onClick={() => handleCopyOrderDetails(activeOrder)}>
+                    <i className="fa-light fa-sharp fa-copy" /> Copy Details
+                  </button>
+                </div>
                 <button type="button" className="btn btn-primary" onClick={handleSaveModal}>
                   <i className="fa-light fa-sharp fa-floppy-disk" /> Save Changes
                 </button>

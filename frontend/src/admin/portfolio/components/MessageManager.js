@@ -268,7 +268,7 @@ export default function MessageManager({ token, authFetch }) {
               <form onSubmit={handleSaveSettings} style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-4)' }}>
                 
                 <div className="form-group">
-                  <label className="toggle" style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-3)', cursor: 'pointer' }}>
+                  <label style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-3)', cursor: 'pointer' }}>
                     <input 
                       type="checkbox"
                       checked={form.smtp_forward_enabled === '1'}
@@ -351,7 +351,7 @@ export default function MessageManager({ token, authFetch }) {
                 </div>
 
                 <div className="form-group">
-                  <label className="toggle" style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-3)', cursor: 'pointer' }}>
+                  <label style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-3)', cursor: 'pointer' }}>
                     <input 
                       type="checkbox"
                       checked={form.smtp_secure === '1'}

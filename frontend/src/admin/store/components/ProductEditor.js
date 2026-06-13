@@ -192,7 +192,10 @@ export default function ProductEditor({
           
           <form onSubmit={handleSubmit} className="admin-modal__body">
             <div className="form-group">
-              <label className="form-label">Product Name</label>
+              <label className="form-label">
+                Product Name{' '}
+                <i className="fa-light fa-sharp fa-circle-info" style={{ marginLeft: '4px', cursor: 'help', opacity: 0.7 }} title="Enter the public name of the product, e.g. Arduino Uno R3" />
+              </label>
               <input 
                 className="form-input" 
                 required 
@@ -204,7 +207,10 @@ export default function ProductEditor({
             
             <div className="flex gap-4">
               <div className="form-group" style={{ flex: 1 }}>
-                <label className="form-label">SKU</label>
+                <label className="form-label">
+                  SKU{' '}
+                  <i className="fa-light fa-sharp fa-circle-info" style={{ marginLeft: '4px', cursor: 'help', opacity: 0.7 }} title="Stock Keeping Unit: a unique identifier code for cataloging" />
+                </label>
                 <input 
                   className="form-input" 
                   required 
@@ -214,7 +220,10 @@ export default function ProductEditor({
                 />
               </div>
               <div className="form-group" style={{ flex: 1 }}>
-                <label className="form-label">Category</label>
+                <label className="form-label">
+                  Category{' '}
+                  <i className="fa-light fa-sharp fa-circle-info" style={{ marginLeft: '4px', cursor: 'help', opacity: 0.7 }} title="Organize the product into a catalog group, e.g. Microcontrollers, Sensors" />
+                </label>
                 <input 
                   className="form-input" 
                   required 
@@ -227,7 +236,10 @@ export default function ProductEditor({
 
             <div className="flex gap-4">
               <div className="form-group" style={{ flex: 1 }}>
-                <label className="form-label">Price (Rs.)</label>
+                <label className="form-label">
+                  Price (Rs.){' '}
+                  <i className="fa-light fa-sharp fa-circle-info" style={{ marginLeft: '4px', cursor: 'help', opacity: 0.7 }} title="Set the public retail selling price of the item" />
+                </label>
                 <input 
                   type="number" 
                   step="0.01" 
@@ -239,7 +251,10 @@ export default function ProductEditor({
                 />
               </div>
               <div className="form-group" style={{ flex: 1 }}>
-                <label className="form-label">Cost Price (Rs.)</label>
+                <label className="form-label">
+                  Cost Price (Rs.){' '}
+                  <i className="fa-light fa-sharp fa-circle-info" style={{ marginLeft: '4px', cursor: 'help', opacity: 0.7 }} title="Purchase cost of the item used for internal margin calculation" />
+                </label>
                 <input 
                   type="number" 
                   step="0.01" 
@@ -254,7 +269,10 @@ export default function ProductEditor({
 
             <div className="flex gap-4">
               <div className="form-group" style={{ flex: 1 }}>
-                <label className="form-label">Stock Qty</label>
+                <label className="form-label">
+                  Stock Qty{' '}
+                  <i className="fa-light fa-sharp fa-circle-info" style={{ marginLeft: '4px', cursor: 'help', opacity: 0.7 }} title="Current physical inventory quantity available for immediate sale" />
+                </label>
                 <input 
                   type="number" 
                   className="form-input" 
@@ -265,7 +283,10 @@ export default function ProductEditor({
                 />
               </div>
               <div className="form-group" style={{ flex: 1 }}>
-                <label className="form-label">Stock Type</label>
+                <label className="form-label">
+                  Stock Type{' '}
+                  <i className="fa-light fa-sharp fa-circle-info" style={{ marginLeft: '4px', cursor: 'help', opacity: 0.7 }} title="In Stock means items are in inventory; Outsourced means items are ordered from suppliers on-demand" />
+                </label>
                 <select className="form-select" value={form.stock_type} onChange={e => setForm({...form, stock_type: e.target.value})}>
                   <option value="in_stock">In Stock</option>
                   <option value="outsourced">Outsourced</option>
@@ -275,7 +296,10 @@ export default function ProductEditor({
 
             {form.stock_type === 'outsourced' && (
               <div className="form-group">
-                <label className="form-label">Outsource Days</label>
+                <label className="form-label">
+                  Outsource Days{' '}
+                  <i className="fa-light fa-sharp fa-circle-info" style={{ marginLeft: '4px', cursor: 'help', opacity: 0.7 }} title="Number of days required to procure/manufacture the outsourced product" />
+                </label>
                 <input 
                   type="number" 
                   className="form-input" 
@@ -288,7 +312,10 @@ export default function ProductEditor({
             )}
 
             <div className="form-group">
-              <label className="form-label">Description</label>
+              <label className="form-label">
+                Description{' '}
+                <i className="fa-light fa-sharp fa-circle-info" style={{ marginLeft: '4px', cursor: 'help', opacity: 0.7 }} title="Detailed product description, specifications, usage instructions, or documentation links" />
+              </label>
               <textarea 
                 className="form-textarea" 
                 required 
@@ -300,7 +327,10 @@ export default function ProductEditor({
 
             <div className="form-group">
               <label className="form-label" style={{ display: 'flex', justifyContent: 'between', alignItems: 'center' }}>
-                <span>Technical Specifications</span>
+                <span>
+                  Technical Specifications{' '}
+                  <i className="fa-light fa-sharp fa-circle-info" style={{ marginLeft: '4px', cursor: 'help', opacity: 0.7 }} title="Key-value specifications table to display in product details (e.g., Operating Voltage: 5V)" />
+                </span>
                 <button 
                   type="button" 
                   className="btn btn-ghost btn-sm" 
@@ -342,7 +372,10 @@ export default function ProductEditor({
             </div>
 
             <div className="form-group">
-              <label className="form-label">Product Images</label>
+              <label className="form-label">
+                Product Images{' '}
+                <i className="fa-light fa-sharp fa-circle-info" style={{ marginLeft: '4px', cursor: 'help', opacity: 0.7 }} title="Upload product pictures. The first image selected will serve as the cover image. Click any uploaded image to select it as the Main cover image." />
+              </label>
               <div className="drag-drop-zone" style={{ marginBottom: 'var(--space-4)' }}>
                 <input 
                   type="file" 

@@ -4,6 +4,7 @@ import StoreNavbar from './Navbar';
 import { useCart } from './CartContext';
 import { useAuth } from '../auth/AuthContext';
 import StoreFooter from './Footer';
+import LocationPicker from '../components/LocationPicker';
 
 export default function Cart() {
   const { items, itemCount, totalAmount, updateQty, removeItem, clearCart } = useCart();
@@ -245,6 +246,14 @@ export default function Cart() {
                 <div className="checkout-address__row">
                   {addrField('addr-city', 'City / Municipality', 'city', 'e.g. Kathmandu')}
                   {addrField('addr-district', 'District', 'district', 'e.g. Kathmandu')}
+                </div>
+                <div className="form-group">
+                  <label className="form-label">Map Location (Pinpoint on map)</label>
+                  <LocationPicker 
+                    lat={address.lat} 
+                    lng={address.lng} 
+                    onChange={(lat, lng) => setAddress(p => ({ ...p, lat, lng }))} 
+                  />
                 </div>
                 <div className="checkout-address__row" style={{ alignItems: 'flex-end' }}>
                   {addrField('addr-lat', 'Latitude', 'lat', '27.7029', 'number')}
