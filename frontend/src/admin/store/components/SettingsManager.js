@@ -34,6 +34,11 @@ export default function SettingsManager({ authFetch }) {
   const [editingKey, setEditingKey] = useState(null);
   const [editingValue, setEditingValue] = useState('');
 
+  // Email Receivers State
+  const [emailReceivers, setEmailReceivers] = useState([]);
+  const [emailReceiversLoading, setEmailReceiversLoading] = useState(false);
+  const [newReceiver, setNewReceiver] = useState({ email_address: '', notify_on_order_placed: true, notify_on_low_stock: true, notify_on_user_registered: true });
+
   const fetchSettings = async () => {
     setLoading(true);
     try {
@@ -64,6 +69,22 @@ export default function SettingsManager({ authFetch }) {
     }
   };
 
+  const fetchEmailReceivers = async () => {
+    setEmailReceiversLoading(true);
+    setMsg(null);
+    try {
+      const res = await authFetch('/api/store/admin/settings/email-receivers');
+      if (!res.ok) throw new Error('Failed to fetch email receivers');
+      const data = await res.json();
+      setEmailReceivers(data || []);
+    } catch (err) {
+      console.error(err);
+      setMsg({ type: 'danger', text: 'Failed to load email receivers' });
+    } finally {
+      setEmailReceiversLoading(false);
+    }
+  };
+
   useEffect(() => {
     fetchSettings();
   }, []);
@@ -73,6 +94,8 @@ export default function SettingsManager({ authFetch }) {
     setMsg(null);
     if (tab === 'raw') {
       fetchRawSettings();
+    } else if (tab === 'emails') {
+      fetchEmailReceivers();
     } else {
       fetchSettings();
     }
@@ -160,6 +183,48 @@ export default function SettingsManager({ authFetch }) {
     }
   };
 
+  // Email Receiver Handlers
+  const handleAddReceiver = async (e) => {
+    e.preventDefault();
+    if (!newReceiver.email_address.trim()) return;
+    setSaving(true);
+    setMsg(null);
+    try {
+      const res = await authFetch('/api/store/admin/settings/email-receivers', {
+        method: 'POST',
+        body: JSON.stringify(newReceiver)
+      });
+      const d = await res.json();
+      if (!res.ok) throw new Error(d.message || 'Failed to save receiver');
+      setNewReceiver({ email_address: '', notify_on_order_placed: true, notify_on_low_stock: true, notify_on_user_registered: true });
+      setMsg({ type: 'success', text: 'Email receiver added/updated successfully!' });
+      await fetchEmailReceivers();
+    } catch (err) {
+      setMsg({ type: 'danger', text: err.message });
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const handleDeleteReceiver = async (id, email) => {
+    if (!window.confirm(`Are you sure you want to delete receiver: ${email}?`)) return;
+    setSaving(true);
+    setMsg(null);
+    try {
+      const res = await authFetch(`/api/store/admin/settings/email-receivers/${id}`, {
+        method: 'DELETE'
+      });
+      const d = await res.json();
+      if (!res.ok) throw new Error(d.message || 'Failed to delete receiver');
+      setMsg({ type: 'success', text: 'Receiver deleted successfully!' });
+      await fetchEmailReceivers();
+    } catch (err) {
+      setMsg({ type: 'danger', text: err.message });
+    } finally {
+      setSaving(false);
+    }
+  };
+
   if (loading) {
     return <div className="loading-page"><div className="spinner" /></div>;
   }
@@ -214,6 +279,14 @@ export default function SettingsManager({ authFetch }) {
           </button>
           <button 
             type="button"
+            className={`btn btn-sm ${activeTab === 'emails' ? 'btn-primary' : 'btn-outline'}`}
+            onClick={() => handleTabChange('emails')}
+            style={{ textAlign: 'left', justifyContent: 'flex-start' }}
+          >
+            <i className="fa-light fa-sharp fa-users" /> Email Receivers
+          </button>
+          <button 
+            type="button"
             className={`btn btn-sm ${activeTab === 'raw' ? 'btn-primary' : 'btn-outline'}`}
             onClick={() => handleTabChange('raw')}
             style={{ textAlign: 'left', justifyContent: 'flex-start' }}
@@ -223,7 +296,204 @@ export default function SettingsManager({ authFetch }) {
         </div>
 
         {/* Configurations Form or Raw Table */}
-        {activeTab !== 'raw' ? (
+        {activeTab === 'raw' ? (
+          <div style={{ flex: 1 }}>
+            <h3 className="section-title mb-4" style={{ fontSize: 'var(--text-sm)' }}>Raw Key-Value Settings Database</h3>
+
+            {/* Add New Key Form */}
+            <form onSubmit={handleAddRaw} className="flex gap-2 mb-6 items-end" style={{ border: '1px solid var(--border)', padding: 'var(--space-4)', background: '#141414' }}>
+              <div className="form-group mb-0" style={{ flex: 1 }}>
+                <label className="form-label">Key Name</label>
+                <input 
+                  type="text" 
+                  className="form-input" 
+                  placeholder="e.g. custom_config_key" 
+                  value={newKey} 
+                  onChange={e => setNewKey(e.target.value)} 
+                  required
+                />
+              </div>
+              <div className="form-group mb-0" style={{ flex: 1 }}>
+                <label className="form-label">Key Value</label>
+                <input 
+                  type="text" 
+                  className="form-input" 
+                  placeholder="e.g. 100 or true or text-value" 
+                  value={newValue} 
+                  onChange={e => setNewValue(e.target.value)}
+                />
+              </div>
+              <button type="submit" className="btn btn-primary" style={{ height: '38px', minWidth: '100px' }} disabled={saving}>
+                Add Key
+              </button>
+            </form>
+
+            {/* Spreadsheet Table View */}
+            {rawLoading ? <div className="spinner" /> : (
+              <div className="admin-table-wrap">
+                <table className="admin-table" style={{ width: '100%' }}>
+                  <thead>
+                    <tr>
+                      <th>Key Name</th>
+                      <th>Key Value</th>
+                      <th style={{ textAlign: 'right', minWidth: '120px' }}>Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {rawSettings.map((item) => (
+                      <tr key={item.key_name}>
+                        <td className="font-mono" style={{ fontWeight: 'bold', color: 'var(--text-1)' }}>
+                          {item.key_name}
+                        </td>
+                        <td>
+                          {editingKey === item.key_name ? (
+                            <input
+                              type="text"
+                              className="form-input"
+                              style={{ width: '100%', height: '30px', padding: 'var(--space-1) var(--space-2)' }}
+                              value={editingValue}
+                              onChange={e => setEditingValue(e.target.value)}
+                            />
+                          ) : (
+                            <span className="font-mono" style={{ whiteSpace: 'normal', wordBreak: 'break-all' }}>
+                              {item.key_value}
+                            </span>
+                          )}
+                        </td>
+                        <td>
+                          <div className="flex gap-2 justify-end">
+                            {editingKey === item.key_name ? (
+                              <>
+                                <button 
+                                  className="btn btn-primary btn-sm"
+                                  onClick={() => handleUpdateRaw(item.key_name)}
+                                  disabled={saving}
+                                >
+                                  Save
+                                </button>
+                                <button 
+                                  className="btn btn-ghost btn-sm"
+                                  onClick={() => setEditingKey(null)}
+                                >
+                                  Cancel
+                                </button>
+                              </>
+                            ) : (
+                              <>
+                                <button 
+                                  className="btn btn-outline btn-sm"
+                                  onClick={() => {
+                                    setEditingKey(item.key_name);
+                                    setEditingValue(item.key_value || '');
+                                  }}
+                                >
+                                  Edit
+                                </button>
+                                <button 
+                                  className="btn btn-danger btn-sm"
+                                  onClick={() => handleDeleteRaw(item.key_name)}
+                                  disabled={saving}
+                                >
+                                  Delete
+                                </button>
+                              </>
+                            )}
+                          </div>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            )}
+          </div>
+        ) : activeTab === 'emails' ? (
+          <div style={{ flex: 1 }}>
+            <h3 className="section-title mb-4" style={{ fontSize: 'var(--text-sm)' }}>Email Notification Receivers</h3>
+
+            <form onSubmit={handleAddReceiver} className="mb-6 flex flex-col gap-4" style={{ border: '1px solid var(--border)', padding: 'var(--space-4)', background: '#141414' }}>
+              <div className="form-group mb-0">
+                <label className="form-label">Email Address</label>
+                <input 
+                  type="email" 
+                  className="form-input" 
+                  placeholder="admin@example.com" 
+                  value={newReceiver.email_address} 
+                  onChange={e => setNewReceiver({...newReceiver, email_address: e.target.value})} 
+                  required
+                />
+              </div>
+              <div className="flex gap-4">
+                <label className="flex items-center gap-2" style={{ cursor: 'pointer' }}>
+                  <input type="checkbox" checked={newReceiver.notify_on_order_placed} onChange={e => setNewReceiver({...newReceiver, notify_on_order_placed: e.target.checked})} />
+                  New Orders
+                </label>
+                <label className="flex items-center gap-2" style={{ cursor: 'pointer' }}>
+                  <input type="checkbox" checked={newReceiver.notify_on_low_stock} onChange={e => setNewReceiver({...newReceiver, notify_on_low_stock: e.target.checked})} />
+                  Low Stock
+                </label>
+                <label className="flex items-center gap-2" style={{ cursor: 'pointer' }}>
+                  <input type="checkbox" checked={newReceiver.notify_on_user_registered} onChange={e => setNewReceiver({...newReceiver, notify_on_user_registered: e.target.checked})} />
+                  New Users
+                </label>
+              </div>
+              <div className="flex justify-end">
+                <button type="submit" className="btn btn-primary btn-sm" disabled={saving}>Add / Update Receiver</button>
+              </div>
+            </form>
+
+            {emailReceiversLoading ? <div className="spinner" /> : (
+              <div className="admin-table-wrap">
+                <table className="admin-table" style={{ width: '100%' }}>
+                  <thead>
+                    <tr>
+                      <th>Email</th>
+                      <th>Orders</th>
+                      <th>Low Stock</th>
+                      <th>New Users</th>
+                      <th style={{ textAlign: 'right' }}>Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {emailReceivers.map((item) => (
+                      <tr key={item.id}>
+                        <td className="font-mono">{item.email_address}</td>
+                        <td>{item.notify_on_order_placed ? 'Yes' : 'No'}</td>
+                        <td>{item.notify_on_low_stock ? 'Yes' : 'No'}</td>
+                        <td>{item.notify_on_user_registered ? 'Yes' : 'No'}</td>
+                        <td>
+                          <div className="flex gap-2 justify-end">
+                            <button 
+                              className="btn btn-outline btn-sm"
+                              onClick={() => setNewReceiver({
+                                email_address: item.email_address,
+                                notify_on_order_placed: !!item.notify_on_order_placed,
+                                notify_on_low_stock: !!item.notify_on_low_stock,
+                                notify_on_user_registered: !!item.notify_on_user_registered
+                              })}
+                            >
+                              Edit
+                            </button>
+                            <button 
+                              className="btn btn-danger btn-sm"
+                              onClick={() => handleDeleteReceiver(item.id, item.email_address)}
+                              disabled={saving}
+                            >
+                              Delete
+                            </button>
+                          </div>
+                        </td>
+                      </tr>
+                    ))}
+                    {emailReceivers.length === 0 && (
+                      <tr><td colSpan="5" style={{ textAlign: 'center' }}>No email receivers configured.</td></tr>
+                    )}
+                  </tbody>
+                </table>
+              </div>
+            )}
+          </div>
+        ) : (
           <form onSubmit={handleSubmit} style={{ flex: 1 }} className="form-settings-grid">
             {activeTab === 'general' && (
               <div className="settings-section">
