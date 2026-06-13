@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo, useCallback, useRef } from 'react';
+import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import StoreNavbar from './Navbar';
 import ProductCard from './ProductCard';
 import StoreFooter from './Footer';
@@ -47,10 +47,6 @@ export default function Storefront() {
   const [sort, setSort] = useState('default');
   const [stockFilter, setStockFilter] = useState('all');
   const [priceRange, setPriceRange] = useState('all');
-  const [mobileFiltersOpen, setMobileFiltersOpen] = useState(false);
-
-  const filterBarRef = useRef(null);
-  const [isSticky, setIsSticky] = useState(false);
 
   useEffect(() => {
     fetch('/api/store/products')
@@ -61,17 +57,6 @@ export default function Storefront() {
       })
       .catch(() => setError('Failed to load products.'))
       .finally(() => setLoading(false));
-  }, []);
-
-  useEffect(() => {
-    const handleScroll = () => {
-      if (filterBarRef.current) {
-        const rect = filterBarRef.current.getBoundingClientRect();
-        setIsSticky(rect.top <= 56);
-      }
-    };
-    window.addEventListener('scroll', handleScroll, { passive: true });
-    return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
   const categories = useMemo(() => {
@@ -173,6 +158,31 @@ export default function Storefront() {
             <p className="store-hero__subtitle">Quality components delivered across Nepal</p>
           </div>
 
+          {/* Search */}
+          <div className="store-hero__search" role="search">
+            <span className="store-hero__search-icon" aria-hidden="true">
+              <i className="fa-light fa-sharp fa-magnifying-glass" />
+            </span>
+            <input
+              className="store-hero__search-input"
+              type="search"
+              placeholder={`Search ${products.length > 0 ? products.length + '+' : ''} products...`}
+              value={search}
+              onChange={e => setSearch(e.target.value)}
+              aria-label="Search products"
+            />
+            {search && (
+              <button
+                className="store-hero__search-clear"
+                onClick={() => setSearch('')}
+                aria-label="Clear search"
+              >
+                <i className="fa-light fa-sharp fa-xmark" />
+              </button>
+            )}
+          </div>
+
+          {/* Category Chips */}
           <div className="store-hero__categories" role="group" aria-label="Category quick filters">
             <button
               className={`store-hero__cat-chip${activeCategory === 'all' ? ' store-hero__cat-chip--active' : ''}`}
@@ -216,41 +226,17 @@ export default function Storefront() {
         </section>
       )}
 
-      {/* Sticky Filter Bar */}
-      <div
-        ref={filterBarRef}
-        className={`store-filter-bar${isSticky ? ' store-filter-bar--sticky' : ''}`}
-      >
-        <div className="store-filter-bar__inner">
-          <div className="store-filter-bar__left">
-            <div className="store-filter-bar__search" role="search">
-              <span className="store-filter-bar__search-icon" aria-hidden="true">
-                <i className="fa-light fa-sharp fa-magnifying-glass" />
-              </span>
-              <input
-                className="store-filter-bar__search-input"
-                type="search"
-                placeholder="Search products..."
-                value={search}
-                onChange={e => setSearch(e.target.value)}
-                aria-label="Search products"
-              />
-            </div>
-
+      {/* Sort / Filter Row */}
+      <div className="store-toolbar">
+        <div className="store-toolbar__inner">
+          <div className="store-toolbar__left">
+            <span className="store-toolbar__count">
+              {filtered.length} {filtered.length === 1 ? 'product' : 'products'}
+            </span>
+          </div>
+          <div className="store-toolbar__right">
             <select
-              className="store-filter-bar__select"
-              value={activeCategory}
-              onChange={e => setCategory(e.target.value)}
-              aria-label="Filter by category"
-            >
-              <option value="all">All Categories</option>
-              {categories.map(cat => (
-                <option key={cat} value={cat}>{cat}</option>
-              ))}
-            </select>
-
-            <select
-              className="store-filter-bar__select"
+              className="store-toolbar__select"
               value={stockFilter}
               onChange={e => setStockFilter(e.target.value)}
               aria-label="Filter by stock"
@@ -259,9 +245,8 @@ export default function Storefront() {
                 <option key={o.value} value={o.value}>{o.label}</option>
               ))}
             </select>
-
             <select
-              className="store-filter-bar__select"
+              className="store-toolbar__select"
               value={priceRange}
               onChange={e => setPriceRange(e.target.value)}
               aria-label="Filter by price"
@@ -270,15 +255,8 @@ export default function Storefront() {
                 <option key={o.value} value={o.value}>{o.label}</option>
               ))}
             </select>
-          </div>
-
-          <div className="store-filter-bar__right">
-            <span className="store-filter-bar__count">
-              {filtered.length} {filtered.length === 1 ? 'product' : 'products'}
-            </span>
-
             <select
-              className="store-filter-bar__select"
+              className="store-toolbar__select"
               value={sort}
               onChange={e => setSort(e.target.value)}
               aria-label="Sort products"
@@ -287,73 +265,8 @@ export default function Storefront() {
                 <option key={o.value} value={o.value}>{o.label}</option>
               ))}
             </select>
-
-            <button
-              className="store-filter-bar__mobile-toggle"
-              onClick={() => setMobileFiltersOpen(o => !o)}
-              aria-label="Toggle filters"
-              aria-expanded={mobileFiltersOpen}
-            >
-              <i className="fa-light fa-sliders" />
-              Filters
-            </button>
           </div>
         </div>
-
-        {/* Mobile Filter Drawer */}
-        {mobileFiltersOpen && (
-          <div className="store-filter-drawer">
-            <div className="store-filter-drawer__row">
-              <label className="store-filter-drawer__label">Category</label>
-              <select
-                className="store-filter-bar__select store-filter-bar__select--full"
-                value={activeCategory}
-                onChange={e => setCategory(e.target.value)}
-              >
-                <option value="all">All Categories</option>
-                {categories.map(cat => (
-                  <option key={cat} value={cat}>{cat}</option>
-                ))}
-              </select>
-            </div>
-            <div className="store-filter-drawer__row">
-              <label className="store-filter-drawer__label">Stock</label>
-              <select
-                className="store-filter-bar__select store-filter-bar__select--full"
-                value={stockFilter}
-                onChange={e => setStockFilter(e.target.value)}
-              >
-                {STOCK_OPTIONS.map(o => (
-                  <option key={o.value} value={o.value}>{o.label}</option>
-                ))}
-              </select>
-            </div>
-            <div className="store-filter-drawer__row">
-              <label className="store-filter-drawer__label">Price</label>
-              <select
-                className="store-filter-bar__select store-filter-bar__select--full"
-                value={priceRange}
-                onChange={e => setPriceRange(e.target.value)}
-              >
-                {PRICE_RANGES.map(o => (
-                  <option key={o.value} value={o.value}>{o.label}</option>
-                ))}
-              </select>
-            </div>
-            <div className="store-filter-drawer__row">
-              <label className="store-filter-drawer__label">Sort</label>
-              <select
-                className="store-filter-bar__select store-filter-bar__select--full"
-                value={sort}
-                onChange={e => setSort(e.target.value)}
-              >
-                {SORT_OPTIONS.map(o => (
-                  <option key={o.value} value={o.value}>{o.label}</option>
-                ))}
-              </select>
-            </div>
-          </div>
-        )}
       </div>
 
       {/* Active Filters Summary */}
