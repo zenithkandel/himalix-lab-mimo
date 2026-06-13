@@ -5,93 +5,130 @@ const { authMiddleware } = require('../middleware/auth');
 
 router.use(authMiddleware);
 
+// GET / - Retrieve cart items
 router.get('/', async (req, res) => {
   try {
     const [items] = await pool.query(
-      `SELECT ci.id, ci.product_id, ci.quantity, p.name, p.price, p.image_url, p.stock_quantity, p.stock_type, p.outsource_days
-       FROM cart_items ci
-       JOIN products p ON ci.product_id = p.id
+      `SELECT ci.id, ci.product_id, ci.quantity, p.name, p.name AS product_name, p.price, p.image_url, p.stock_quantity, p.stock_type, p.outsource_days
+       FROM himalix_store.cart_items ci
+       JOIN himalix_store.products p ON ci.product_id = p.id
        WHERE ci.user_id = ?`,
       [req.user.id]
     );
-    res.json({ items });
+    res.json({ success: true, cart: items, items: items });
   } catch (err) {
     console.error(err);
-    res.status(500).json({ message: 'Server error' });
+    res.status(500).json({ success: false, message: 'Server error' });
   }
 });
 
-router.post('/add', async (req, res) => {
+// Helper: Add item logic
+const addCartItem = async (req, res) => {
   try {
-    const { productId, quantity = 1 } = req.body;
+    const { product_id, productId, quantity = 1 } = req.body;
+    const targetProductId = product_id || productId;
+    if (!targetProductId) {
+      return res.status(400).json({ success: false, message: 'product_id or productId is required' });
+    }
 
-    const [productRows] = await pool.query('SELECT id, name, stock_quantity FROM products WHERE id = ?', [productId]);
-    if (productRows.length === 0) return res.status(404).json({ message: 'Product not found' });
-
-    const product = productRows[0];
-
-
+    const [productRows] = await pool.query('SELECT id, name, stock_quantity FROM himalix_store.products WHERE id = ?', [targetProductId]);
+    if (productRows.length === 0) return res.status(404).json({ success: false, message: 'Product not found' });
 
     const [existing] = await pool.query(
-      'SELECT id, quantity FROM cart_items WHERE user_id = ? AND product_id = ?',
-      [req.user.id, productId]
+      'SELECT id, quantity FROM himalix_store.cart_items WHERE user_id = ? AND product_id = ?',
+      [req.user.id, targetProductId]
     );
 
     let cartItem;
     if (existing.length > 0) {
       const newQty = existing[0].quantity + quantity;
-
-      await pool.query('UPDATE cart_items SET quantity = ? WHERE id = ?', [newQty, existing[0].id]);
-      const [updated] = await pool.query('SELECT id, product_id, quantity FROM cart_items WHERE id = ?', [existing[0].id]);
-      cartItem = updated[0];
+      await pool.query('UPDATE himalix_store.cart_items SET quantity = ? WHERE id = ?', [newQty, existing[0].id]);
+      cartItem = { id: existing[0].id, product_id: targetProductId, quantity: newQty };
     } else {
       const [result] = await pool.query(
-        'INSERT INTO cart_items (user_id, product_id, quantity) VALUES (?, ?, ?)',
-        [req.user.id, productId, quantity]
+        'INSERT INTO himalix_store.cart_items (user_id, product_id, quantity) VALUES (?, ?, ?)',
+        [req.user.id, targetProductId, quantity]
       );
-      cartItem = { id: result.insertId, product_id: productId, quantity };
+      cartItem = { id: result.insertId, product_id: targetProductId, quantity };
     }
 
-    res.status(201).json(cartItem);
+    res.status(201).json({ success: true, message: 'Added to cart', ...cartItem });
   } catch (err) {
     console.error(err);
-    res.status(500).json({ message: 'Server error' });
+    res.status(500).json({ success: false, message: 'Server error' });
   }
-});
+};
 
-router.put('/update', async (req, res) => {
+// POST / and POST /add
+router.post('/', addCartItem);
+router.post('/add', addCartItem);
+
+// Helper: Update item logic
+const updateCartItem = async (req, res) => {
   try {
+    const { productId } = req.params;
     const { cartItemId, quantity } = req.body;
 
-    const [cartRows] = await pool.query(
-      'SELECT ci.id, ci.product_id, ci.quantity FROM cart_items ci WHERE ci.id = ? AND ci.user_id = ?',
-      [cartItemId, req.user.id]
+    let targetProductId = productId;
+    
+    if (cartItemId) {
+      const [rows] = await pool.query('SELECT product_id FROM himalix_store.cart_items WHERE id = ? AND user_id = ?', [cartItemId, req.user.id]);
+      if (rows.length === 0) return res.status(404).json({ success: false, message: 'Cart item not found' });
+      targetProductId = rows[0].product_id;
+    }
+
+    if (!targetProductId) {
+      return res.status(400).json({ success: false, message: 'productId or cartItemId is required' });
+    }
+
+    await pool.query(
+      'UPDATE himalix_store.cart_items SET quantity = ? WHERE user_id = ? AND product_id = ?',
+      [quantity, req.user.id, targetProductId]
     );
-    if (cartRows.length === 0) return res.status(404).json({ message: 'Cart item not found' });
 
-    const [productRows] = await pool.query('SELECT name, stock_quantity FROM products WHERE id = ?', [cartRows[0].product_id]);
-    const product = productRows[0];
-
-    await pool.query('UPDATE cart_items SET quantity = ? WHERE id = ?', [quantity, cartItemId]);
-    const [updated] = await pool.query('SELECT id, product_id, quantity FROM cart_items WHERE id = ?', [cartItemId]);
-    res.json(updated[0]);
+    const [updated] = await pool.query('SELECT id, product_id, quantity FROM himalix_store.cart_items WHERE user_id = ? AND product_id = ?', [req.user.id, targetProductId]);
+    res.json({ success: true, message: 'Cart updated', ...(updated[0] || {}) });
   } catch (err) {
     console.error(err);
-    res.status(500).json({ message: 'Server error' });
+    res.status(500).json({ success: false, message: 'Server error' });
   }
-});
+};
 
-router.delete('/remove/:id', async (req, res) => {
+// PUT /update and PUT /:productId
+router.put('/update', updateCartItem);
+router.put('/:productId', updateCartItem);
+
+// Helper: Delete item logic
+const deleteCartItem = async (req, res) => {
   try {
-    const [result] = await pool.query(
-      'DELETE FROM cart_items WHERE id = ? AND user_id = ?',
-      [req.params.id, req.user.id]
-    );
-    if (result.affectedRows === 0) return res.status(404).json({ message: 'Cart item not found' });
-    res.json({ message: 'Item removed' });
+    const { productId, id } = req.params;
+    let result;
+    if (id) {
+      [result] = await pool.query('DELETE FROM himalix_store.cart_items WHERE id = ? AND user_id = ?', [id, req.user.id]);
+    } else {
+      [result] = await pool.query('DELETE FROM himalix_store.cart_items WHERE product_id = ? AND user_id = ?', [productId, req.user.id]);
+    }
+
+    if (result.affectedRows === 0) return res.status(404).json({ success: false, message: 'Cart item not found' });
+    res.json({ success: true, message: 'Item removed' });
   } catch (err) {
     console.error(err);
-    res.status(500).json({ message: 'Server error' });
+    res.status(500).json({ success: false, message: 'Server error' });
+  }
+};
+
+// DELETE /remove/:id and DELETE /:productId
+router.delete('/remove/:id', deleteCartItem);
+router.delete('/:productId', deleteCartItem);
+
+// DELETE / - Clear Cart
+router.delete('/', async (req, res) => {
+  try {
+    await pool.query('DELETE FROM himalix_store.cart_items WHERE user_id = ?', [req.user.id]);
+    res.json({ success: true, message: 'Cart cleared' });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ success: false, message: 'Server error' });
   }
 });
 

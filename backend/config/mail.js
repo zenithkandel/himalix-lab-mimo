@@ -29,6 +29,12 @@ async function getMailTransporter() {
     auth: {
       user,
       pass
+    },
+    connectionTimeout: 5000,
+    greetingTimeout: 5000,
+    socketTimeout: 10000,
+    tls: {
+      rejectUnauthorized: false
     }
   });
 }
