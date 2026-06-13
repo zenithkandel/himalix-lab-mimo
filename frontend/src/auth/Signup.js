@@ -3,7 +3,7 @@ import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from './AuthContext';
 
 export default function Signup() {
-  const { login, user } = useAuth();
+  const { login, user, systemConfig } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -69,9 +69,9 @@ export default function Signup() {
 
   /* Google Sign-In callback */
   useEffect(() => {
-    if (!window.google) return;
+    if (!systemConfig?.googleAuthEnabled || !systemConfig?.googleClientId || !window.google) return;
     window.google.accounts.id.initialize({
-      client_id: process.env.REACT_APP_GOOGLE_CLIENT_ID,
+      client_id: systemConfig.googleClientId,
       callback: async (response) => {
         setLoading(true);
         setError('');
@@ -93,11 +93,14 @@ export default function Signup() {
       },
     });
 
-    window.google.accounts.id.renderButton(
-      document.getElementById('google-btn-signup'),
-      { type: 'standard', theme: 'filled_black', size: 'large', width: '100%' }
-    );
-  }, []); // eslint-disable-line
+    const btnEl = document.getElementById('google-btn-signup');
+    if (btnEl) {
+      window.google.accounts.id.renderButton(
+        btnEl,
+        { type: 'standard', theme: 'filled_black', size: 'large', width: '100%' }
+      );
+    }
+  }, [systemConfig]); // eslint-disable-line
 
   const Field = ({ id, label, icon, name, type = 'text', placeholder, autoComplete }) => (
     <div className={`form-group${fieldErrors[name] ? ' form-group--error' : ''}`}>
@@ -171,8 +174,12 @@ export default function Signup() {
 
           <form className="auth-form" onSubmit={handleSubmit} noValidate>
             {/* Google */}
-            <div id="google-btn-signup" style={{ width: '100%' }} />
-            <div className="auth-separator">or</div>
+            {systemConfig?.googleAuthEnabled && systemConfig?.googleClientId && (
+              <>
+                <div id="google-btn-signup" style={{ width: '100%' }} />
+                <div className="auth-separator">or</div>
+              </>
+            )}
 
             <Field id="signup-name"     label="Full Name"  icon="user"     name="name"     placeholder="Your name"      autoComplete="name" />
             <Field id="signup-email"    label="Email"      icon="envelope" name="email"    type="email" placeholder="you@example.com" autoComplete="email" />

@@ -5,12 +5,20 @@ import React, {
 const AuthContext = createContext();
 
 export function AuthProvider({ children }) {
-  const [user, setUser]       = useState(null);
-  const [loading, setLoading] = useState(true);
-  const [token, setToken]     = useState(() => localStorage.getItem('himalix-token'));
+  const [user, setUser]           = useState(null);
+  const [loading, setLoading]     = useState(true);
+  const [token, setToken]         = useState(() => localStorage.getItem('himalix-token'));
+  const [systemConfig, setConfig] = useState(null);
 
-  /* Verify token on mount */
+  /* Fetch settings config and verify token on mount */
   useEffect(() => {
+    // 1. Fetch public settings
+    fetch('/api/auth/config')
+      .then(r => r.ok ? r.json() : Promise.reject())
+      .then(data => setConfig(data))
+      .catch(err => console.error('Failed to load system config:', err));
+
+    // 2. Verify token
     if (!token) { setLoading(false); return; }
     fetch('/api/auth/me', {
       headers: { Authorization: `Bearer ${token}` }
@@ -33,6 +41,18 @@ export function AuthProvider({ children }) {
     setUser(null);
   }, []);
 
+  const loginWithGoogle = useCallback(async (googleToken) => {
+    const res = await fetch('/api/auth/google', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ token: googleToken }),
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.message || 'Google sign-in failed');
+    login(data.token, data.user);
+    return data;
+  }, [login]);
+
   /* Helper: authenticated fetch */
   const authFetch = useCallback((url, options = {}) => {
     return fetch(url, {
@@ -48,7 +68,7 @@ export function AuthProvider({ children }) {
   const isAdmin = user?.role === 'admin';
 
   return (
-    <AuthContext.Provider value={{ user, loading, token, login, logout, authFetch, isAdmin }}>
+    <AuthContext.Provider value={{ user, loading, token, login, logout, authFetch, isAdmin, systemConfig, loginWithGoogle }}>
       {children}
     </AuthContext.Provider>
   );

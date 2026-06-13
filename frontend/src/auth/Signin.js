@@ -3,7 +3,7 @@ import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from './AuthContext';
 
 export default function Signin() {
-  const { login, user } = useAuth();
+  const { login, user, systemConfig } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -44,9 +44,9 @@ export default function Signin() {
 
   /* Google Sign-In callback */
   useEffect(() => {
-    if (!window.google) return;
+    if (!systemConfig?.googleAuthEnabled || !systemConfig?.googleClientId || !window.google) return;
     window.google.accounts.id.initialize({
-      client_id: process.env.REACT_APP_GOOGLE_CLIENT_ID,
+      client_id: systemConfig.googleClientId,
       callback: async (response) => {
         setLoading(true);
         setError('');
@@ -68,11 +68,14 @@ export default function Signin() {
       },
     });
 
-    window.google.accounts.id.renderButton(
-      document.getElementById('google-btn-signin'),
-      { type: 'standard', theme: 'filled_black', size: 'large', width: '100%' }
-    );
-  }, []);  // eslint-disable-line
+    const btnEl = document.getElementById('google-btn-signin');
+    if (btnEl) {
+      window.google.accounts.id.renderButton(
+        btnEl,
+        { type: 'standard', theme: 'filled_black', size: 'large', width: '100%' }
+      );
+    }
+  }, [systemConfig]);  // eslint-disable-line
 
   return (
     <div className="auth-page">
@@ -123,9 +126,12 @@ export default function Signin() {
 
           <form className="auth-form" onSubmit={handleSubmit} noValidate>
             {/* Google Sign-In */}
-            <div id="google-btn-signin" style={{ width: '100%' }} />
-
-            <div className="auth-separator">or</div>
+            {systemConfig?.googleAuthEnabled && systemConfig?.googleClientId && (
+              <>
+                <div id="google-btn-signin" style={{ width: '100%' }} />
+                <div className="auth-separator">or</div>
+              </>
+            )}
 
             {/* Email */}
             <div className="form-group">

@@ -1,7 +1,32 @@
-/* ================================================================
-   admin.css — Unified Admin Panel (Portfolio CMS + Store Admin)
-   Left sidebar layout, dark, data-dense, sharp
-   ================================================================ */
+/* ── UTILITY LAYOUT CLASSES ── */
+.flex { display: flex !important; }
+.flex-col { display: flex !important; flex-direction: column !important; }
+.items-center { align-items: center !important; }
+.justify-between { justify-content: space-between !important; }
+.justify-end { justify-content: flex-end !important; }
+.flex-wrap { flex-wrap: wrap !important; }
+.gap-1 { gap: var(--space-1) !important; }
+.gap-2 { gap: var(--space-2) !important; }
+.gap-3 { gap: var(--space-3) !important; }
+.gap-4 { gap: var(--space-4) !important; }
+.gap-6 { gap: var(--space-6) !important; }
+.mb-0 { margin-bottom: 0 !important; }
+.mb-2 { margin-bottom: var(--space-2) !important; }
+.mb-4 { margin-bottom: var(--space-4) !important; }
+.mb-6 { margin-bottom: var(--space-6) !important; }
+.mt-2 { margin-top: var(--space-2) !important; }
+.mt-4 { margin-top: var(--space-4) !important; }
+.mt-6 { margin-top: var(--space-6) !important; }
+.mr-2 { margin-right: var(--space-2) !important; }
+.ml-auto { margin-left: auto !important; }
+.w-full { width: 100% !important; }
+
+/* ── DOUBLE-HYPHEN BADGES MAPPINGS ── */
+.badge--warning { background: #fbbf2415 !important; color: var(--warning) !important; border-color: #fbbf2430 !important; }
+.badge--success { background: #4ade8015 !important; color: var(--success) !important; border-color: #4ade8030 !important; }
+.badge--danger  { background: #f8717115 !important; color: var(--danger) !important;  border-color: #f8717130 !important; }
+.badge--neutral { background: var(--bg-3) !important; color: var(--text-1) !important; border-color: var(--border) !important; }
+.badge--info    { background: #3b82f615 !important; color: #3b82f6 !important; border-color: #3b82f630 !important; }
 
 /* ── ADMIN SHELL ── */
 .admin-shell {
