@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import StoreNavbar from './Navbar';
 import { useAuth } from '../auth/AuthContext';
 import { useNavigate } from 'react-router-dom';
+import StoreFooter from './Footer';
 
 export default function Profile() {
   const { user, setUser, authFetch, logout } = useAuth();
@@ -622,6 +623,7 @@ export default function Profile() {
           )}
         </div>
       </div>
+      <StoreFooter />
     </div>
   );
 }

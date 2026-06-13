@@ -3,6 +3,7 @@ import { useParams, useNavigate, Link } from 'react-router-dom';
 import StoreNavbar from './Navbar';
 import { useCart } from './CartContext';
 import { useAuth } from '../auth/AuthContext';
+import StoreFooter from './Footer';
 
 export default function ProductDetail() {
   const { id } = useParams();
@@ -386,9 +387,10 @@ export default function ProductDetail() {
                 )}
               </div>
             )}
-          </div>
         </div>
       </div>
     </div>
-  );
+    <StoreFooter />
+  </div>
+);
 }

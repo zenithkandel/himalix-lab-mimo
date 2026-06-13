@@ -1,6 +1,7 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import StoreNavbar from './Navbar';
+import StoreFooter from './Footer';
 
 export default function Terms() {
   return (
@@ -58,6 +59,7 @@ export default function Terms() {
           </Link>
         </div>
       </div>
+      <StoreFooter />
     </div>
   );
 }

@@ -3,6 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import StoreNavbar from './Navbar';
 import { useCart } from './CartContext';
 import { useAuth } from '../auth/AuthContext';
+import StoreFooter from './Footer';
 
 export default function Cart() {
   const { items, itemCount, totalAmount, updateQty, removeItem, clearCart } = useCart();
@@ -146,6 +147,7 @@ export default function Cart() {
             </Link>
           </div>
         </div>
+        <StoreFooter />
       </div>
     );
   }
@@ -399,6 +401,7 @@ export default function Cart() {
           </div>
         </div>
       </div>
+      <StoreFooter />
     </div>
   );
 }

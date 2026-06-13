@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import StoreNavbar from './Navbar';
 import ProductCard from './ProductCard';
+import StoreFooter from './Footer';
 
 const SORT_OPTIONS = [
   { value: 'default',   label: 'Default' },
@@ -171,6 +172,7 @@ export default function Storefront() {
           </>
         )}
       </div>
+      <StoreFooter />
     </div>
   );
 }
