@@ -58,59 +58,6 @@
   color: var(--text-2);
 }
 
-/* Hero Search */
-.store-hero__search-wrapper {
-  max-width: 640px;
-  width: 100%;
-}
-
-.store-hero__search {
-  display: flex;
-  align-items: center;
-  background: var(--bg-2);
-  border: 2px solid var(--border);
-  transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
-  position: relative;
-}
-
-.store-hero__search:focus-within {
-  border-color: var(--accent);
-  box-shadow: 0 0 0 4px rgba(255, 255, 255, 0.05);
-}
-
-.store-hero__search-icon {
-  padding: 0 var(--space-5);
-  color: var(--text-3);
-  font-size: var(--text-lg);
-  pointer-events: none;
-}
-
-.store-hero__search-input {
-  flex: 1;
-  padding: 16px 0 16px var(--space-3);
-  background: transparent;
-  border: none;
-  outline: none;
-  color: var(--text-0);
-  font-size: var(--text-lg);
-  font-family: var(--font-sans);
-}
-
-.store-hero__search-input::placeholder {
-  color: var(--text-3);
-}
-
-.store-hero__search-clear {
-  padding: var(--space-4);
-  color: var(--text-3);
-  font-size: var(--text-base);
-  transition: color var(--transition-fast);
-}
-
-.store-hero__search-clear:hover {
-  color: var(--text-0);
-}
-
 /* Hero Category Chips */
 .store-hero__categories {
   display: flex;

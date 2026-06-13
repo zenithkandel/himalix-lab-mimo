@@ -173,31 +173,6 @@ export default function Storefront() {
             <p className="store-hero__subtitle">Quality components delivered across Nepal</p>
           </div>
 
-          <div className="store-hero__search-wrapper">
-            <div className="store-hero__search" role="search">
-              <span className="store-hero__search-icon" aria-hidden="true">
-                <i className="fa-light fa-sharp fa-magnifying-glass" />
-              </span>
-              <input
-                className="store-hero__search-input"
-                type="search"
-                placeholder={`Search ${products.length > 0 ? products.length + '+' : ''} products...`}
-                value={search}
-                onChange={e => setSearch(e.target.value)}
-                aria-label="Search products"
-              />
-              {search && (
-                <button
-                  className="store-hero__search-clear"
-                  onClick={() => setSearch('')}
-                  aria-label="Clear search"
-                >
-                  <i className="fa-light fa-sharp fa-xmark" />
-                </button>
-              )}
-            </div>
-          </div>
-
           <div className="store-hero__categories" role="group" aria-label="Category quick filters">
             <button
               className={`store-hero__cat-chip${activeCategory === 'all' ? ' store-hero__cat-chip--active' : ''}`}
