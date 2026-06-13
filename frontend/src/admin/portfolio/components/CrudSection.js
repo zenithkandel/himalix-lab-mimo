@@ -101,6 +101,14 @@ export default function CrudSection({ sectionName, label, schema, token, apiUrl,
     setEditingItem(null);
   };
 
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      if (e.key === 'Escape') closeModal();
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, []);
+
   const handleSaveItem = async () => {
     setSaving(true);
     try {

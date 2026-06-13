@@ -92,6 +92,14 @@ export default function Profile() {
   }, [user, authFetch, navigate]);
 
   useEffect(() => {
+    const handleKeyDown = (e) => {
+      if (e.key === 'Escape') setSelectedOrder(null);
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, []);
+
+  useEffect(() => {
     if (tab !== 'wallet') return;
     setHistoryLoading(true);
     authFetch('/api/store/wallet/history')
