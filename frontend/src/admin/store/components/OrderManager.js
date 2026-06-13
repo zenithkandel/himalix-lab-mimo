@@ -193,9 +193,9 @@ export default function OrderManager({ orders, updateOrderDetails, loading }) {
                     <h3 style={{ fontSize: '14px', borderBottom: '1px solid var(--border)', paddingBottom: '6px', marginBottom: '12px' }}>Customer Profile</h3>
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', fontSize: '13px', marginBottom: '16px', background: 'var(--bg-1)', padding: '12px', border: '1px solid var(--border)' }}>
                       <div><strong>Email:</strong> {activeOrder.email}</div>
-                      <div><strong>Name:</strong> {activeOrder.user_name}</div>
-                      <div><strong>Phone:</strong> {activeOrder.user_phone}</div>
-                      <div><strong>Wallet Balance:</strong> Rs. {activeOrder.user_wallet_balance.toFixed(2)}</div>
+                      <div><strong>Name:</strong> {activeOrder.user_name || 'Guest'}</div>
+                      <div><strong>Phone:</strong> {activeOrder.user_phone || 'N/A'}</div>
+                      <div><strong>Wallet Balance:</strong> {activeOrder.user_wallet_balance != null ? `Rs. ${Number(activeOrder.user_wallet_balance).toFixed(2)}` : 'N/A'}</div>
                     </div>
 
                     <h3 style={{ fontSize: '14px', borderBottom: '1px solid var(--border)', paddingBottom: '6px', marginBottom: '12px' }}>Shipping Address</h3>
