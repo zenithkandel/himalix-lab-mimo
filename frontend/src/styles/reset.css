@@ -398,14 +398,13 @@ input[type="radio"] {
 
 input[type="checkbox"]::before {
   content: "";
-  width: 0.65em;
-  height: 0.65em;
-  transform: scale(0);
+  width: 0.35em;
+  height: 0.6em;
+  border: solid var(--bg-0);
+  border-width: 0 2px 2px 0;
+  transform: scale(0) rotate(45deg);
   transition: 120ms transform ease-in-out;
-  box-shadow: inset 1em 1em var(--text-0);
-  background-color: var(--text-0);
-  transform-origin: center;
-  clip-path: polygon(14% 44%, 0 65%, 50% 100%, 100% 16%, 80% 0%, 43% 62%);
+  margin-bottom: 0.1em;
 }
 
 input[type="radio"] {
@@ -414,13 +413,12 @@ input[type="radio"] {
 
 input[type="radio"]::before {
   content: "";
-  width: 0.65em;
-  height: 0.65em;
+  width: 0.5em;
+  height: 0.5em;
   border-radius: 50%;
   transform: scale(0);
   transition: 120ms transform ease-in-out;
-  box-shadow: inset 1em 1em var(--text-0);
-  background-color: var(--text-0);
+  background-color: var(--bg-0);
 }
 
 input[type="checkbox"]:checked,
@@ -429,7 +427,10 @@ input[type="radio"]:checked {
   border-color: var(--accent);
 }
 
-input[type="checkbox"]:checked::before,
+input[type="checkbox"]:checked::before {
+  transform: scale(1) rotate(45deg);
+}
+
 input[type="radio"]:checked::before {
   transform: scale(1);
 }
