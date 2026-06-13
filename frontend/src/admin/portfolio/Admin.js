@@ -30,7 +30,16 @@ export default function PortfolioAdmin() {
     try {
       const res  = await authFetch('/api/admin/content');
       const data = await res.json();
-      setContent(data.content || {});
+      const rawContent = data.content || {};
+
+      if (rawContent.services && Array.isArray(rawContent.services.items)) {
+        rawContent.services.items = rawContent.services.items.map(item => ({
+          ...item,
+          features: Array.isArray(item.features) ? item.features.join('\n') : (item.features || '')
+        }));
+      }
+
+      setContent(rawContent);
     } catch {}
     finally { setLoading(false); }
   }, [authFetch]);
@@ -44,9 +53,19 @@ export default function PortfolioAdmin() {
     setSaving(true);
     setMsg('');
     try {
+      let payload = newData;
+      if (section === 'services' && Array.isArray(newData.items)) {
+        payload = {
+          items: newData.items.map(item => ({
+            ...item,
+            features: typeof item.features === 'string' ? item.features.split('\n').map(f => f.trim()).filter(Boolean) : (item.features || [])
+          }))
+        };
+      }
+
       const res = await authFetch(`/api/admin/content/${section}`, {
         method: 'PUT',
-        body: JSON.stringify(newData),
+        body: JSON.stringify(payload),
       });
       if (!res.ok) throw new Error();
       setContent(prev => ({ ...prev, [section]: newData }));
@@ -222,6 +241,9 @@ function ContentEditor({ section, data, onSave, saving }) {
           { key: 'role',       label: 'Role / Title' },
           { key: 'bio',        label: 'Short Bio', multiline: true },
           { key: 'avatar_url', label: 'Avatar URL' },
+          { key: 'twitter',    label: 'Twitter Link', placeholder: '#' },
+          { key: 'linkedin',   label: 'LinkedIn Link', placeholder: '#' },
+          { key: 'github',     label: 'GitHub Link', placeholder: '#' },
         ]}
         onChange={(members) => setLocal({ members })}
         onSave={() => onSave(local)}
@@ -236,10 +258,12 @@ function ContentEditor({ section, data, onSave, saving }) {
         label="Testimonials"
         items={local.items || []}
         schema={[
-          { key: 'name',   label: 'Client Name' },
-          { key: 'title',  label: 'Title / City' },
-          { key: 'rating', label: 'Rating (1–5)', type: 'number' },
-          { key: 'text',   label: 'Testimonial Text', multiline: true },
+          { key: 'name',      label: 'Client Name' },
+          { key: 'title',     label: 'Title / City' },
+          { key: 'company',   label: 'Company', placeholder: 'e.g. Nepal Telecom' },
+          { key: 'image_url', label: 'Client Image URL', placeholder: 'e.g. https://...' },
+          { key: 'rating',    label: 'Rating (1–5)', type: 'number' },
+          { key: 'text',      label: 'Testimonial Text', multiline: true },
         ]}
         onChange={(items) => setLocal({ items })}
         onSave={() => onSave(local)}
@@ -257,6 +281,7 @@ function ContentEditor({ section, data, onSave, saving }) {
           { key: 'icon',        label: 'Icon (FA name)', placeholder: 'store' },
           { key: 'title',       label: 'Title' },
           { key: 'description', label: 'Description', multiline: true },
+          { key: 'features',    label: 'Features (one per line)', multiline: true, placeholder: 'Feature 1\nFeature 2' },
           { key: 'link',        label: 'Link (optional)', placeholder: '/store' },
           { key: 'cta',         label: 'CTA Text', placeholder: 'Shop Now' },
         ]}
@@ -295,8 +320,24 @@ function ContentEditor({ section, data, onSave, saving }) {
 }
 
 function ArrayEditor({ label, items, schema, onChange, onSave, saving }) {
+  const [draggedIndex, setDraggedIndex] = useState(null);
+
+  useEffect(() => {
+    const missingKeys = items.some(item => !item._dragId);
+    if (missingKeys) {
+      const updated = items.map(item => {
+        if (item._dragId) return item;
+        return {
+          ...item,
+          _dragId: item.id ? `id-${item.id}` : `rand-${Math.random().toString(36).substr(2, 9)}`
+        };
+      });
+      onChange(updated);
+    }
+  }, [items, onChange]);
+
   const addItem = () => {
-    const blank = {};
+    const blank = { _dragId: `rand-${Math.random().toString(36).substr(2, 9)}` };
     schema.forEach(f => { blank[f.key] = ''; });
     onChange([...items, blank]);
   };
@@ -309,6 +350,39 @@ function ArrayEditor({ label, items, schema, onChange, onSave, saving }) {
   };
 
   const removeItem = (i) => onChange(items.filter((_, idx) => idx !== i));
+
+  const handleDragStart = (e, index) => {
+    const isHeader = e.target.closest('.cms-section-card__header');
+    const isButton = e.target.closest('button');
+    if (!isHeader || isButton) {
+      e.preventDefault();
+      return;
+    }
+    setDraggedIndex(index);
+    e.dataTransfer.effectAllowed = 'move';
+    e.dataTransfer.setData('text/plain', index.toString());
+  };
+
+  const handleDragOver = (e, index) => {
+    e.preventDefault();
+    if (draggedIndex === null || draggedIndex === index) return;
+
+    const next = [...items];
+    const draggedItem = next[draggedIndex];
+    next.splice(draggedIndex, 1);
+    next.splice(index, 0, draggedItem);
+
+    setDraggedIndex(index);
+    onChange(next);
+  };
+
+  const handleDragEnd = () => {
+    setDraggedIndex(null);
+  };
+
+  const handleDrop = (e) => {
+    e.preventDefault();
+  };
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-5)' }}>
@@ -326,7 +400,15 @@ function ArrayEditor({ label, items, schema, onChange, onSave, saving }) {
       )}
 
       {items.map((item, i) => (
-        <div key={i} className="cms-section-card">
+        <div
+          key={item._dragId || i}
+          className={`cms-section-card${i === draggedIndex ? ' cms-section-card--dragging' : ''}`}
+          draggable={true}
+          onDragStart={(e) => handleDragStart(e, i)}
+          onDragOver={(e) => handleDragOver(e, i)}
+          onDragEnd={handleDragEnd}
+          onDrop={handleDrop}
+        >
           <div className="cms-section-card__header">
             <div className="cms-section-card__title">
               <i className="fa-light fa-sharp fa-grip-dots" />

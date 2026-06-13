@@ -62,20 +62,30 @@ router.get('/content', async (req, res) => {
         title: s.title,
         description: s.description,
         link: s.link_url,
-        cta: s.subtitle
+        cta: s.subtitle,
+        features: typeof s.features === 'string' ? JSON.parse(s.features) : (s.features || [])
       }))
     };
 
     // Load team members
     const [team] = await pool.query('SELECT * FROM himalix_portfolio.team_members ORDER BY display_order ASC');
     content.team = {
-      members: team.map(t => ({
-        id: t.id,
-        name: t.name,
-        role: t.role,
-        bio: t.bio,
-        avatar_url: t.image_url
-      }))
+      members: team.map(t => {
+        let links = {};
+        try {
+          links = typeof t.social_links === 'string' ? JSON.parse(t.social_links) : (t.social_links || {});
+        } catch (e) {}
+        return {
+          id: t.id,
+          name: t.name,
+          role: t.role,
+          bio: t.bio,
+          avatar_url: t.image_url,
+          twitter: links.twitter || '',
+          linkedin: links.linkedin || '',
+          github: links.github || ''
+        };
+      })
     };
 
     // Load testimonials
@@ -86,7 +96,9 @@ router.get('/content', async (req, res) => {
         name: t.client_name,
         title: t.client_title,
         rating: t.rating,
-        text: t.content
+        text: t.content,
+        company: t.company || '',
+        image_url: t.image_url || ''
       }))
     };
 
@@ -125,7 +137,7 @@ router.put('/content/:section', async (req, res) => {
           }
           return [];
         };
-        const features = getFeaturesForTitle(item.title || '');
+        const features = Array.isArray(item.features) ? item.features : getFeaturesForTitle(item.title || '');
 
         await connection.query(
           `INSERT INTO himalix_portfolio.services (title, subtitle, description, icon_class, features, link_url, display_order)
@@ -140,10 +152,15 @@ router.put('/content/:section', async (req, res) => {
       // Insert new
       for (let i = 0; i < members.length; i++) {
         const member = members[i];
+        const socialLinks = {
+          twitter: member.twitter || '#',
+          linkedin: member.linkedin || '#',
+          github: member.github || '#'
+        };
         await connection.query(
           `INSERT INTO himalix_portfolio.team_members (name, role, bio, image_url, social_links, display_order)
            VALUES (?, ?, ?, ?, ?, ?)`,
-          [member.name || '', member.role || '', member.bio || '', member.avatar_url || '', JSON.stringify({"twitter":"#","linkedin":"#","github":"#"}), i + 1]
+          [member.name || '', member.role || '', member.bio || '', member.avatar_url || '', JSON.stringify(socialLinks), i + 1]
         );
       }
     } else if (section === 'testimonials') {
@@ -154,9 +171,9 @@ router.put('/content/:section', async (req, res) => {
       for (let i = 0; i < items.length; i++) {
         const item = items[i];
         await connection.query(
-          `INSERT INTO himalix_portfolio.testimonials (client_name, client_title, content, rating, display_order)
-           VALUES (?, ?, ?, ?, ?)`,
-          [item.name || '', item.title || '', item.text || '', item.rating || 5, i + 1]
+          `INSERT INTO himalix_portfolio.testimonials (client_name, client_title, company, content, rating, image_url, display_order)
+           VALUES (?, ?, ?, ?, ?, ?, ?)`,
+          [item.name || '', item.title || '', item.company || '', item.text || '', item.rating || 5, item.image_url || '', i + 1]
         );
       }
     } else {

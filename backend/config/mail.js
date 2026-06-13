@@ -15,7 +15,7 @@ async function getMailTransporter() {
   const port = parseInt(config.smtp_port, 10) || 587;
   const user = config.smtp_user || '';
   const pass = config.smtp_pass || '';
-  const secure = config.smtp_secure === '1';
+  const secure = config.smtp_secure === '1' || port === 465;
 
   if (!host || !user || !pass) {
     console.warn('SMTP configuration is incomplete. Emails will not be sent.');
@@ -30,9 +30,9 @@ async function getMailTransporter() {
       user,
       pass
     },
-    connectionTimeout: 5000,
-    greetingTimeout: 5000,
-    socketTimeout: 10000,
+    connectionTimeout: 15000,
+    greetingTimeout: 15000,
+    socketTimeout: 20000,
     tls: {
       rejectUnauthorized: false
     }

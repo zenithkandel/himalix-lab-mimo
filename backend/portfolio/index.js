@@ -59,7 +59,9 @@ router.get('/', async (req, res) => {
       name: t.client_name,
       title: t.client_title,
       rating: t.rating,
-      text: t.content
+      text: t.content,
+      company: t.company || '',
+      image_url: t.image_url || ''
     }));
 
     const [settingsRows] = await pool.query('SELECT * FROM himalix_portfolio.labs_site_settings');
