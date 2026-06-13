@@ -7,6 +7,9 @@ export default function OrderManager({ orders, updateOrderDetails, loading }) {
   const [search, setSearch] = useState('');
   const [activeOrder, setActiveOrder] = useState(null);
   const [modalFields, setModalFields] = useState({ status: '', payment_status: '', tracking_code: '' });
+  const [statusFilter, setStatusFilter] = useState('all');
+  const [paymentFilter, setPaymentFilter] = useState('all');
+  const [sortBy, setSortBy] = useState('date_desc');
 
   useEffect(() => {
     const handleKeyDown = (e) => {
@@ -24,10 +27,30 @@ export default function OrderManager({ orders, updateOrderDetails, loading }) {
 
   if (loading) return <div className="spinner" />;
 
-  const filtered = orders.filter(o => 
-    o.tracking_code.toLowerCase().includes(search.toLowerCase()) || 
-    o.id.toString().includes(search)
-  );
+  const filteredAndSorted = orders
+    .filter(o => {
+      const matchSearch = o.tracking_code.toLowerCase().includes(search.toLowerCase()) || 
+                          o.id.toString().includes(search);
+      const matchStatus = statusFilter === 'all' || o.status === statusFilter;
+      const matchPayment = paymentFilter === 'all' || o.payment_status === paymentFilter;
+      return matchSearch && matchStatus && matchPayment;
+    })
+    .sort((a, b) => {
+      if (sortBy === 'date_desc') {
+        return new Date(b.created_at) - new Date(a.created_at);
+      } else if (sortBy === 'date_asc') {
+        return new Date(a.created_at) - new Date(b.created_at);
+      } else if (sortBy === 'total_desc') {
+        return parseFloat(b.total) - parseFloat(a.total);
+      } else if (sortBy === 'total_asc') {
+        return parseFloat(a.total) - parseFloat(b.total);
+      } else if (sortBy === 'id_desc') {
+        return b.id - a.id;
+      } else if (sortBy === 'id_asc') {
+        return a.id - b.id;
+      }
+      return 0;
+    });
 
   const handleOpenModal = (order) => {
     setActiveOrder(order);
@@ -136,19 +159,56 @@ ${itemsStr}`;
 
   return (
     <div className="admin-orders">
-      <div className="admin-orders__header">
-        <h2 className="page-title">Order Management</h2>
-        <div className="form-group">
-          <input 
-            className="form-input" 
-            placeholder="Search tracking code or ID..." 
-            value={search} 
-            onChange={e => setSearch(e.target.value)} 
-          />
+      <div className="admin-orders__header" style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-4)', marginBottom: 'var(--space-6)' }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+          <h2 className="page-title" style={{ margin: 0 }}>Order Management</h2>
+          <span style={{ fontSize: 'var(--text-sm)', color: 'var(--text-2)' }}>
+            Showing {filteredAndSorted.length} of {orders.length} orders
+          </span>
+        </div>
+        
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: 'var(--space-3)', width: '100%' }}>
+          <div className="form-group mb-0">
+            <label className="form-label" style={{ fontSize: '11px', textTransform: 'uppercase', color: 'var(--text-3)' }}>Search</label>
+            <input 
+              className="form-input" 
+              placeholder="Tracking code or ID..." 
+              value={search} 
+              onChange={e => setSearch(e.target.value)} 
+            />
+          </div>
+          
+          <div className="form-group mb-0">
+            <label className="form-label" style={{ fontSize: '11px', textTransform: 'uppercase', color: 'var(--text-3)' }}>Order Status</label>
+            <select className="form-select" value={statusFilter} onChange={e => setStatusFilter(e.target.value)}>
+              <option value="all">ALL STATUSES</option>
+              {ORDER_STATUS.map(s => <option key={s} value={s}>{s.toUpperCase()}</option>)}
+            </select>
+          </div>
+          
+          <div className="form-group mb-0">
+            <label className="form-label" style={{ fontSize: '11px', textTransform: 'uppercase', color: 'var(--text-3)' }}>Payment Status</label>
+            <select className="form-select" value={paymentFilter} onChange={e => setPaymentFilter(e.target.value)}>
+              <option value="all">ALL PAYMENT STATES</option>
+              {PAYMENT_STATUS.map(s => <option key={s} value={s}>{s.toUpperCase()}</option>)}
+            </select>
+          </div>
+          
+          <div className="form-group mb-0">
+            <label className="form-label" style={{ fontSize: '11px', textTransform: 'uppercase', color: 'var(--text-3)' }}>Sort By</label>
+            <select className="form-select" value={sortBy} onChange={e => setSortBy(e.target.value)}>
+              <option value="date_desc">Newest Orders</option>
+              <option value="date_asc">Oldest Orders</option>
+              <option value="total_desc">Total: High to Low</option>
+              <option value="total_asc">Total: Low to High</option>
+              <option value="id_desc">ID: High to Low</option>
+              <option value="id_asc">ID: Low to High</option>
+            </select>
+          </div>
         </div>
       </div>
 
-      {filtered.length > 0 ? (
+      {filteredAndSorted.length > 0 ? (
         <div className="table-responsive">
           <table className="admin-table">
             <thead>
@@ -162,7 +222,7 @@ ${itemsStr}`;
               </tr>
             </thead>
             <tbody>
-              {filtered.map(o => (
+              {filteredAndSorted.map(o => (
                 <tr key={o.id}>
                   <td data-label="ID">#{o.id}</td>
                   <td 
