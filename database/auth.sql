@@ -10,7 +10,7 @@ CREATE TABLE IF NOT EXISTS users (
     google_id       VARCHAR(255)  DEFAULT NULL,
     avatar_url      VARCHAR(500)  DEFAULT NULL,
     phone           VARCHAR(50)   DEFAULT NULL,
-    address         TEXT          DEFAULT NULL,
+    shipping_address JSON         DEFAULT NULL,
     role            ENUM('user','admin') NOT NULL DEFAULT 'user',
     wallet_balance  DECIMAL(10,2) NOT NULL DEFAULT 0.00,
     referral_code   VARCHAR(50)   DEFAULT NULL,
