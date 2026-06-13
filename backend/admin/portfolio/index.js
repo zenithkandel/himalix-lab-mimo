@@ -1,6 +1,7 @@
 const express = require('express');
 const multer = require('multer');
 const path = require('path');
+const fs = require('fs');
 const { pool } = require('../../config/db');
 const { authMiddleware, adminMiddleware } = require('../../middleware/auth');
 
@@ -9,10 +10,15 @@ const router = express.Router();
 // Apply auth + admin middleware to all routes
 router.use(authMiddleware, adminMiddleware);
 
+const uploadsDir = path.join(__dirname, '../../uploads');
+if (!fs.existsSync(uploadsDir)) {
+  fs.mkdirSync(uploadsDir, { recursive: true });
+}
+
 // Multer config for image uploads
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
-    cb(null, path.join(__dirname, '..', 'uploads'));
+    cb(null, uploadsDir);
   },
   filename: (req, file, cb) => {
     const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
@@ -329,7 +335,19 @@ router.delete('/services/:id', async (req, res) => {
 router.get('/team', async (req, res) => {
   try {
     const [rows] = await pool.query('SELECT * FROM himalix_portfolio.team_members ORDER BY display_order ASC');
-    res.json(rows);
+    const mappedRows = rows.map(t => {
+      let links = {};
+      try {
+        links = typeof t.social_links === 'string' ? JSON.parse(t.social_links) : (t.social_links || {});
+      } catch (e) {}
+      return {
+        ...t,
+        instagram: links.instagram || '',
+        linkedin: links.linkedin || '',
+        github: links.github || ''
+      };
+    });
+    res.json(mappedRows);
   } catch (error) {
     console.error('Get team error:', error);
     res.status(500).json({ error: 'Server error' });
@@ -339,16 +357,18 @@ router.get('/team', async (req, res) => {
 // POST /team
 router.post('/team', async (req, res) => {
   try {
-    const { name, role, bio, image_url, social_links, display_order, is_active } = req.body;
+    const { name, role, bio, image_url, instagram, linkedin, github, display_order, is_active } = req.body;
 
     if (!name || !role) {
       return res.status(400).json({ error: 'Name and role are required' });
     }
 
+    const social_links = { instagram, linkedin, github };
+
     const [result] = await pool.query(
       `INSERT INTO himalix_portfolio.team_members (name, role, bio, image_url, social_links, display_order, is_active)
        VALUES (?, ?, ?, ?, ?, ?, ?)`,
-      [name, role, bio || '', image_url || '', JSON.stringify(social_links || {}), display_order || 0, is_active !== false]
+      [name, role, bio || '', image_url || '', JSON.stringify(social_links), display_order || 0, is_active !== false]
     );
 
     const [rows] = await pool.query('SELECT * FROM himalix_portfolio.team_members WHERE id = ?', [result.insertId]);
@@ -362,12 +382,13 @@ router.post('/team', async (req, res) => {
 // PUT /team/:id
 router.put('/team/:id', async (req, res) => {
   try {
-    const { name, role, bio, image_url, social_links, display_order, is_active } = req.body;
+    const { name, role, bio, image_url, instagram, linkedin, github, display_order, is_active } = req.body;
+    const social_links = { instagram, linkedin, github };
 
     const [result] = await pool.query(
       `UPDATE himalix_portfolio.team_members SET name = ?, role = ?, bio = ?, image_url = ?, social_links = ?, display_order = ?, is_active = ?
        WHERE id = ?`,
-      [name, role, bio || '', image_url || '', JSON.stringify(social_links || {}), display_order || 0, is_active !== false, req.params.id]
+      [name, role, bio || '', image_url || '', JSON.stringify(social_links), display_order || 0, is_active !== false, req.params.id]
     );
 
     if (result.affectedRows === 0) {

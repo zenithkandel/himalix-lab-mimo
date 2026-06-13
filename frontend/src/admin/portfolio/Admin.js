@@ -2,7 +2,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { useAuth } from '../../auth/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import { useTheme } from '../../context/ThemeContext';
-import ImageUploadZone from '../../components/ImageUploadZone';
+import CrudSection from './components/CrudSection';
 import MessageManager from './components/MessageManager';
 
 const SECTIONS = [
@@ -159,6 +159,15 @@ export default function PortfolioAdmin() {
             <div className="loading-page"><div className="spinner" /></div>
           ) : activeSection === 'messages' ? (
             <MessageManager token={token} authFetch={authFetch} />
+          ) : ['stats', 'team', 'testimonials', 'services'].includes(activeSection) ? (
+            <CrudSection
+              sectionName={activeSection === 'stats' ? 'statistics' : activeSection}
+              label={SECTIONS.find(s => s.id === activeSection)?.label}
+              schema={getSchema(activeSection)}
+              token={token}
+              apiUrl="/api"
+              authFetch={authFetch}
+            />
           ) : (
             <ContentEditor
               section={activeSection}
@@ -181,6 +190,50 @@ export default function PortfolioAdmin() {
     </div>
   );
 }
+
+/* ── Schemas for CrudSection ── */
+const getSchema = (section) => {
+  if (section === 'stats') {
+    return [
+      { key: 'icon_class', label: 'Icon (FA name)', placeholder: 'users' },
+      { key: 'stat_value', label: 'Value', placeholder: '500' },
+      { key: 'suffix', label: 'Suffix', placeholder: '+' },
+      { key: 'label', label: 'Label', placeholder: 'Happy Customers' },
+    ];
+  }
+  if (section === 'team') {
+    return [
+      { key: 'name',       label: 'Name' },
+      { key: 'role',       label: 'Role / Title' },
+      { key: 'bio',        label: 'Short Bio', multiline: true },
+      { key: 'image_url',  label: 'Avatar Image', type: 'image' },
+      { key: 'instagram',  label: 'Instagram Link', placeholder: '#' },
+      { key: 'linkedin',   label: 'LinkedIn Link', placeholder: '#' },
+      { key: 'github',     label: 'GitHub Link', placeholder: '#' },
+    ];
+  }
+  if (section === 'testimonials') {
+    return [
+      { key: 'client_name',label: 'Client Name' },
+      { key: 'client_title',label: 'Title / City' },
+      { key: 'company',    label: 'Company', placeholder: 'e.g. Nepal Telecom' },
+      { key: 'image_url',  label: 'Client Image', type: 'image' },
+      { key: 'rating',     label: 'Rating (1–5)', type: 'number' },
+      { key: 'content',    label: 'Testimonial Text', multiline: true },
+    ];
+  }
+  if (section === 'services') {
+    return [
+      { key: 'icon_class',  label: 'Icon (FA name)', placeholder: 'store' },
+      { key: 'title',       label: 'Title' },
+      { key: 'description', label: 'Description', multiline: true },
+      { key: 'features',    label: 'Features (one per line)', multiline: true, placeholder: 'Feature 1\nFeature 2' },
+      { key: 'link_url',    label: 'Link (optional)', placeholder: '/store' },
+      { key: 'subtitle',    label: 'CTA Text', placeholder: 'Shop Now' },
+    ];
+  }
+  return [];
+};
 
 /* ── Section-specific editors ── */
 function ContentEditor({ section, data, onSave, saving, token }) {
@@ -219,93 +272,6 @@ function ContentEditor({ section, data, onSave, saving, token }) {
     ],
   };
 
-  if (section === 'stats') {
-    return (
-      <ArrayEditor
-        label="Statistics"
-        items={local.items || []}
-        schema={[
-          { key: 'icon', label: 'Icon (FA name)', placeholder: 'users' },
-          { key: 'value', label: 'Value', placeholder: '500', type: 'number' },
-          { key: 'suffix', label: 'Suffix', placeholder: '+' },
-          { key: 'label', label: 'Label', placeholder: 'Happy Customers' },
-        ]}
-        onChange={(items) => setLocal({ items })}
-        onSave={() => onSave(local)}
-        saving={saving}
-        token={token}
-        apiUrl="/api"
-      />
-    );
-  }
-
-  if (section === 'team') {
-    return (
-      <ArrayEditor
-        label="Team Members"
-        items={local.members || []}
-        schema={[
-          { key: 'name',       label: 'Name' },
-          { key: 'role',       label: 'Role / Title' },
-          { key: 'bio',        label: 'Short Bio', multiline: true },
-          { key: 'avatar_url', label: 'Avatar Image', type: 'image' },
-          { key: 'instagram',  label: 'Instagram Link', placeholder: '#' },
-          { key: 'linkedin',   label: 'LinkedIn Link', placeholder: '#' },
-          { key: 'github',     label: 'GitHub Link', placeholder: '#' },
-        ]}
-        onChange={(members) => setLocal({ members })}
-        onSave={() => onSave(local)}
-        saving={saving}
-        token={token}
-        apiUrl="/api"
-      />
-    );
-  }
-
-  if (section === 'testimonials') {
-    return (
-      <ArrayEditor
-        label="Testimonials"
-        items={local.items || []}
-        schema={[
-          { key: 'name',      label: 'Client Name' },
-          { key: 'title',     label: 'Title / City' },
-          { key: 'company',   label: 'Company', placeholder: 'e.g. Nepal Telecom' },
-          { key: 'image_url', label: 'Client Image', type: 'image' },
-          { key: 'rating',    label: 'Rating (1–5)', type: 'number' },
-          { key: 'text',      label: 'Testimonial Text', multiline: true },
-        ]}
-        onChange={(items) => setLocal({ items })}
-        onSave={() => onSave(local)}
-        saving={saving}
-        token={token}
-        apiUrl="/api"
-      />
-    );
-  }
-
-  if (section === 'services') {
-    return (
-      <ArrayEditor
-        label="Services"
-        items={local.items || []}
-        schema={[
-          { key: 'icon',        label: 'Icon (FA name)', placeholder: 'store' },
-          { key: 'title',       label: 'Title' },
-          { key: 'description', label: 'Description', multiline: true },
-          { key: 'features',    label: 'Features (one per line)', multiline: true, placeholder: 'Feature 1\nFeature 2' },
-          { key: 'link',        label: 'Link (optional)', placeholder: '/store' },
-          { key: 'cta',         label: 'CTA Text', placeholder: 'Shop Now' },
-        ]}
-        onChange={(items) => setLocal({ items })}
-        onSave={() => onSave(local)}
-        saving={saving}
-        token={token}
-        apiUrl="/api"
-      />
-    );
-  }
-
   return (
     <div className="cms-section-list">
       <div className="cms-section-card">
@@ -329,191 +295,6 @@ function ContentEditor({ section, data, onSave, saving, token }) {
           </div>
         </div>
       </div>
-    </div>
-  );
-}
-
-function ArrayEditor({ label, items, schema, onChange, onSave, saving, token, apiUrl }) {
-  const [draggedIndex, setDraggedIndex] = useState(null);
-  const [dragOverIndex, setDragOverIndex] = useState(null);
-
-  useEffect(() => {
-    const missingKeys = items.some(item => !item._dragId);
-    if (missingKeys) {
-      const updated = items.map(item => {
-        if (item._dragId) return item;
-        return {
-          ...item,
-          _dragId: item.id ? `id-${item.id}` : `rand-${Math.random().toString(36).substr(2, 9)}`
-        };
-      });
-      onChange(updated);
-    }
-  }, [items, onChange]);
-
-  const addItem = () => {
-    const blank = { _dragId: `rand-${Math.random().toString(36).substr(2, 9)}` };
-    schema.forEach(f => { blank[f.key] = ''; });
-    onChange([...items, blank]);
-  };
-
-  const updateItem = (i, key, val) => {
-    const next = items.map((item, idx) =>
-      idx === i ? { ...item, [key]: val } : item
-    );
-    onChange(next);
-  };
-
-  const removeItem = (i) => onChange(items.filter((_, idx) => idx !== i));
-
-  const handleDragStart = (e, index) => {
-    const isHeader = e.target.closest('.cms-section-card__header');
-    const isButton = e.target.closest('button');
-    if (!isHeader || isButton) {
-      e.preventDefault();
-      return;
-    }
-    setDraggedIndex(index);
-    e.dataTransfer.effectAllowed = 'move';
-    e.dataTransfer.setData('text/plain', index.toString());
-  };
-
-  const handleDragOver = (e, index) => {
-    e.preventDefault();
-    if (draggedIndex === null) return;
-    if (dragOverIndex !== index) {
-      setDragOverIndex(index);
-    }
-  };
-
-  const handleDragEnd = () => {
-    setDraggedIndex(null);
-    setDragOverIndex(null);
-  };
-
-  const handleDrop = (e, targetIndex) => {
-    e.preventDefault();
-    if (draggedIndex === null || draggedIndex === targetIndex) {
-      setDraggedIndex(null);
-      setDragOverIndex(null);
-      return;
-    }
-
-    const next = [...items];
-    const draggedItem = next[draggedIndex];
-    next.splice(draggedIndex, 1);
-    next.splice(targetIndex, 0, draggedItem);
-
-    onChange(next);
-    setDraggedIndex(null);
-    setDragOverIndex(null);
-  };
-
-  const isGridLayout = label !== "Statistics";
-
-  return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-5)' }}>
-      <div style={{ display: 'flex', alignItems: 'center', justifyBetween: 'space-between' }}>
-        <span style={{ fontSize: 'var(--text-sm)', fontWeight: 700, color: 'var(--text-0)' }}>{label}</span>
-        <button className="btn btn-outline btn-sm" onClick={addItem}>
-          <i className="fa-light fa-sharp fa-plus" /> Add Item
-        </button>
-      </div>
-
-      {items.length === 0 && (
-        <div className="empty-state" style={{ padding: 'var(--space-8)' }}>
-          <p>No items yet. Click "Add Item" to begin.</p>
-        </div>
-      )}
-
-      <div className={isGridLayout ? "cms-array-grid" : "cms-array-list"}>
-        {items.map((item, i) => (
-          <div
-            key={item._dragId || i}
-            className={`cms-section-card${i === draggedIndex ? ' cms-section-card--dragging' : ''}${i === dragOverIndex && i !== draggedIndex ? ' cms-section-card--drag-over' : ''}`}
-            draggable={true}
-            onDragStart={(e) => handleDragStart(e, i)}
-            onDragOver={(e) => handleDragOver(e, i)}
-            onDragEnd={handleDragEnd}
-            onDrop={(e) => handleDrop(e, i)}
-            style={{ position: 'relative' }}
-          >
-            <div className="cms-section-card__header">
-              {/* Simulated Window Controls */}
-              <div className="cms-window-controls" style={{ display: 'flex', gap: '6px', marginRight: '10px' }}>
-                <span className="cms-window-dot" style={{ width: 8, height: 8, borderRadius: '50%', background: '#ff5f56', display: 'inline-block' }} />
-                <span className="cms-window-dot" style={{ width: 8, height: 8, borderRadius: '50%', background: '#ffbd2e', display: 'inline-block' }} />
-                <span className="cms-window-dot" style={{ width: 8, height: 8, borderRadius: '50%', background: '#27c93f', display: 'inline-block' }} />
-              </div>
-              <div className="cms-section-card__title" style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-2)' }}>
-                <i className="fa-light fa-sharp fa-grip-dots" style={{ cursor: 'grab' }} />
-                Item {i + 1}
-              </div>
-              <button
-                className="btn btn-ghost btn-sm"
-                onClick={() => removeItem(i)}
-                style={{ color: 'var(--danger)', marginLeft: 'auto' }}
-                aria-label="Remove item"
-              >
-                <i className="fa-light fa-sharp fa-trash" />
-              </button>
-            </div>
-            <div className="cms-section-card__body">
-              <div style={{ display: 'grid', gridTemplateColumns: isGridLayout ? '1fr' : '1fr 1fr', gap: 'var(--space-4)' }}>
-                {schema.map(field => (
-                  <div
-                    key={field.key}
-                    className="form-group"
-                    style={{ gridColumn: field.multiline || field.type === 'image' ? 'span 2' : 'auto' }}
-                  >
-                    {field.type === 'image' ? (
-                      <ImageUploadZone
-                        value={item[field.key] || ''}
-                        onChange={val => updateItem(i, field.key, val)}
-                        token={token}
-                        apiUrl={apiUrl}
-                        label={field.label}
-                      />
-                    ) : (
-                      <>
-                        <label className="form-label">
-                          {field.label}
-                          {field.key === 'icon' && item[field.key] && (
-                            <i className={`fa-light fa-sharp fa-${item[field.key]}`} style={{ marginLeft: 'var(--space-2)', fontSize: 'var(--text-base)', color: 'var(--accent)' }} />
-                          )}
-                        </label>
-                        {field.multiline ? (
-                          <textarea
-                            className="form-textarea"
-                            value={item[field.key] || ''}
-                            onChange={e => updateItem(i, field.key, e.target.value)}
-                            style={{ minHeight: 80 }}
-                          />
-                        ) : (
-                          <input
-                            type={field.type || 'text'}
-                            className="form-input"
-                            placeholder={field.placeholder || ''}
-                            value={item[field.key] || ''}
-                            onChange={e => updateItem(i, field.key, e.target.value)}
-                          />
-                        )}
-                      </>
-                    )}
-                  </div>
-                ))}
-              </div>
-            </div>
-          </div>
-        ))}
-      </div>
-
-      <button className="btn btn-primary" onClick={onSave} disabled={saving}>
-        {saving
-          ? <><div className="spinner" style={{ width: 14, height: 14 }} /> Saving…</>
-          : <><i className="fa-light fa-sharp fa-floppy-disk" /> Save All</>
-        }
-      </button>
     </div>
   );
 }
