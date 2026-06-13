@@ -611,13 +611,23 @@ table.admin-table tbody tr:hover td {
   border-color: var(--border-strong);
 }
 
+.cms-section-card--dragging {
+  opacity: 0.4;
+  border-style: dashed !important;
+  border-color: var(--accent) !important;
+}
+
 .cms-section-card__header {
   display: flex;
   align-items: center;
   justify-content: space-between;
   padding: var(--space-4) var(--space-5);
   border-bottom: 1px solid var(--border);
-  cursor: pointer;
+  cursor: grab;
+}
+
+.cms-section-card--dragging .cms-section-card__header {
+  cursor: grabbing;
 }
 
 .cms-section-card__title {
