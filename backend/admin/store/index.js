@@ -685,44 +685,6 @@ router.delete('/settings/raw/:key', async (req, res) => {
   }
 });
 
-// EMAIL RECEIVERS
-// ============================================================
-router.get('/settings/email-receivers', async (req, res) => {
-  try {
-    const [rows] = await pool.query('SELECT * FROM email_notification_receivers ORDER BY id DESC');
-    res.json(rows);
-  } catch (err) {
-    console.error(err);
-    res.status(500).json({ message: 'Server error' });
-  }
-});
-
-router.post('/settings/email-receivers', async (req, res) => {
-  try {
-    const { email_address, notify_on_order_placed, notify_on_low_stock, notify_on_user_registered } = req.body;
-    if (!email_address) return res.status(400).json({ message: 'Email address is required' });
-    await pool.query(
-      'INSERT INTO email_notification_receivers (email_address, notify_on_order_placed, notify_on_low_stock, notify_on_user_registered) VALUES (?, ?, ?, ?) ON DUPLICATE KEY UPDATE notify_on_order_placed = VALUES(notify_on_order_placed), notify_on_low_stock = VALUES(notify_on_low_stock), notify_on_user_registered = VALUES(notify_on_user_registered)',
-      [email_address, notify_on_order_placed ? 1 : 0, notify_on_low_stock ? 1 : 0, notify_on_user_registered ? 1 : 0]
-    );
-    res.json({ message: 'Email receiver saved' });
-  } catch (err) {
-    console.error(err);
-    res.status(500).json({ message: 'Server error' });
-  }
-});
-
-router.delete('/settings/email-receivers/:id', async (req, res) => {
-  try {
-    const [result] = await pool.query('DELETE FROM email_notification_receivers WHERE id = ?', [req.params.id]);
-    if (result.affectedRows === 0) return res.status(404).json({ message: 'Receiver not found' });
-    res.json({ message: 'Receiver deleted' });
-  } catch (err) {
-    console.error(err);
-    res.status(500).json({ message: 'Server error' });
-  }
-});
-
 // Manual Wallet Credit Deposit (eSewa manually processed by admin)
 router.post('/users/:id/credit', async (req, res) => {
   const connection = await pool.getConnection();

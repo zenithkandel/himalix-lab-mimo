@@ -37,7 +37,7 @@ export default function SettingsManager({ authFetch }) {
   // Email Receivers State
   const [emailReceivers, setEmailReceivers] = useState([]);
   const [emailReceiversLoading, setEmailReceiversLoading] = useState(false);
-  const [newReceiver, setNewReceiver] = useState({ email_address: '', notify_on_order_placed: true, notify_on_low_stock: true, notify_on_user_registered: true });
+  const [newReceiver, setNewReceiver] = useState({ id: null, email_address: '', notify_on_order_placed: true, notify_on_low_stock: true, notify_on_user_registered: true });
 
   const fetchSettings = async () => {
     setLoading(true);
@@ -73,7 +73,7 @@ export default function SettingsManager({ authFetch }) {
     setEmailReceiversLoading(true);
     setMsg(null);
     try {
-      const res = await authFetch('/api/store/admin/settings/email-receivers');
+      const res = await authFetch('/api/store/admin/notification-receivers');
       if (!res.ok) throw new Error('Failed to fetch email receivers');
       const data = await res.json();
       setEmailReceivers(data || []);
@@ -190,14 +190,19 @@ export default function SettingsManager({ authFetch }) {
     setSaving(true);
     setMsg(null);
     try {
-      const res = await authFetch('/api/store/admin/settings/email-receivers', {
-        method: 'POST',
+      const isUpdating = newReceiver.id !== null;
+      const url = isUpdating
+        ? `/api/store/admin/notification-receivers/${newReceiver.id}`
+        : '/api/store/admin/notification-receivers';
+
+      const res = await authFetch(url, {
+        method: isUpdating ? 'PUT' : 'POST',
         body: JSON.stringify(newReceiver)
       });
       const d = await res.json();
       if (!res.ok) throw new Error(d.message || 'Failed to save receiver');
-      setNewReceiver({ email_address: '', notify_on_order_placed: true, notify_on_low_stock: true, notify_on_user_registered: true });
-      setMsg({ type: 'success', text: 'Email receiver added/updated successfully!' });
+      setNewReceiver({ id: null, email_address: '', notify_on_order_placed: true, notify_on_low_stock: true, notify_on_user_registered: true });
+      setMsg({ type: 'success', text: 'Email receiver saved successfully!' });
       await fetchEmailReceivers();
     } catch (err) {
       setMsg({ type: 'danger', text: err.message });
@@ -211,7 +216,7 @@ export default function SettingsManager({ authFetch }) {
     setSaving(true);
     setMsg(null);
     try {
-      const res = await authFetch(`/api/store/admin/settings/email-receivers/${id}`, {
+      const res = await authFetch(`/api/store/admin/notification-receivers/${id}`, {
         method: 'DELETE'
       });
       const d = await res.json();
@@ -420,8 +425,7 @@ export default function SettingsManager({ authFetch }) {
                   placeholder="admin@example.com"
                   value={newReceiver.email_address}
                   onChange={e => setNewReceiver({ ...newReceiver, email_address: e.target.value })}
-                  required
-                />
+                  required disabled={newReceiver.id !== null} />
               </div>
               <div className="flex gap-4">
                 <label className="flex items-center gap-2" style={{ cursor: 'pointer' }}>
@@ -437,8 +441,13 @@ export default function SettingsManager({ authFetch }) {
                   New Users
                 </label>
               </div>
-              <div className="flex justify-end">
-                <button type="submit" className="btn btn-primary btn-sm" disabled={saving}>Add / Update Receiver</button>
+              <div className="flex justify-end gap-2">
+                {newReceiver.id && (
+                  <button type="button" className="btn btn-ghost btn-sm" onClick={() => setNewReceiver({ id: null, email_address: '', notify_on_order_placed: true, notify_on_low_stock: true, notify_on_user_registered: true })}>Cancel</button>
+                )}
+                <button type="submit" className="btn btn-primary btn-sm" disabled={saving}>
+                  {newReceiver.id ? 'Update Receiver' : 'Add Receiver'}
+                </button>
               </div>
             </form>
 
@@ -466,6 +475,7 @@ export default function SettingsManager({ authFetch }) {
                             <button
                               className="btn btn-outline btn-sm"
                               onClick={() => setNewReceiver({
+                                id: item.id,
                                 email_address: item.email_address,
                                 notify_on_order_placed: !!item.notify_on_order_placed,
                                 notify_on_low_stock: !!item.notify_on_low_stock,
