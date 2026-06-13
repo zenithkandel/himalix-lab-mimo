@@ -14,11 +14,15 @@ export default function MessageManager({ token, authFetch }) {
     smtp_port: '587',
     smtp_user: '',
     smtp_pass: '',
-    smtp_secure: '0',
-    forward_email_addresses: ''
+    smtp_secure: '0'
   });
   const [saving, setSaving] = useState(false);
   const [testing, setTesting] = useState(false);
+
+  // Email Forwarding Receivers States
+  const [forwardReceivers, setForwardReceivers] = useState([]);
+  const [receiversLoading, setReceiversLoading] = useState(false);
+  const [newReceiver, setNewReceiver] = useState({ id: null, email_address: '', active: true });
 
   // Fetch messages
   const fetchMessages = async () => {
@@ -52,8 +56,7 @@ export default function MessageManager({ token, authFetch }) {
         smtp_port: flat.smtp_port || '587',
         smtp_user: flat.smtp_user || '',
         smtp_pass: flat.smtp_pass || '',
-        smtp_secure: flat.smtp_secure || '0',
-        forward_email_addresses: flat.forward_email_addresses || ''
+        smtp_secure: flat.smtp_secure || '0'
       });
     } catch (e) {
       console.error(e);
@@ -62,11 +65,68 @@ export default function MessageManager({ token, authFetch }) {
     }
   };
 
+  const fetchForwardReceivers = async () => {
+    setReceiversLoading(true);
+    try {
+      const res = await authFetch('/api/admin/forward-receivers');
+      const data = await res.json();
+      setForwardReceivers(Array.isArray(data) ? data : []);
+    } catch (e) {
+      console.error(e);
+    } finally {
+      setReceiversLoading(false);
+    }
+  };
+
+  const handleAddReceiver = async (e) => {
+    e.preventDefault();
+    if (!newReceiver.email_address.trim()) return;
+    try {
+      const isUpdating = newReceiver.id !== null;
+      const url = isUpdating 
+        ? `/api/admin/forward-receivers/${newReceiver.id}`
+        : '/api/admin/forward-receivers';
+      const method = isUpdating ? 'PUT' : 'POST';
+
+      const res = await authFetch(url, {
+        method,
+        body: JSON.stringify({
+          email_address: newReceiver.email_address.trim(),
+          active: newReceiver.active ? 1 : 0
+        })
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Failed to save receiver');
+
+      setNewReceiver({ id: null, email_address: '', active: true });
+      fetchForwardReceivers();
+      alert('Forwarding receiver saved successfully!');
+    } catch (err) {
+      alert(err.message);
+    }
+  };
+
+  const handleDeleteReceiver = async (id, email) => {
+    if (!window.confirm(`Are you sure you want to delete receiver: ${email}?`)) return;
+    try {
+      const res = await authFetch(`/api/admin/forward-receivers/${id}`, {
+        method: 'DELETE'
+      });
+      if (res.ok) {
+        fetchForwardReceivers();
+        alert('Receiver deleted successfully!');
+      }
+    } catch (e) {
+      console.error(e);
+    }
+  };
+
   useEffect(() => {
     if (tab === 'inquiries') {
       fetchMessages();
     } else {
       fetchSettings();
+      fetchForwardReceivers();
     }
   }, [tab]);
 
@@ -107,7 +167,7 @@ export default function MessageManager({ token, authFetch }) {
     e.preventDefault();
     setSaving(true);
     try {
-      const keys = ['smtp_forward_enabled', 'smtp_host', 'smtp_port', 'smtp_user', 'smtp_pass', 'smtp_secure', 'forward_email_addresses'];
+      const keys = ['smtp_forward_enabled', 'smtp_host', 'smtp_port', 'smtp_user', 'smtp_pass', 'smtp_secure'];
       for (const key of keys) {
         await authFetch(`/api/admin/settings/${key}`, {
           method: 'PUT',
@@ -259,146 +319,236 @@ export default function MessageManager({ token, authFetch }) {
       )}
 
       {tab === 'forwarding' && (
-        <div className="cms-section-card">
-          <div className="cms-section-card__header">
-            <div className="cms-section-card__title">SMTP & Email Forwarding Settings</div>
+        <div style={{ display: 'grid', gridTemplateColumns: '1.2fr 1fr', gap: 'var(--space-6)', alignItems: 'start' }}>
+          {/* Left Column: SMTP Server settings */}
+          <div className="cms-section-card">
+            <div className="cms-section-card__header">
+              <div className="cms-section-card__title">SMTP Configuration Settings</div>
+            </div>
+            <div className="cms-section-card__body">
+              {settingsLoading ? <div className="spinner" /> : (
+                <form onSubmit={handleSaveSettings} style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-4)' }}>
+                  
+                  <div className="form-group">
+                    <label style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-3)', cursor: 'pointer' }}>
+                      <input 
+                        type="checkbox"
+                        checked={form.smtp_forward_enabled === '1'}
+                        onChange={e => setForm({ ...form, smtp_forward_enabled: e.target.checked ? '1' : '0' })}
+                        style={{ display: 'none' }}
+                      />
+                      <span className="toggle__track" style={{ width: '40px', height: '20px', background: 'var(--bg-4)', borderRadius: '10px', position: 'relative', display: 'inline-block' }}>
+                        <span 
+                          className="toggle__thumb" 
+                          style={{ 
+                            width: '16px', 
+                            height: '16px', 
+                            background: form.smtp_forward_enabled === '1' ? 'var(--accent)' : 'var(--text-3)', 
+                            borderRadius: '50%', 
+                            position: 'absolute', 
+                            top: '2px', 
+                            left: form.smtp_forward_enabled === '1' ? '22px' : '2px',
+                            transition: 'left var(--transition-fast)'
+                          }} 
+                        />
+                      </span>
+                      <span style={{ fontSize: '14px', fontWeight: 600 }}>Enable SMTP Message Forwarding</span>
+                    </label>
+                  </div>
+
+                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 'var(--space-4)' }}>
+                    <div className="form-group">
+                      <label className="form-label">SMTP Host</label>
+                      <input 
+                        className="form-input"
+                        placeholder="smtp.gmail.com"
+                        value={form.smtp_host}
+                        onChange={e => setForm({ ...form, smtp_host: e.target.value })}
+                      />
+                    </div>
+                    <div className="form-group">
+                      <label className="form-label">SMTP Port</label>
+                      <input 
+                        className="form-input"
+                        placeholder="587"
+                        value={form.smtp_port}
+                        onChange={e => setForm({ ...form, smtp_port: e.target.value })}
+                      />
+                    </div>
+                  </div>
+
+                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 'var(--space-4)' }}>
+                    <div className="form-group">
+                      <label className="form-label">SMTP Username (Email)</label>
+                      <input 
+                        className="form-input"
+                        placeholder="your-email@gmail.com"
+                        value={form.smtp_user}
+                        onChange={e => setForm({ ...form, smtp_user: e.target.value })}
+                      />
+                    </div>
+                    <div className="form-group">
+                      <label className="form-label">SMTP Password</label>
+                      <input 
+                        type="password"
+                        className="form-input"
+                        placeholder="••••••••••••••••"
+                        value={form.smtp_pass}
+                        onChange={e => setForm({ ...form, smtp_pass: e.target.value })}
+                      />
+                    </div>
+                  </div>
+
+                  <div className="form-group">
+                    <label style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-3)', cursor: 'pointer' }}>
+                      <input 
+                        type="checkbox"
+                        checked={form.smtp_secure === '1'}
+                        onChange={e => setForm({ ...form, smtp_secure: e.target.checked ? '1' : '0' })}
+                        style={{ display: 'none' }}
+                      />
+                      <span className="toggle__track" style={{ width: '40px', height: '20px', background: 'var(--bg-4)', borderRadius: '10px', position: 'relative', display: 'inline-block' }}>
+                        <span 
+                          className="toggle__thumb" 
+                          style={{ 
+                            width: '16px', 
+                            height: '16px', 
+                            background: form.smtp_secure === '1' ? 'var(--accent)' : 'var(--text-3)', 
+                            borderRadius: '50%', 
+                            position: 'absolute', 
+                            top: '2px', 
+                            left: form.smtp_secure === '1' ? '22px' : '2px',
+                            transition: 'left var(--transition-fast)'
+                          }} 
+                        />
+                      </span>
+                      <span style={{ fontSize: '14px', fontWeight: 600 }}>Use SSL/TLS (Port 465)</span>
+                    </label>
+                  </div>
+
+                  <div className="flex gap-4 justify-between mt-4">
+                    <button 
+                      type="button" 
+                      className="btn btn-outline" 
+                      onClick={handleTestSMTP}
+                      disabled={testing || saving}
+                    >
+                      {testing ? <i className="fa-light fa-sharp fa-spinner-third fa-spin" /> : <i className="fa-light fa-sharp fa-circle-nodes" />}
+                      {testing ? ' Testing Connection...' : ' Test Connection & Send Email'}
+                    </button>
+                    <button 
+                      type="submit" 
+                      className="btn btn-primary"
+                      disabled={saving || testing}
+                    >
+                      {saving ? <i className="fa-light fa-sharp fa-spinner-third fa-spin" /> : <i className="fa-light fa-sharp fa-floppy-disk" />}
+                      {saving ? ' Saving...' : ' Save Settings'}
+                    </button>
+                  </div>
+
+                </form>
+              )}
+            </div>
           </div>
-          <div className="cms-section-card__body">
-            {settingsLoading ? <div className="spinner" /> : (
-              <form onSubmit={handleSaveSettings} style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-4)' }}>
-                
-                <div className="form-group">
-                  <label style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-3)', cursor: 'pointer' }}>
-                    <input 
-                      type="checkbox"
-                      checked={form.smtp_forward_enabled === '1'}
-                      onChange={e => setForm({ ...form, smtp_forward_enabled: e.target.checked ? '1' : '0' })}
-                      style={{ display: 'none' }}
-                    />
-                    <span className="toggle__track" style={{ width: '40px', height: '20px', background: 'var(--bg-4)', borderRadius: '10px', position: 'relative', display: 'inline-block' }}>
-                      <span 
-                        className="toggle__thumb" 
-                        style={{ 
-                          width: '16px', 
-                          height: '16px', 
-                          background: form.smtp_forward_enabled === '1' ? 'var(--accent)' : 'var(--text-3)', 
-                          borderRadius: '50%', 
-                          position: 'absolute', 
-                          top: '2px', 
-                          left: form.smtp_forward_enabled === '1' ? '22px' : '2px',
-                          transition: 'left var(--transition-fast)'
-                        }} 
-                      />
-                    </span>
-                    <span style={{ fontSize: '14px', fontWeight: 600 }}>Enable SMTP Message Forwarding</span>
-                  </label>
-                </div>
 
-                <div className="form-group">
-                  <label className="form-label">Recipient Email Address(es)</label>
+          {/* Right Column: Email Forwarding Receivers */}
+          <div className="cms-section-card">
+            <div className="cms-section-card__header">
+              <div className="cms-section-card__title">Forwarding Receivers</div>
+            </div>
+            <div className="cms-section-card__body" style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-4)' }}>
+              {/* Add/Edit Receiver Form */}
+              <form onSubmit={handleAddReceiver} style={{ border: '1px solid var(--border)', padding: 'var(--space-3)', background: 'var(--bg-0)', display: 'flex', flexDirection: 'column', gap: 'var(--space-3)' }}>
+                <div className="form-group mb-0">
+                  <label className="form-label" style={{ fontSize: '12px' }}>Email Address</label>
                   <input 
+                    type="email"
                     className="form-input"
-                    placeholder="receiver1@example.com, receiver2@example.com"
-                    value={form.forward_email_addresses}
-                    onChange={e => setForm({ ...form, forward_email_addresses: e.target.value })}
+                    placeholder="admin@example.com"
+                    value={newReceiver.email_address}
+                    onChange={e => setNewReceiver({ ...newReceiver, email_address: e.target.value })}
+                    required
+                    disabled={newReceiver.id !== null}
                   />
-                  <small style={{ color: 'var(--text-3)', fontSize: '11px', marginTop: '4px', display: 'block' }}>
-                    Separate multiple recipient email addresses with commas.
-                  </small>
                 </div>
-
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 'var(--space-4)' }}>
-                  <div className="form-group">
-                    <label className="form-label">SMTP Host</label>
-                    <input 
-                      className="form-input"
-                      placeholder="smtp.gmail.com"
-                      value={form.smtp_host}
-                      onChange={e => setForm({ ...form, smtp_host: e.target.value })}
-                    />
-                  </div>
-                  <div className="form-group">
-                    <label className="form-label">SMTP Port</label>
-                    <input 
-                      className="form-input"
-                      placeholder="587"
-                      value={form.smtp_port}
-                      onChange={e => setForm({ ...form, smtp_port: e.target.value })}
-                    />
-                  </div>
-                </div>
-
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 'var(--space-4)' }}>
-                  <div className="form-group">
-                    <label className="form-label">SMTP Username (Email)</label>
-                    <input 
-                      className="form-input"
-                      placeholder="your-email@gmail.com"
-                      value={form.smtp_user}
-                      onChange={e => setForm({ ...form, smtp_user: e.target.value })}
-                    />
-                  </div>
-                  <div className="form-group">
-                    <label className="form-label">SMTP Password</label>
-                    <input 
-                      type="password"
-                      className="form-input"
-                      placeholder="••••••••••••••••"
-                      value={form.smtp_pass}
-                      onChange={e => setForm({ ...form, smtp_pass: e.target.value })}
-                    />
-                  </div>
-                </div>
-
-                <div className="form-group">
-                  <label style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-3)', cursor: 'pointer' }}>
+                <div className="form-group mb-0">
+                  <label style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-2)', cursor: 'pointer' }}>
                     <input 
                       type="checkbox"
-                      checked={form.smtp_secure === '1'}
-                      onChange={e => setForm({ ...form, smtp_secure: e.target.checked ? '1' : '0' })}
-                      style={{ display: 'none' }}
+                      checked={newReceiver.active}
+                      onChange={e => setNewReceiver({ ...newReceiver, active: e.target.checked })}
                     />
-                    <span className="toggle__track" style={{ width: '40px', height: '20px', background: 'var(--bg-4)', borderRadius: '10px', position: 'relative', display: 'inline-block' }}>
-                      <span 
-                        className="toggle__thumb" 
-                        style={{ 
-                          width: '16px', 
-                          height: '16px', 
-                          background: form.smtp_secure === '1' ? 'var(--accent)' : 'var(--text-3)', 
-                          borderRadius: '50%', 
-                          position: 'absolute', 
-                          top: '2px', 
-                          left: form.smtp_secure === '1' ? '22px' : '2px',
-                          transition: 'left var(--transition-fast)'
-                        }} 
-                      />
-                    </span>
-                    <span style={{ fontSize: '14px', fontWeight: 600 }}>Use SSL/TLS (Port 465)</span>
+                    <span style={{ fontSize: '13px' }}>Active (Receive forwards)</span>
                   </label>
                 </div>
-
-                <div className="flex gap-4 justify-between mt-4">
-                  <button 
-                    type="button" 
-                    className="btn btn-outline" 
-                    onClick={handleTestSMTP}
-                    disabled={testing || saving}
-                  >
-                    {testing ? <i className="fa-light fa-sharp fa-spinner-third fa-spin" /> : <i className="fa-light fa-sharp fa-circle-nodes" />}
-                    {testing ? ' Testing Connection...' : ' Test Connection & Send Email'}
-                  </button>
-                  <button 
-                    type="submit" 
-                    className="btn btn-primary"
-                    disabled={saving || testing}
-                  >
-                    {saving ? <i className="fa-light fa-sharp fa-spinner-third fa-spin" /> : <i className="fa-light fa-sharp fa-floppy-disk" />}
-                    {saving ? ' Saving...' : ' Save Settings'}
+                <div className="flex gap-2 justify-end">
+                  {newReceiver.id && (
+                    <button 
+                      type="button" 
+                      className="btn btn-ghost btn-sm" 
+                      onClick={() => setNewReceiver({ id: null, email_address: '', active: true })}
+                    >
+                      Cancel
+                    </button>
+                  )}
+                  <button type="submit" className="btn btn-primary btn-sm">
+                    {newReceiver.id ? 'Update' : 'Add Receiver'}
                   </button>
                 </div>
-
               </form>
-            )}
+
+              {/* Receivers Table */}
+              {receiversLoading ? <div className="spinner" /> : (
+                <div className="table-responsive">
+                  <table className="admin-table" style={{ fontSize: '12px', width: '100%' }}>
+                    <thead>
+                      <tr>
+                        <th>Email Address</th>
+                        <th>Status</th>
+                        <th style={{ textAlign: 'right' }}>Actions</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {forwardReceivers.map(r => (
+                        <tr key={r.id}>
+                          <td style={{ fontFamily: 'var(--font-mono)', wordBreak: 'break-all' }}>{r.email_address}</td>
+                          <td>
+                            <span className={`badge badge-${r.active ? 'success' : 'warning'}`}>
+                              {r.active ? 'Active' : 'Inactive'}
+                            </span>
+                          </td>
+                          <td>
+                            <div className="flex gap-2 justify-end">
+                              <button 
+                                className="btn btn-ghost btn-sm" 
+                                onClick={() => setNewReceiver({ id: r.id, email_address: r.email_address, active: !!r.active })}
+                                style={{ padding: '2px 6px' }}
+                              >
+                                <i className="fa-light fa-sharp fa-pen-to-square" />
+                              </button>
+                              <button 
+                                className="btn btn-danger btn-sm" 
+                                onClick={() => handleDeleteReceiver(r.id, r.email_address)}
+                                style={{ padding: '2px 6px' }}
+                              >
+                                <i className="fa-light fa-sharp fa-trash" />
+                              </button>
+                            </div>
+                          </td>
+                        </tr>
+                      ))}
+                      {forwardReceivers.length === 0 && (
+                        <tr>
+                          <td colSpan="3" style={{ textAlign: 'center', color: 'var(--text-3)', padding: 'var(--space-4)' }}>
+                            No receivers configured.
+                          </td>
+                        </tr>
+                      )}
+                    </tbody>
+                  </table>
+                </div>
+              )}
+            </div>
           </div>
         </div>
       )}

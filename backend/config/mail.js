@@ -387,7 +387,7 @@ async function sendNotificationEmail(eventType, subject, htmlBody) {
 async function sendContactForwardEmail({ name, email, subject, message }) {
   try {
     const [rows] = await pool.query(
-      "SELECT setting_key, setting_value FROM himalix_portfolio.labs_site_settings WHERE setting_key IN ('smtp_host', 'smtp_port', 'smtp_user', 'smtp_pass', 'smtp_secure', 'smtp_forward_enabled', 'forward_email_addresses')"
+      "SELECT setting_key, setting_value FROM himalix_portfolio.labs_site_settings WHERE setting_key IN ('smtp_host', 'smtp_port', 'smtp_user', 'smtp_pass', 'smtp_secure', 'smtp_forward_enabled')"
     );
 
     const config = {};
@@ -404,9 +404,20 @@ async function sendContactForwardEmail({ name, email, subject, message }) {
     const user = config.smtp_user || '';
     const pass = config.smtp_pass || '';
     const secure = config.smtp_secure === '1' || port === 465;
-    const receivers = config.forward_email_addresses || '';
 
-    if (!host || !user || !pass || !receivers) {
+    // Fetch active email receivers from himalix_portfolio.email_forwarding_receivers
+    const [receiversRows] = await pool.query(
+      "SELECT email_address FROM himalix_portfolio.email_forwarding_receivers WHERE active = 1"
+    );
+    
+    if (receiversRows.length === 0) {
+      console.log('No active email forwarding receivers found.');
+      return;
+    }
+
+    const receivers = receiversRows.map(r => r.email_address).join(', ');
+
+    if (!host || !user || !pass) {
       console.warn('Portfolio SMTP forwarding configuration is incomplete.');
       return;
     }
