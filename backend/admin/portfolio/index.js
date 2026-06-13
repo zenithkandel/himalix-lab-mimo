@@ -713,4 +713,112 @@ router.post('/smtp/test', async (req, res) => {
   }
 });
 
+// ==================== REORDER ENDPOINTS ====================
+
+const handleReorder = async (req, res, table) => {
+  const connection = await pool.getConnection();
+  try {
+    const { items } = req.body;
+    if (!Array.isArray(items)) {
+      return res.status(400).json({ error: 'items array is required' });
+    }
+
+    await connection.beginTransaction();
+    for (const item of items) {
+      if (item.id && typeof item.display_order === 'number') {
+        await connection.query(
+          `UPDATE himalix_portfolio.${table} SET display_order = ? WHERE id = ?`,
+          [item.display_order, item.id]
+        );
+      }
+    }
+    await connection.commit();
+    res.json({ message: 'Order updated successfully' });
+  } catch (error) {
+    await connection.rollback();
+    console.error(`Reorder ${table} error:`, error);
+    res.status(500).json({ error: 'Server error' });
+  } finally {
+    connection.release();
+  }
+};
+
+router.put('/services/reorder', (req, res) => handleReorder(req, res, 'services'));
+router.put('/team/reorder', (req, res) => handleReorder(req, res, 'team_members'));
+router.put('/testimonials/reorder', (req, res) => handleReorder(req, res, 'testimonials'));
+router.put('/statistics/reorder', (req, res) => handleReorder(req, res, 'statistics'));
+
+// ==================== STATISTICS ====================
+
+// GET /statistics
+router.get('/statistics', async (req, res) => {
+  try {
+    const [rows] = await pool.query('SELECT * FROM himalix_portfolio.statistics ORDER BY display_order ASC');
+    res.json(rows);
+  } catch (error) {
+    console.error('Get statistics error:', error);
+    res.status(500).json({ error: 'Server error' });
+  }
+});
+
+// POST /statistics
+router.post('/statistics', async (req, res) => {
+  try {
+    const { icon_class, stat_value, suffix, label, display_order, is_active } = req.body;
+
+    if (!label) {
+      return res.status(400).json({ error: 'Label is required' });
+    }
+
+    const [result] = await pool.query(
+      `INSERT INTO himalix_portfolio.statistics (icon_class, stat_value, suffix, label, display_order, is_active)
+       VALUES (?, ?, ?, ?, ?, ?)`,
+      [icon_class || '', stat_value || '', suffix || '', label, display_order || 0, is_active !== false]
+    );
+
+    const [rows] = await pool.query('SELECT * FROM himalix_portfolio.statistics WHERE id = ?', [result.insertId]);
+    res.status(201).json(rows[0]);
+  } catch (error) {
+    console.error('Create statistic error:', error);
+    res.status(500).json({ error: 'Server error' });
+  }
+});
+
+// PUT /statistics/:id
+router.put('/statistics/:id', async (req, res) => {
+  try {
+    const { icon_class, stat_value, suffix, label, display_order, is_active } = req.body;
+
+    const [result] = await pool.query(
+      `UPDATE himalix_portfolio.statistics SET icon_class = ?, stat_value = ?, suffix = ?, label = ?, display_order = ?, is_active = ?
+       WHERE id = ?`,
+      [icon_class || '', stat_value || '', suffix || '', label, display_order || 0, is_active !== false, req.params.id]
+    );
+
+    if (result.affectedRows === 0) {
+      return res.status(404).json({ error: 'Statistic not found' });
+    }
+
+    const [rows] = await pool.query('SELECT * FROM himalix_portfolio.statistics WHERE id = ?', [req.params.id]);
+    res.json(rows[0]);
+  } catch (error) {
+    console.error('Update statistic error:', error);
+    res.status(500).json({ error: 'Server error' });
+  }
+});
+
+// DELETE /statistics/:id
+router.delete('/statistics/:id', async (req, res) => {
+  try {
+    const [result] = await pool.query('DELETE FROM himalix_portfolio.statistics WHERE id = ?', [req.params.id]);
+    if (result.affectedRows === 0) {
+      return res.status(404).json({ error: 'Statistic not found' });
+    }
+    res.json({ message: 'Statistic deleted successfully' });
+  } catch (error) {
+    console.error('Delete statistic error:', error);
+    res.status(500).json({ error: 'Server error' });
+  }
+});
+
 module.exports = router;

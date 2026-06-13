@@ -54,7 +54,7 @@ export default function Landing() {
   const hero      = content?.content?.hero      || defaultHero;
   const services  = content?.services          || defaultServices;
   const about     = content?.content?.about     || defaultAbout;
-  const stats     = content?.content?.stats?.items || defaultStats;
+  const stats     = content?.statistics || defaultStats;
   const team      = content?.team              || defaultTeam;
 
   return (

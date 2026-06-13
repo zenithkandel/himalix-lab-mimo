@@ -58,6 +58,17 @@ CREATE TABLE IF NOT EXISTS labs_site_settings (
     updated_at     TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
+CREATE TABLE IF NOT EXISTS statistics (
+    id            INT AUTO_INCREMENT PRIMARY KEY,
+    icon_class    VARCHAR(100),
+    stat_value    VARCHAR(50),
+    suffix        VARCHAR(20),
+    label         VARCHAR(255) NOT NULL,
+    display_order INT DEFAULT 0,
+    is_active     BOOLEAN DEFAULT TRUE,
+    updated_at    TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
 CREATE TABLE IF NOT EXISTS contact_messages (
     id         INT AUTO_INCREMENT PRIMARY KEY,
     name       VARCHAR(255) NOT NULL,

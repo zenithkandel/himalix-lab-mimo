@@ -65,13 +65,24 @@ router.get('/', async (req, res) => {
       image_url: t.image_url || ''
     }));
 
+    const [statisticsRows] = await pool.query(
+      'SELECT * FROM himalix_portfolio.statistics WHERE is_active = TRUE ORDER BY display_order ASC'
+    );
+    const parsedStatistics = statisticsRows.map(s => ({
+      id: s.id,
+      icon: s.icon_class,
+      value: s.stat_value,
+      suffix: s.suffix,
+      label: s.label
+    }));
+
     const [settingsRows] = await pool.query('SELECT * FROM himalix_portfolio.labs_site_settings');
     const settings = {};
     settingsRows.forEach(row => {
       settings[row.setting_key] = row.setting_value;
     });
 
-    res.json({ content, services: parsedServices, team: parsedTeam, testimonials: parsedTestimonials, settings });
+    res.json({ content, services: parsedServices, team: parsedTeam, testimonials: parsedTestimonials, statistics: parsedStatistics, settings });
   } catch (error) {
     console.error('Get content error:', error);
     res.status(500).json({ error: 'Server error' });
