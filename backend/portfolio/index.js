@@ -23,21 +23,44 @@ router.get('/', async (req, res) => {
       'SELECT * FROM himalix_portfolio.services WHERE is_active = TRUE ORDER BY display_order ASC'
     );
     const parsedServices = services.map(s => ({
-      ...s,
-      features: typeof s.features === 'string' ? JSON.parse(s.features) : s.features
+      id: s.id,
+      title: s.title,
+      description: s.description,
+      icon: s.icon_class,
+      link: s.link_url,
+      cta: s.subtitle,
+      features: typeof s.features === 'string' ? JSON.parse(s.features) : (s.features || [])
     }));
 
     const [team] = await pool.query(
       'SELECT * FROM himalix_portfolio.team_members WHERE is_active = TRUE ORDER BY display_order ASC'
     );
-    const parsedTeam = team.map(t => ({
-      ...t,
-      social_links: typeof t.social_links === 'string' ? JSON.parse(t.social_links) : t.social_links
-    }));
+    const parsedTeam = team.map(t => {
+      let socials = [];
+      try {
+        const links = typeof t.social_links === 'string' ? JSON.parse(t.social_links) : (t.social_links || {});
+        socials = Object.entries(links).map(([platform, url]) => ({ platform, url }));
+      } catch (e) {}
+      return {
+        id: t.id,
+        name: t.name,
+        role: t.role,
+        bio: t.bio,
+        avatar_url: t.image_url,
+        socials
+      };
+    });
 
     const [testimonials] = await pool.query(
       'SELECT * FROM himalix_portfolio.testimonials WHERE is_active = TRUE ORDER BY display_order ASC'
     );
+    const parsedTestimonials = testimonials.map(t => ({
+      id: t.id,
+      name: t.client_name,
+      title: t.client_title,
+      rating: t.rating,
+      text: t.content
+    }));
 
     const [settingsRows] = await pool.query('SELECT * FROM himalix_portfolio.labs_site_settings');
     const settings = {};
@@ -45,7 +68,7 @@ router.get('/', async (req, res) => {
       settings[row.setting_key] = row.setting_value;
     });
 
-    res.json({ content, services: parsedServices, team: parsedTeam, testimonials, settings });
+    res.json({ content, services: parsedServices, team: parsedTeam, testimonials: parsedTestimonials, settings });
   } catch (error) {
     console.error('Get content error:', error);
     res.status(500).json({ error: 'Server error' });
